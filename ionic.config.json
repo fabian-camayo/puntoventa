@@ -1,0 +1,7 @@
+{
+  "name": "puntoventa",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
