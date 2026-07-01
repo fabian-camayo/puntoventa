@@ -65,6 +65,21 @@ yarn-error.log
 testem.log
 /typings
 
-# System files
-.DS_Store
-Thumbs.db
+# Environment
+.env
+.env.local
+.env.production
+
+# Electron
+/dist/installer
+apps/desktop/dist
+
+# Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# API build
+apps/api/dist
+
+# Shared lib build
+libs/shared/dist

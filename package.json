@@ -1,17 +1,43 @@
 {
   "name": "puntoventa",
-  "version": "0.0.1",
-  "author": "Ionic Framework",
-  "homepage": "https://ionicframework.com/",
+  "version": "1.0.0",
+  "description": "Sistema Punto de Venta empresarial - Electron + Ionic + NestJS",
+  "author": "PuntoVenta",
+  "license": "UNLICENSED",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "libs/*"
+  ],
+  "overrides": {
+    "rxjs": "7.8.2"
+  },
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
+    "start:web": "ng serve",
+    "build:web": "ng build --configuration production",
+    "build:web:dev": "ng build --configuration development",
+    "start:api": "npm run start:dev -w @puntoventa/api",
+    "build:api": "npm run build -w @puntoventa/api",
+    "prebuild:api": "npm run build:shared",
+    "build:shared": "npm run build -w @puntoventa/shared",
+    "prestart:api": "npm run build:shared",
+    "start:electron": "npm run start -w @puntoventa/desktop",
+    "build:electron": "npm run build -w @puntoventa/desktop",
+    "dist:win": "npm run dist:win -w @puntoventa/desktop",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts",
+    "postinstall": "prisma generate && node scripts/fix-rxjs-dedup.js && npm run build:shared",
+    "free:ports": "node scripts/free-ports.js",
+    "dev": "npm run free:ports && concurrently -n api,web \"npm run start:api\" \"npm run start:web\"",
+    "dev:full": "npm run free:ports && concurrently -n api,web,electron \"npm run start:api\" \"npm run start:web\" \"npm run start:electron\"",
+    "lint": "ng lint && npm run lint -w @puntoventa/api",
     "test": "ng test",
-    "lint": "ng lint"
+    "test:api": "npm run test -w @puntoventa/api"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "20.3.25",
     "@angular/common": "20.3.25",
@@ -27,8 +53,12 @@
     "@capacitor/keyboard": "8.0.5",
     "@capacitor/status-bar": "8.0.2",
     "@ionic/angular": "^8.0.0",
+    "@ngx-translate/core": "^16.0.4",
+    "@ngx-translate/http-loader": "^16.0.1",
+    "@prisma/client": "^6.9.0",
+    "@puntoventa/shared": "*",
     "ionicons": "^7.0.0",
-    "rxjs": "~7.8.0",
+    "rxjs": "7.8.2",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },
@@ -47,6 +77,7 @@
     "@types/jasmine": "~5.1.0",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
+    "concurrently": "^9.1.2",
     "eslint": "^9.16.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jsdoc": "^48.2.1",
@@ -58,7 +89,8 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "prisma": "^6.9.0",
+    "ts-node": "^10.9.2",
     "typescript": "~5.9.0"
-  },
-  "description": "An Ionic project"
+  }
 }

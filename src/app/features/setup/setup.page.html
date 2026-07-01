@@ -1,0 +1,138 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>{{ 'SETUP.TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="setup-content">
+  <div class="setup-container" [formGroup]="form">
+    @if (step() === 1) {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>{{ 'SETUP.SELECT_MODE' | translate }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-radio-group formControlName="mode">
+            <ion-list>
+              <ion-item>
+                <ion-radio [value]="APP_MODES.STANDALONE" justify="start" labelPlacement="end">
+                  {{ 'SETUP.MODE_STANDALONE' | translate }}
+                </ion-radio>
+              </ion-item>
+              <ion-item>
+                <ion-radio [value]="APP_MODES.SERVER" justify="start" labelPlacement="end">
+                  {{ 'SETUP.MODE_SERVER' | translate }}
+                </ion-radio>
+              </ion-item>
+              <ion-item>
+                <ion-radio [value]="APP_MODES.CLIENT" justify="start" labelPlacement="end">
+                  {{ 'SETUP.MODE_CLIENT' | translate }}
+                </ion-radio>
+              </ion-item>
+            </ion-list>
+          </ion-radio-group>
+          <ion-button expand="block" (click)="nextStep()">{{ 'COMMON.NEXT' | translate }}</ion-button>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    @if (step() === 2 && isClientMode()) {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>{{ 'SETUP.CLIENT_CONFIG' | translate }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-button expand="block" fill="outline" (click)="onDiscoverServers()">
+            {{ 'SETUP.DISCOVER_SERVERS' | translate }}
+          </ion-button>
+
+          @for (server of discoveredServers(); track server.host) {
+            <ion-item button (click)="form.patchValue({ serverHost: server.host, serverPort: server.port })">
+              <ion-label>
+                <h2>{{ server.name }}</h2>
+                <p>{{ server.host }}:{{ server.port }}</p>
+              </ion-label>
+            </ion-item>
+          }
+
+          <ion-item>
+            <ion-label position="stacked">{{ 'SETUP.SERVER_IP' | translate }}</ion-label>
+            <ion-input formControlName="serverHost" placeholder="192.168.1.100"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">{{ 'SETUP.SERVER_PORT' | translate }}</ion-label>
+            <ion-input formControlName="serverPort" type="number"></ion-input>
+          </ion-item>
+
+          <ion-button expand="block" fill="outline" (click)="onTestConnection()" [disabled]="loading()">
+            @if (loading()) { <ion-spinner></ion-spinner> }
+            {{ 'SETUP.TEST_CONNECTION' | translate }}
+          </ion-button>
+
+          @if (connectionResult(); as result) {
+            <ion-text [color]="result.success ? 'success' : 'danger'">
+              <p>{{ result.message }}</p>
+            </ion-text>
+          }
+
+          <div class="step-buttons">
+            <ion-button fill="outline" (click)="prevStep()">{{ 'COMMON.BACK' | translate }}</ion-button>
+            <ion-button (click)="nextStep()" [disabled]="!connectionResult()?.success">{{ 'COMMON.NEXT' | translate }}</ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    @if (step() === 2 && isServerMode()) {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>{{ 'SETUP.SERVER_CONFIG' | translate }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item>
+            <ion-label position="stacked">{{ 'SETUP.BUSINESS_NAME' | translate }}</ion-label>
+            <ion-input formControlName="businessName"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">{{ 'SETUP.ADMIN_USER' | translate }}</ion-label>
+            <ion-input formControlName="adminUsername"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">{{ 'SETUP.ADMIN_PASSWORD' | translate }}</ion-label>
+            <ion-input formControlName="adminPassword" type="password"></ion-input>
+          </ion-item>
+          <div class="step-buttons">
+            <ion-button fill="outline" (click)="prevStep()">{{ 'COMMON.BACK' | translate }}</ion-button>
+            <ion-button (click)="onComplete()" [disabled]="loading()">
+              {{ 'SETUP.COMPLETE' | translate }}
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    @if (step() === 3 && isClientMode()) {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>{{ 'SETUP.CLIENT_LOGIN' | translate }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item>
+            <ion-label position="stacked">{{ 'AUTH.USERNAME' | translate }}</ion-label>
+            <ion-input formControlName="username"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">{{ 'AUTH.PASSWORD' | translate }}</ion-label>
+            <ion-input formControlName="password" type="password"></ion-input>
+          </ion-item>
+          <div class="step-buttons">
+            <ion-button fill="outline" (click)="prevStep()">{{ 'COMMON.BACK' | translate }}</ion-button>
+            <ion-button (click)="onComplete()" [disabled]="loading()">
+              {{ 'SETUP.COMPLETE' | translate }}
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+  </div>
+</ion-content>

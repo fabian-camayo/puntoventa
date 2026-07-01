@@ -1,0 +1,113 @@
+<ion-content class="page-content">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+    <div class="page-title-bar">
+      <h1>
+        <ion-icon name="receipt-outline"></ion-icon>
+        {{ 'ADMIN.SALES' | translate }}
+      </h1>
+    </div>
+
+    <div class="pv-toolbar-card">
+      <ion-searchbar
+        [value]="searchQuery()"
+        [placeholder]="'SALES.SEARCH_PLACEHOLDER' | translate"
+        [debounce]="0"
+        (ionInput)="onSearchInput($event)"
+      ></ion-searchbar>
+      <div class="filter-chips">
+        <ion-chip
+          [color]="statusFilter() === SaleStatus.COMPLETED ? 'primary' : 'medium'"
+          (click)="setStatusFilter(SaleStatus.COMPLETED)"
+        >
+          <ion-label>{{ 'SALES.FILTER_COMPLETED' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip
+          [color]="statusFilter() === SaleStatus.SUSPENDED ? 'primary' : 'medium'"
+          (click)="setStatusFilter(SaleStatus.SUSPENDED)"
+        >
+          <ion-label>{{ 'SALES.FILTER_SUSPENDED' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip
+          [color]="statusFilter() === SaleStatus.ACTIVE ? 'primary' : 'medium'"
+          (click)="setStatusFilter(SaleStatus.ACTIVE)"
+        >
+          <ion-label>{{ 'SALES.FILTER_ACTIVE' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip
+          [color]="statusFilter() === 'ALL' ? 'primary' : 'medium'"
+          (click)="setStatusFilter('ALL')"
+        >
+          <ion-label>{{ 'SALES.FILTER_ALL' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip outline="true">
+          <ion-label>{{ total() }} {{ 'SALES.RECORDS' | translate }}</ion-label>
+        </ion-chip>
+      </div>
+    </div>
+
+    <div class="pv-card list-card">
+      @if (loading()) {
+        <div class="loading-state">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>{{ 'COMMON.LOADING' | translate }}</p>
+        </div>
+      } @else if (sales().length === 0) {
+        <div class="empty-state">
+          <ion-icon name="receipt-outline"></ion-icon>
+          <h2>{{ 'SALES.EMPTY_TITLE' | translate }}</h2>
+          <p>{{ 'SALES.EMPTY_HINT' | translate }}</p>
+        </div>
+      } @else {
+        <div class="table-header">
+          <span class="col-invoice">{{ 'SALES.INVOICE' | translate }}</span>
+          <span class="col-date">{{ 'SALES.DATE' | translate }}</span>
+          <span class="col-customer">{{ 'SALES.CUSTOMER' | translate }}</span>
+          <span class="col-register">{{ 'SALES.REGISTER' | translate }}</span>
+          <span class="col-cashier">{{ 'SALES.CASHIER' | translate }}</span>
+          <span class="col-items">{{ 'SALES.ITEMS' | translate }}</span>
+          <span class="col-total">{{ 'POS.TOTAL' | translate }}</span>
+          <span class="col-status">{{ 'SALES.STATUS' | translate }}</span>
+        </div>
+
+        <ion-list class="sales-list" lines="full">
+          @for (sale of sales(); track sale.id) {
+            <ion-item class="sale-row" button [detail]="true" (click)="openDetail(sale)">
+              <div class="sale-grid">
+                <span class="col-invoice">
+                  <strong>{{ sale.documentNumber ?? '—' }}</strong>
+                </span>
+                <span class="col-date">{{ formatDate(sale.completedAt ?? sale.createdAt) }}</span>
+                <span class="col-customer">{{ sale.customerName ?? '—' }}</span>
+                <span class="col-register">{{ sale.registerName ?? '—' }}</span>
+                <span class="col-cashier">{{ sale.cashierName ?? '—' }}</span>
+                <span class="col-items">{{ sale.itemCount }}</span>
+                <span class="col-total">{{ sale.total | appCurrency:'1.0-0' }}</span>
+                <span class="col-status">
+                  <ion-badge [color]="statusColor(sale.status)">
+                    {{ 'SALES.STATUS_' + sale.status | translate }}
+                  </ion-badge>
+                </span>
+              </div>
+            </ion-item>
+          }
+        </ion-list>
+
+        <div class="pagination">
+          <ion-button fill="outline" [disabled]="page() <= 1" (click)="prevPage()">
+            <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+            {{ 'COMMON.BACK' | translate }}
+          </ion-button>
+          <span class="page-info">{{ page() }} / {{ totalPages() }}</span>
+          <ion-button fill="outline" [disabled]="page() >= totalPages()" (click)="nextPage()">
+            {{ 'COMMON.NEXT' | translate }}
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      }
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,66 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ 'SALES.DETAIL_TITLE' | translate }}</ion-title>
+    <ion-buttons slot="end">
+      @if (sale.status === SaleStatus.COMPLETED) {
+        <ion-button (click)="print()">
+          <ion-icon name="print-outline" slot="start"></ion-icon>
+          {{ 'POS.PRINT_RECEIPT' | translate }}
+        </ion-button>
+      }
+      <ion-button (click)="close()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="sale-detail-content">
+  <div class="detail-meta">
+    <div class="meta-row">
+      <span class="meta-label">{{ 'SALES.INVOICE' | translate }}</span>
+      <strong>{{ sale.documentNumber ?? '—' }}</strong>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">{{ 'SALES.STATUS' | translate }}</span>
+      <strong>{{ 'SALES.STATUS_' + sale.status | translate }}</strong>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">{{ 'SALES.DATE' | translate }}</span>
+      <strong>{{ formatDate(sale.completedAt) }}</strong>
+    </div>
+    @if (sale.customerName) {
+      <div class="meta-row">
+        <span class="meta-label">{{ 'SALES.CUSTOMER' | translate }}</span>
+        <strong>{{ sale.customerName }}</strong>
+      </div>
+    }
+  </div>
+
+  <ion-list lines="full">
+    @for (item of sale.items; track item.productId) {
+      <ion-item>
+        <ion-label>
+          <h2>{{ item.productName }}</h2>
+          <p>{{ item.quantity }} × {{ item.unitPrice | appCurrency:'1.0-0' }}</p>
+        </ion-label>
+        <ion-text slot="end">{{ item.total | appCurrency:'1.0-0' }}</ion-text>
+      </ion-item>
+    }
+  </ion-list>
+
+  <div class="detail-totals">
+    <div class="total-row">
+      <span>{{ 'POS.SUBTOTAL' | translate }}</span>
+      <span>{{ sale.subtotal | appCurrency:'1.0-0' }}</span>
+    </div>
+    <div class="total-row">
+      <span>{{ 'POS.TAX' | translate }}</span>
+      <span>{{ sale.taxAmount | appCurrency:'1.0-0' }}</span>
+    </div>
+    <div class="total-row total-main">
+      <span>{{ 'POS.TOTAL' | translate }}</span>
+      <span>{{ sale.total | appCurrency:'1.0-0' }}</span>
+    </div>
+  </div>
+</ion-content>

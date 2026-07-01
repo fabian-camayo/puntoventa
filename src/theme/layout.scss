@@ -1,0 +1,65 @@
+// Layout y componentes reutilizables
+
+.page-content {
+  --background: var(--pv-bg-app);
+}
+
+.page-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: var(--pv-space-page);
+}
+
+.page-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+
+  h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--pv-text-primary);
+
+    ion-icon {
+      font-size: 1.6rem;
+      color: var(--pv-accent);
+    }
+  }
+}
+
+.pv-card {
+  background: var(--pv-bg-primary);
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-lg);
+  box-shadow: var(--pv-shadow-sm);
+  overflow: hidden;
+}
+
+.pv-card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--pv-border);
+  background: var(--pv-bg-secondary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--pv-text-primary);
+}
+
+.pv-card-body {
+  padding: 16px 18px;
+}
+
+.pv-toolbar-card {
+  background: var(--pv-bg-primary);
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-lg);
+  box-shadow: var(--pv-shadow-sm);
+  margin-bottom: 16px;
+  overflow: hidden;
+}

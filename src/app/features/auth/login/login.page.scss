@@ -1,0 +1,26 @@
+.login-content {
+  --background: var(--pv-bg-secondary);
+}
+
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 2rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  margin: 0;
+}
+
+.login-button {
+  margin-top: 1.5rem;
+}
+
+.error-text {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}

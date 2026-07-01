@@ -1,0 +1,16 @@
+.setup-content {
+  --background: var(--pv-bg-secondary);
+}
+
+.setup-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.step-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  gap: 1rem;
+}

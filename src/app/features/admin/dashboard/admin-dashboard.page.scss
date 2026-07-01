@@ -1,0 +1,44 @@
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.dashboard-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-lg);
+  background: var(--pv-bg-primary);
+  box-shadow: var(--pv-shadow-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  font-family: var(--pv-font);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--pv-shadow-md);
+    border-color: var(--pv-accent);
+  }
+}
+
+.card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 1.5rem;
+}
+
+.card-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--pv-text-primary);
+  letter-spacing: -0.01em;
+}

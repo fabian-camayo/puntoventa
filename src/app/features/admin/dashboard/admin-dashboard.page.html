@@ -1,0 +1,21 @@
+<ion-content class="page-content">
+  <div class="page-container">
+    <div class="page-title-bar">
+      <h1>
+        <ion-icon name="grid-outline"></ion-icon>
+        {{ 'ADMIN.DASHBOARD' | translate }}
+      </h1>
+    </div>
+
+    <div class="dashboard-grid">
+      @for (card of visibleCards(); track card.route) {
+        <button type="button" class="dashboard-card" (click)="goTo(card.route)">
+          <span class="card-icon" [style.background]="card.color + '18'" [style.color]="card.color">
+            <ion-icon [name]="card.icon"></ion-icon>
+          </span>
+          <span class="card-label">{{ card.labelKey | translate }}</span>
+        </button>
+      }
+    </div>
+  </div>
+</ion-content>

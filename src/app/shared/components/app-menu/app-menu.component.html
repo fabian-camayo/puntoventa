@@ -1,0 +1,39 @@
+<header class="top-nav">
+  <div class="top-nav-inner">
+    <button class="brand" type="button" (click)="navigateTo('/pos')">
+      <span class="brand-icon">
+        <ion-icon name="storefront-outline"></ion-icon>
+      </span>
+      <span class="brand-text">PuntoVenta</span>
+    </button>
+
+    <nav class="top-nav-links" aria-label="Navegación principal">
+      @for (item of visibleItems(); track item.route) {
+        <button
+          type="button"
+          class="nav-link"
+          [class.active]="isActive(item.route)"
+          (click)="navigateTo(item.route)"
+        >
+          <ion-icon [name]="item.icon"></ion-icon>
+          <span>{{ item.labelKey | translate }}</span>
+        </button>
+      }
+    </nav>
+
+    <div class="top-nav-actions">
+      @if (userName()) {
+        <div class="user-pill">
+          <ion-icon name="person-circle-outline"></ion-icon>
+          <span>{{ userName() }}</span>
+        </div>
+      }
+      <button type="button" class="icon-btn" (click)="toggleTheme()" [title]="'NAV.THEME' | translate">
+        <ion-icon [name]="isDarkMode() ? 'sunny-outline' : 'moon-outline'"></ion-icon>
+      </button>
+      <button type="button" class="icon-btn logout-btn" (click)="logout()" [title]="'AUTH.LOGOUT' | translate">
+        <ion-icon name="log-out-outline"></ion-icon>
+      </button>
+    </div>
+  </div>
+</header>

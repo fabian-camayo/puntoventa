@@ -1,0 +1,8 @@
+export enum SaleStatus {
+  DRAFT = 'DRAFT',
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+  VOIDED = 'VOIDED',
+}

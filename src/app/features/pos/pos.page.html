@@ -1,0 +1,156 @@
+<div class="pos-layout">
+  <div class="pos-subheader">
+    <app-sale-tabs
+      [tabs]="tabs()"
+      [activeTabId]="activeTabId()"
+      [disableNewTab]="isCreatingTab() || !posReady()"
+      (tabSelect)="selectTab($event)"
+      (tabClose)="closeTab($event.id, $event.event)"
+      (newTab)="onNewTab()"
+    ></app-sale-tabs>
+  </div>
+
+  <ion-content class="pos-content">
+    <div class="pos-container">
+      <section class="pos-card search-card">
+        <div class="card-head">
+          <ion-icon name="search-outline"></ion-icon>
+          <span>{{ 'POS.SEARCH_PLACEHOLDER' | translate }}</span>
+        </div>
+        <ion-searchbar
+          [value]="searchQuery()"
+          [placeholder]="'POS.SEARCH_PLACEHOLDER' | translate"
+          [debounce]="0"
+          [disabled]="isSaleCompleted()"
+          (ionInput)="onSearchInput($event)"
+          (keydown)="onSearchKeydown($event)"
+          class="product-search"
+          autofocus
+        ></ion-searchbar>
+
+        <ion-list class="search-results">
+          @for (product of searchResults(); track product.id) {
+            <ion-item button (click)="addProduct(product)" detail="false" [disabled]="isSaleCompleted()">
+              <ion-label>
+                <h2>{{ product.name }}</h2>
+                <p>{{ product.sku }} · {{ product.salePrice | appCurrency:'1.0-0' }}</p>
+              </ion-label>
+              <ion-badge slot="end" [class]="getStockClass(product.stock)">
+                {{ product.stock }}
+              </ion-badge>
+            </ion-item>
+          } @empty {
+            @if (searchQuery().length > 0 && !isSearching()) {
+              <ion-item>
+                <ion-label color="medium">{{ 'POS.NO_RESULTS' | translate }}</ion-label>
+              </ion-item>
+            }
+          }
+        </ion-list>
+      </section>
+
+      <section class="pos-card cart-card">
+        <div class="card-head cart-head">
+          <div class="cart-title">
+            <ion-icon name="cart-outline"></ion-icon>
+            <span>{{ 'POS.CURRENT_SALE' | translate }}</span>
+          </div>
+          @if (isSaleCompleted()) {
+            <ion-chip color="success">
+              <ion-label>{{ 'POS.SALE_SAVED' | translate }}: {{ activeSale()?.documentNumber }}</ion-label>
+            </ion-chip>
+          } @else {
+            <ion-chip color="primary">
+              <ion-label>{{ itemCount() }} {{ 'POS.ITEMS' | translate }}</ion-label>
+            </ion-chip>
+          }
+        </div>
+
+        <ion-list class="cart-items">
+          @for (item of activeSale()?.items ?? []; track item.productId) {
+            <ion-item class="cart-item">
+              <ion-label>
+                <h2>{{ item.productName }}</h2>
+                <p>{{ item.unitPrice | appCurrency:'1.0-0' }} c/u</p>
+              </ion-label>
+
+              <div class="qty-controls" slot="end">
+                @if (!isSaleCompleted()) {
+                  <ion-button fill="clear" size="small" (click)="updateQuantity(item, -1)">
+                    <ion-icon name="remove-outline"></ion-icon>
+                  </ion-button>
+                  <span class="qty-value">{{ item.quantity }}</span>
+                  <ion-button fill="clear" size="small" (click)="updateQuantity(item, 1)">
+                    <ion-icon name="add-outline"></ion-icon>
+                  </ion-button>
+                  <ion-button fill="clear" color="danger" size="small" (click)="removeItem(item)">
+                    <ion-icon name="trash-outline"></ion-icon>
+                  </ion-button>
+                } @else {
+                  <span class="qty-value">{{ item.quantity }}</span>
+                }
+                <ion-text class="item-total">
+                  {{ item.total | appCurrency:'1.0-0' }}
+                </ion-text>
+              </div>
+            </ion-item>
+          } @empty {
+            <div class="empty-cart">
+              <ion-icon name="cart-outline"></ion-icon>
+              <ion-text color="medium">{{ 'POS.EMPTY_CART' | translate }}</ion-text>
+            </div>
+          }
+        </ion-list>
+
+        <div class="cart-summary">
+          <div class="summary-row">
+            <span>{{ 'POS.SUBTOTAL' | translate }}</span>
+            <span>{{ saleSubtotal() | appCurrency:'1.0-0' }}</span>
+          </div>
+          <div class="summary-row">
+            <span>{{ 'POS.TAX' | translate }}</span>
+            <span>{{ saleTax() | appCurrency:'1.0-0' }}</span>
+          </div>
+          <div class="summary-row summary-total">
+            <span>{{ 'POS.TOTAL' | translate }}</span>
+            <span class="summary-total-amount">{{ total() | appCurrency:'1.0-0' }}</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="pos-actions-bar" slot="fixed">
+      <div class="total-section">
+        <div class="total-label">{{ 'POS.TOTAL' | translate }}</div>
+        <div class="total-amount" [class.total-zero]="total() === 0">{{ total() | appCurrency:'1.0-0' }}</div>
+      </div>
+
+      <div class="actions-section">
+        <ion-button
+          fill="outline"
+          (click)="onSuspend()"
+          [disabled]="itemCount() === 0 || isSaleCompleted()"
+        >
+          <ion-icon name="pause-outline" slot="start"></ion-icon>
+          {{ 'POS.SUSPEND' | translate }}
+        </ion-button>
+        <ion-button
+          class="btn-save"
+          (click)="onSaveSale()"
+          [disabled]="!canSaveSale()"
+        >
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          {{ 'POS.SAVE_SALE' | translate }}
+        </ion-button>
+        <ion-button
+          class="btn-print"
+          (click)="onPrintReceipt()"
+          [disabled]="!canPrintReceipt()"
+        >
+          <ion-icon name="print-outline" slot="start"></ion-icon>
+          {{ 'POS.PRINT_RECEIPT' | translate }}
+        </ion-button>
+      </div>
+    </div>
+  </ion-content>
+</div>

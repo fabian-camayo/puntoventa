@@ -1,0 +1,129 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()">{{ 'COMMON.CANCEL' | translate }}</ion-button>
+    </ion-buttons>
+    <ion-title>
+      {{ (isEdit ? 'PRODUCTS.EDIT_TITLE' : 'PRODUCTS.NEW_TITLE') | translate }}
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button strong (click)="save()" [disabled]="saving()">
+        {{ 'COMMON.SAVE' | translate }}
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="form">
+    <ion-list lines="full">
+      <ion-item>
+        <ion-input
+          label="{{ 'PRODUCTS.SKU' | translate }}"
+          labelPlacement="stacked"
+          formControlName="sku"
+          [readonly]="isEdit"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input
+          label="{{ 'PRODUCTS.NAME' | translate }}"
+          labelPlacement="stacked"
+          formControlName="name"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input
+          label="{{ 'PRODUCTS.BARCODE' | translate }}"
+          labelPlacement="stacked"
+          formControlName="barcode"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-textarea
+          label="{{ 'PRODUCTS.DESCRIPTION' | translate }}"
+          labelPlacement="stacked"
+          formControlName="description"
+          [autoGrow]="true"
+        ></ion-textarea>
+      </ion-item>
+
+      <ion-item>
+        <ion-input
+          label="{{ 'PRODUCTS.SALE_PRICE' | translate }}"
+          labelPlacement="stacked"
+          type="number"
+          formControlName="salePrice"
+        ></ion-input>
+      </ion-item>
+
+      @if (canViewCosts) {
+        <ion-item>
+          <ion-input
+            label="{{ 'PRODUCTS.COST_PRICE' | translate }}"
+            labelPlacement="stacked"
+            type="number"
+            formControlName="costPrice"
+          ></ion-input>
+        </ion-item>
+      }
+
+      <ion-item>
+        <ion-input
+          label="{{ 'PRODUCTS.TAX_RATE' | translate }}"
+          labelPlacement="stacked"
+          type="number"
+          formControlName="taxRate"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input
+          label="{{ 'PRODUCTS.UNIT' | translate }}"
+          labelPlacement="stacked"
+          formControlName="unit"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-select
+          label="{{ 'PRODUCTS.CATEGORY' | translate }}"
+          labelPlacement="stacked"
+          formControlName="categoryId"
+          interface="popover"
+        >
+          <ion-select-option value="">{{ 'PRODUCTS.NO_CATEGORY' | translate }}</ion-select-option>
+          @for (cat of categories; track cat.id) {
+            <ion-select-option [value]="cat.id">{{ cat.name }}</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-input
+          label="{{ 'PRODUCTS.MIN_STOCK' | translate }}"
+          labelPlacement="stacked"
+          type="number"
+          formControlName="minStock"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-toggle formControlName="trackInventory">
+          {{ 'PRODUCTS.TRACK_INVENTORY' | translate }}
+        </ion-toggle>
+      </ion-item>
+
+      @if (isEdit) {
+        <ion-item>
+          <ion-toggle formControlName="isActive">
+            {{ 'PRODUCTS.ACTIVE' | translate }}
+          </ion-toggle>
+        </ion-item>
+      }
+    </ion-list>
+  </form>
+</ion-content>
