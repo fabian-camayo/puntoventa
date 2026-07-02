@@ -1,5 +1,14 @@
 .sale-detail-content {
   --padding-top: 12px;
+  --background: var(--pv-bg-app);
+  flex: 1;
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--pv-bg-app);
 }
 
 .detail-meta {

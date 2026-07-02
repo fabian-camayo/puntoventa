@@ -7,17 +7,26 @@ import {
   IonButtons,
   IonButton,
   IonContent,
-  IonList,
   IonItem,
   IonInput,
   IonSelect,
   IonSelectOption,
   IonToggle,
   IonTextarea,
+  IonIcon,
+  IonSpinner,
   ModalController,
   ToastController,
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
+import { addIcons } from 'ionicons';
+import {
+  closeOutline,
+  checkmarkOutline,
+  pricetagOutline,
+  cashOutline,
+  layersOutline,
+} from 'ionicons/icons';
 import { firstValueFrom } from 'rxjs';
 import { ProductDto } from '@puntoventa/shared';
 import {
@@ -27,6 +36,14 @@ import {
 } from '@core/services/product.service';
 import { CategoryDto } from '@core/services/category.service';
 import { AuthService } from '@core/services/auth.service';
+
+addIcons({
+  closeOutline,
+  checkmarkOutline,
+  pricetagOutline,
+  cashOutline,
+  layersOutline,
+});
 
 @Component({
   selector: 'app-product-form-modal',
@@ -40,13 +57,14 @@ import { AuthService } from '@core/services/auth.service';
     IonButtons,
     IonButton,
     IonContent,
-    IonList,
     IonItem,
     IonInput,
     IonSelect,
     IonSelectOption,
     IonToggle,
     IonTextarea,
+    IonIcon,
+    IonSpinner,
     TranslateModule,
   ],
 })

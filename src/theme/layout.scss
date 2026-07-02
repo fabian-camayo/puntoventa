@@ -63,3 +63,29 @@
   margin-bottom: 16px;
   overflow: hidden;
 }
+
+.pv-form-modal {
+  --width: 100%;
+  --height: 100%;
+  --max-width: 100%;
+  --max-height: 100%;
+  --border-radius: 0;
+  --box-shadow: none;
+}
+
+.pv-form-modal::part(content) {
+  border-radius: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  position: absolute;
+}
+
+.pv-form-modal::part(backdrop) {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.pv-form-modal .modal-content {
+  --overflow: auto;
+}

@@ -1,30 +1,22 @@
 import { Component, inject, OnInit } from '@angular/core';
 import {
   IonContent,
-  IonHeader,
-  IonTitle,
-  IonToolbar,
   IonItem,
-  IonLabel,
   IonInput,
   IonButton,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
   IonSpinner,
   IonText,
   IonIcon,
   ToastController,
 } from '@ionic/angular/standalone';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { NavController } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
-import { logInOutline } from 'ionicons/icons';
+import { logInOutline, storefrontOutline, personOutline, lockClosedOutline } from 'ionicons/icons';
 import { AuthService } from '@core/services/auth.service';
 
-addIcons({ logInOutline });
+addIcons({ logInOutline, storefrontOutline, personOutline, lockClosedOutline });
 
 @Component({
   selector: 'app-login',
@@ -32,17 +24,9 @@ addIcons({ logInOutline });
   styleUrls: ['./login.page.scss'],
   imports: [
     IonContent,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
     IonItem,
-    IonLabel,
     IonInput,
     IonButton,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
     IonSpinner,
     IonText,
     IonIcon,
@@ -53,7 +37,7 @@ addIcons({ logInOutline });
 export class LoginPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
+  private readonly navCtrl = inject(NavController);
   private readonly toast = inject(ToastController);
 
   loading = false;
@@ -66,20 +50,26 @@ export class LoginPage implements OnInit {
 
   ngOnInit(): void {
     if (this.auth.isAuthenticated) {
-      this.router.navigate(['/pos']);
+      void this.navCtrl.navigateRoot('/pos', { animated: false });
     }
   }
 
   async onSubmit(): Promise<void> {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.loading) return;
 
     this.loading = true;
     this.errorMessage = '';
 
     this.auth.login(this.form.getRawValue()).subscribe({
-      next: () => {
-        this.loading = false;
-        this.router.navigate(['/pos']);
+      next: async () => {
+        try {
+          await this.navCtrl.navigateRoot('/pos', {
+            animated: true,
+            animationDirection: 'forward',
+          });
+        } finally {
+          this.loading = false;
+        }
       },
       error: async (err: { error?: { message?: string } }) => {
         this.loading = false;

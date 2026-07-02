@@ -3,15 +3,53 @@
     <app-sale-tabs
       [tabs]="tabs()"
       [activeTabId]="activeTabId()"
-      [disableNewTab]="isCreatingTab() || !posReady()"
+      [disableNewTab]="isCreatingTab() || !posReady() || !isRegisterOpen()"
       (tabSelect)="selectTab($event)"
       (tabClose)="closeTab($event.id, $event.event)"
       (newTab)="onNewTab()"
     ></app-sale-tabs>
+
+    <div class="register-status-bar" [class.is-open]="isRegisterOpen()">
+      <div class="register-status-info">
+        <ion-icon [name]="isRegisterOpen() ? 'lock-open-outline' : 'lock-closed-outline'"></ion-icon>
+        <span>
+          @if (isRegisterOpen()) {
+            {{ 'REGISTERS.SESSION_OPEN' | translate }} — {{ registerName() }}
+          } @else {
+            {{ 'REGISTERS.SESSION_CLOSED' | translate }} — {{ registerName() }}
+          }
+        </span>
+      </div>
+      @if (!isRegisterOpen() && canOpenRegister) {
+        <ion-button size="small" (click)="openRegisterModal()">
+          {{ 'REGISTERS.OPEN_ACTION' | translate }}
+        </ion-button>
+      }
+    </div>
   </div>
 
+  @if (!posReady()) {
+    <div class="pos-loading">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>{{ 'POS.LOADING' | translate }}</p>
+    </div>
+  } @else {
   <ion-content class="pos-content">
-    <div class="pos-container">
+    <div class="pos-container" [class.pos-blocked]="!isRegisterOpen()">
+      @if (!isRegisterOpen()) {
+        <div class="register-blocker">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          <h2>{{ 'REGISTERS.SESSION_CLOSED' | translate }}</h2>
+          <p>{{ 'POS.REGISTER_CLOSED_HINT' | translate }}</p>
+          @if (canOpenRegister) {
+            <ion-button (click)="openRegisterModal()">
+              <ion-icon name="lock-open-outline" slot="start"></ion-icon>
+              {{ 'REGISTERS.OPEN_ACTION' | translate }}
+            </ion-button>
+          }
+        </div>
+      }
+
       <section class="pos-card search-card">
         <div class="card-head">
           <ion-icon name="search-outline"></ion-icon>
@@ -21,7 +59,7 @@
           [value]="searchQuery()"
           [placeholder]="'POS.SEARCH_PLACEHOLDER' | translate"
           [debounce]="0"
-          [disabled]="isSaleCompleted()"
+          [disabled]="!canOperateSale()"
           (ionInput)="onSearchInput($event)"
           (keydown)="onSearchKeydown($event)"
           class="product-search"
@@ -30,7 +68,7 @@
 
         <ion-list class="search-results">
           @for (product of searchResults(); track product.id) {
-            <ion-item button (click)="addProduct(product)" detail="false" [disabled]="isSaleCompleted()">
+            <ion-item button (click)="addProduct(product)" detail="false" [disabled]="!canOperateSale()">
               <ion-label>
                 <h2>{{ product.name }}</h2>
                 <p>{{ product.sku }} · {{ product.salePrice | appCurrency:'1.0-0' }}</p>
@@ -75,7 +113,7 @@
               </ion-label>
 
               <div class="qty-controls" slot="end">
-                @if (!isSaleCompleted()) {
+                @if (canOperateSale()) {
                   <ion-button fill="clear" size="small" (click)="updateQuantity(item, -1)">
                     <ion-icon name="remove-outline"></ion-icon>
                   </ion-button>
@@ -129,7 +167,7 @@
         <ion-button
           fill="outline"
           (click)="onSuspend()"
-          [disabled]="itemCount() === 0 || isSaleCompleted()"
+          [disabled]="itemCount() === 0 || !canOperateSale()"
         >
           <ion-icon name="pause-outline" slot="start"></ion-icon>
           {{ 'POS.SUSPEND' | translate }}
@@ -153,4 +191,5 @@
       </div>
     </div>
   </ion-content>
+  }
 </div>

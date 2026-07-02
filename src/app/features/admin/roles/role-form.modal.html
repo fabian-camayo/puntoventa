@@ -1,0 +1,69 @@
+<ion-header class="modal-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" class="close-btn" (click)="dismiss()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      {{ (isEdit ? 'ROLES.EDIT_TITLE' : 'ROLES.NEW_TITLE') | translate }}
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button class="save-btn" (click)="save()" [disabled]="saving()">
+        @if (saving()) {
+          <ion-spinner name="crescent"></ion-spinner>
+        } @else {
+          <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+          {{ 'COMMON.SAVE' | translate }}
+        }
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="modal-content">
+  <form [formGroup]="form" class="form-layout">
+    <section class="form-section">
+      <div class="section-title">
+        <ion-icon name="shield-outline"></ion-icon>
+        <span>{{ 'ROLES.SECTION_MAIN' | translate }}</span>
+      </div>
+
+      <div class="fields-grid">
+        <div class="field-box">
+          <label>{{ 'ROLES.CODE' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-input formControlName="code" [readonly]="isEdit" placeholder="CAJERO"></ion-input>
+          </ion-item>
+          @if (!isEdit) {
+            <small class="field-hint">{{ 'ROLES.CODE_HINT' | translate }}</small>
+          }
+        </div>
+
+        <div class="field-box span-2">
+          <label>{{ 'ROLES.NAME' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-input formControlName="name"></ion-input>
+          </ion-item>
+        </div>
+
+        <div class="field-box span-3">
+          <label>{{ 'ROLES.DESCRIPTION' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-textarea formControlName="description" [autoGrow]="true" rows="2"></ion-textarea>
+          </ion-item>
+        </div>
+      </div>
+
+      @if (isEdit) {
+        <div class="toggle-row">
+          <ion-item lines="none" class="toggle-item">
+            <ion-toggle formControlName="isActive" labelPlacement="start">
+              {{ 'ROLES.ACTIVE' | translate }}
+            </ion-toggle>
+          </ion-item>
+        </div>
+      }
+    </section>
+  </form>
+</ion-content>

@@ -1,0 +1,84 @@
+<ion-header class="modal-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="dismiss()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'REGISTERS.DETAIL_TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="modal-content">
+  @if (loading()) {
+    <div class="loading-state">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
+  } @else if (session(); as s) {
+    <div class="detail-layout">
+      <div class="detail-header">
+        <ion-icon name="cash-outline"></ion-icon>
+        <div>
+          <h2>{{ s.registerName }} ({{ s.registerCode }})</h2>
+          <ion-badge [color]="s.status === 'OPEN' ? 'success' : 'medium'">
+            {{ (s.status === 'OPEN' ? 'REGISTERS.STATUS_OPEN' : 'REGISTERS.STATUS_CLOSED') | translate }}
+          </ion-badge>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>{{ 'REGISTERS.CASHIER' | translate }}</label>
+          <span>{{ s.userName ?? '—' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>{{ 'REGISTERS.OPENED_AT' | translate }}</label>
+          <span>{{ formatDate(s.openedAt) }}</span>
+        </div>
+        <div class="detail-item">
+          <label>{{ 'REGISTERS.CLOSED_AT' | translate }}</label>
+          <span>{{ formatDate(s.closedAt) }}</span>
+        </div>
+        <div class="detail-item">
+          <label>{{ 'REGISTERS.OPENING_AMOUNT' | translate }}</label>
+          <span>{{ s.openingAmount | appCurrency:'1.0-0' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>{{ 'REGISTERS.EXPECTED_AMOUNT' | translate }}</label>
+          <span>{{ (s.expectedAmount ?? 0) | appCurrency:'1.0-0' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>{{ 'REGISTERS.CLOSING_AMOUNT' | translate }}</label>
+          <span>{{ s.closingAmount != null ? (s.closingAmount | appCurrency:'1.0-0') : '—' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>{{ 'REGISTERS.DIFFERENCE' | translate }}</label>
+          <span [class.diff-negative]="(s.difference ?? 0) < 0">
+            {{ s.difference != null ? (s.difference | appCurrency:'1.0-0') : '—' }}
+          </span>
+        </div>
+        <div class="detail-item">
+          <label>{{ 'REGISTERS.SALES_COUNT' | translate }}</label>
+          <span>{{ s.salesCount ?? 0 }}</span>
+        </div>
+        <div class="detail-item">
+          <label>{{ 'REGISTERS.SALES_TOTAL' | translate }}</label>
+          <span>{{ (s.salesTotal ?? 0) | appCurrency:'1.0-0' }}</span>
+        </div>
+      </div>
+
+      @if (s.openingNotes) {
+        <div class="notes-box">
+          <label>{{ 'REGISTERS.OPENING_NOTES' | translate }}</label>
+          <p>{{ s.openingNotes }}</p>
+        </div>
+      }
+      @if (s.closingNotes) {
+        <div class="notes-box">
+          <label>{{ 'REGISTERS.CLOSING_NOTES' | translate }}</label>
+          <p>{{ s.closingNotes }}</p>
+        </div>
+      }
+    </div>
+  }
+</ion-content>

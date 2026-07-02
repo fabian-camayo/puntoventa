@@ -10,6 +10,8 @@ import {
   settingsOutline,
   gridOutline,
   receiptOutline,
+  folderOutline,
+  cashOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@core/services/auth.service';
 
@@ -20,6 +22,8 @@ addIcons({
   settingsOutline,
   gridOutline,
   receiptOutline,
+  folderOutline,
+  cashOutline,
 });
 
 interface DashboardCard {
@@ -43,8 +47,10 @@ export class AdminDashboardPage {
   readonly cards: DashboardCard[] = [
     { route: '/admin/sales', labelKey: 'ADMIN.SALES', icon: 'receipt-outline', permission: 'sales.view', color: '#2563eb' },
     { route: '/admin/products', labelKey: 'ADMIN.PRODUCTS', icon: 'cube-outline', permission: 'products.view', color: '#16a34a' },
+    { route: '/admin/categories', labelKey: 'ADMIN.CATEGORIES', icon: 'folder-outline', permission: 'categories.view', color: '#0d9488' },
     { route: '/admin/users', labelKey: 'ADMIN.USERS', icon: 'people-outline', permission: 'users.view', color: '#7c3aed' },
     { route: '/admin/roles', labelKey: 'ADMIN.ROLES', icon: 'shield-outline', permission: 'roles.view', color: '#d97706' },
+    { route: '/admin/register-sessions', labelKey: 'ADMIN.REGISTER_SESSIONS', icon: 'cash-outline', permission: 'registers.view', color: '#0891b2' },
     { route: '/admin/config', labelKey: 'ADMIN.CONFIG', icon: 'settings-outline', permission: 'config.view', color: '#64748b' },
   ];
 
@@ -53,7 +59,7 @@ export class AdminDashboardPage {
   }
 
   goTo(route: string): void {
-    void this.navCtrl.navigateForward(route, {
+    void this.navCtrl.navigateRoot(route, {
       animated: true,
       animationDirection: 'forward',
     });

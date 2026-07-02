@@ -153,6 +153,26 @@ export class RegistersService {
     return session ? this.mapSessionToDto(session) : null;
   }
 
+  async listSessions(params: {
+    branchId: string;
+    registerId?: string;
+    status?: RegisterSessionStatus;
+    page?: number;
+    limit?: number;
+  }) {
+    const result = await this.registerRepository.findSessions(params);
+    return {
+      ...result,
+      items: result.items.map((s) => this.mapSessionToDto(s)),
+    };
+  }
+
+  async getSessionById(sessionId: string): Promise<RegisterSessionDto> {
+    const session = await this.registerRepository.findSessionById(sessionId);
+    if (!session) throw new NotFoundException('Sesión de caja no encontrada');
+    return this.mapSessionToDto(session);
+  }
+
   private mapRegisterToDto(register: {
     id: string;
     branchId: string;
@@ -181,7 +201,19 @@ export class RegistersService {
     difference: Prisma.Decimal | null;
     openedAt: Date;
     closedAt: Date | null;
+    openingNotes?: string | null;
+    closingNotes?: string | null;
+    register?: { code: string; name: string };
+    user?: { username: string; firstName: string; lastName: string };
+    cashMovements?: Array<{ amount: Prisma.Decimal; type: string }>;
+    sales?: Array<{ id: string; total: Prisma.Decimal; documentNumber?: string | null }>;
   }): RegisterSessionDto {
+    const salesTotal = session.sales?.reduce((sum, s) => sum + Number(s.total), 0) ?? 0;
+    const salesCount = session.sales?.length ?? 0;
+    const movementTotal =
+      session.cashMovements?.reduce((sum, m) => sum + Number(m.amount), 0) ?? 0;
+    const computedExpected = Number(session.openingAmount) + movementTotal;
+
     return {
       id: session.id,
       registerId: session.registerId,
@@ -189,10 +221,24 @@ export class RegistersService {
       status: session.status,
       openingAmount: Number(session.openingAmount),
       closingAmount: session.closingAmount ? Number(session.closingAmount) : undefined,
-      expectedAmount: session.expectedAmount ? Number(session.expectedAmount) : undefined,
+      expectedAmount:
+        session.expectedAmount != null
+          ? Number(session.expectedAmount)
+          : session.status === RegisterSessionStatus.OPEN
+            ? computedExpected
+            : undefined,
       difference: session.difference ? Number(session.difference) : undefined,
       openedAt: session.openedAt.toISOString(),
       closedAt: session.closedAt?.toISOString(),
+      openingNotes: session.openingNotes ?? undefined,
+      closingNotes: session.closingNotes ?? undefined,
+      registerName: session.register?.name,
+      registerCode: session.register?.code,
+      userName: session.user
+        ? `${session.user.firstName} ${session.user.lastName}`.trim() || session.user.username
+        : undefined,
+      salesCount,
+      salesTotal,
     };
   }
 }

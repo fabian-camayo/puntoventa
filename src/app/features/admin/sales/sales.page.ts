@@ -166,7 +166,7 @@ export class SalesPage implements OnInit, OnDestroy {
           ticketFooter: this.ticketFooter(),
           registerName: sale.registerName,
         },
-        cssClass: 'sale-detail-modal',
+        cssClass: 'pv-form-modal',
       });
       await modal.present();
     } catch {
@@ -186,10 +186,10 @@ export class SalesPage implements OnInit, OnDestroy {
   private loadBranchContext(): void {
     this.configService.getPosContext().subscribe({
       next: (res) => {
-        this.branchId.set(res.data.branchId);
-        this.businessName.set(res.data.businessName ?? res.data.branchName);
-        this.ticketHeader.set(res.data.ticketHeader);
-        this.ticketFooter.set(res.data.ticketFooter);
+        this.branchId.set(res.branchId);
+        this.businessName.set(res.businessName ?? res.branchName);
+        this.ticketHeader.set(res.ticketHeader);
+        this.ticketFooter.set(res.ticketFooter);
         this.loadSales();
       },
       error: async () => {

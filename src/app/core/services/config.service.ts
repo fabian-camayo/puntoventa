@@ -1,8 +1,48 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '@env/environment';
 import { AppConfigDto, AppMode, PosContextDto } from '@puntoventa/shared';
+
+export interface BusinessConfigDto {
+  id: string;
+  branchId: string;
+  businessName: string;
+  taxId?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  currency: string;
+  currencySymbol: string;
+  taxRate: number;
+  ticketHeader?: string;
+  ticketFooter?: string;
+  allowNegativeStock: boolean;
+  defaultCustomerId?: string;
+}
+
+export interface UpdateBusinessConfigPayload {
+  businessName: string;
+  taxId?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  currency?: string;
+  currencySymbol?: string;
+  taxRate?: number;
+  ticketHeader?: string;
+  ticketFooter?: string;
+  allowNegativeStock?: boolean;
+  defaultCustomerId?: string;
+}
+
+export interface AppSettingDto {
+  key: string;
+  value: string;
+  category: string;
+  isSecret: boolean;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ConfigService {
@@ -46,23 +86,36 @@ export class ConfigService {
     );
   }
 
-  getPosContext(): Observable<{ data: PosContextDto }> {
-    return this.http.get<{ data: PosContextDto }>(`${this.apiUrl}/config/pos-context`);
+  getPosContext(): Observable<PosContextDto> {
+    return this.http
+      .get<{ data: PosContextDto }>(`${this.apiUrl}/config/pos-context`)
+      .pipe(map((r) => r.data));
   }
 
-  getBusinessConfig(branchId: string): Observable<{
-    data: {
-      businessName: string;
-      ticketHeader?: string;
-      ticketFooter?: string;
-    };
-  }> {
-    return this.http.get<{
-      data: {
-        businessName: string;
-        ticketHeader?: string;
-        ticketFooter?: string;
-      };
-    }>(`${this.apiUrl}/config/business/${branchId}`);
+  getAppConfigFromApi(): Observable<AppConfigDto> {
+    return this.http
+      .get<{ data: AppConfigDto }>(`${this.apiUrl}/config/app`)
+      .pipe(map((r) => r.data));
+  }
+
+  getBusinessConfig(branchId: string): Observable<BusinessConfigDto> {
+    return this.http
+      .get<{ data: BusinessConfigDto }>(`${this.apiUrl}/config/business/${branchId}`)
+      .pipe(map((r) => r.data));
+  }
+
+  updateBusinessConfig(
+    branchId: string,
+    payload: UpdateBusinessConfigPayload,
+  ): Observable<BusinessConfigDto> {
+    return this.http
+      .put<{ data: BusinessConfigDto }>(`${this.apiUrl}/config/business/${branchId}`, payload)
+      .pipe(map((r) => r.data));
+  }
+
+  updateAppSetting(key: string, value: string, category = 'app'): Observable<AppSettingDto> {
+    return this.http
+      .put<{ data: AppSettingDto }>(`${this.apiUrl}/config/settings`, { key, value, category })
+      .pipe(map((r) => r.data));
   }
 }

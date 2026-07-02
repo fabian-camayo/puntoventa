@@ -18,6 +18,8 @@ import {
   personCircleOutline,
   moonOutline,
   sunnyOutline,
+  folderOutline,
+  cashOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@core/services/auth.service';
 import { ThemeService } from '@core/services/theme.service';
@@ -35,6 +37,8 @@ addIcons({
   personCircleOutline,
   moonOutline,
   sunnyOutline,
+  folderOutline,
+  cashOutline,
 });
 
 export interface NavItem {
@@ -59,10 +63,22 @@ const NAV_ITEMS: NavItem[] = [
     permission: 'products.view',
   },
   {
+    labelKey: 'ADMIN.CATEGORIES',
+    icon: 'folder-outline',
+    route: '/admin/categories',
+    permission: 'categories.view',
+  },
+  {
+    labelKey: 'ADMIN.REGISTER_SESSIONS',
+    icon: 'cash-outline',
+    route: '/admin/register-sessions',
+    permission: 'registers.view',
+  },
+  {
     labelKey: 'ADMIN.DASHBOARD',
     icon: 'grid-outline',
     route: '/admin',
-    permission: ['users.view', 'roles.view', 'products.view', 'config.view', 'reports.view'],
+    permission: ['users.view', 'roles.view', 'products.view', 'config.view', 'reports.view', 'sales.view', 'categories.view', 'registers.view'],
   },
   {
     labelKey: 'ADMIN.USERS',

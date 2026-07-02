@@ -17,6 +17,13 @@ export interface RegisterSessionDto {
   difference?: number;
   openedAt: string;
   closedAt?: string;
+  openingNotes?: string;
+  closingNotes?: string;
+  registerName?: string;
+  registerCode?: string;
+  userName?: string;
+  salesCount?: number;
+  salesTotal?: number;
 }
 
 export interface OpenRegisterRequest {

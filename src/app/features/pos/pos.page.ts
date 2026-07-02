@@ -17,6 +17,7 @@ import {
   IonList,
   IonItem,
   IonText,
+  IonSpinner,
   ModalController,
   ToastController,
   ViewWillEnter,
@@ -37,12 +38,15 @@ import {
   saveOutline,
   searchOutline,
   cartOutline,
+  lockOpenOutline,
+  lockClosedOutline,
 } from 'ionicons/icons';
 import { SaleService } from '../../core/services/sale.service';
 import { ProductService } from '../../core/services/product.service';
 import { KeyboardService } from '../../core/services/keyboard.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ConfigService } from '../../core/services/config.service';
+import { RegisterService } from '../../core/services/register.service';
 import { ReceiptPrintService } from '../../core/services/receipt-print.service';
 import {
   SaleDto,
@@ -52,9 +56,11 @@ import {
   PaymentMethod,
   SaleStatus,
   AuthUser,
+  RegisterSessionDto,
 } from '@puntoventa/shared';
 import { SaleTabsComponent } from '../../shared/components/sale-tabs/sale-tabs.component';
 import { AppCurrencyPipe } from '../../shared/pipes/app-currency.pipe';
+import { RegisterSessionModal } from './register-session.modal';
 
 addIcons({
   addOutline,
@@ -68,6 +74,8 @@ addIcons({
   saveOutline,
   searchOutline,
   cartOutline,
+  lockOpenOutline,
+  lockClosedOutline,
 });
 
 interface ActiveSale extends SaleDto {
@@ -90,6 +98,7 @@ interface ActiveSale extends SaleDto {
     IonList,
     IonItem,
     IonText,
+    IonSpinner,
     FormsModule,
     TranslateModule,
     SaleTabsComponent,
@@ -102,6 +111,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   private readonly keyboard = inject(KeyboardService);
   private readonly auth = inject(AuthService);
   private readonly configService = inject(ConfigService);
+  private readonly registerService = inject(RegisterService);
   private readonly receiptPrint = inject(ReceiptPrintService);
   private readonly modalCtrl = inject(ModalController);
   private readonly toast = inject(ToastController);
@@ -123,6 +133,9 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   businessName = signal<string>('');
   ticketHeader = signal<string | undefined>(undefined);
   ticketFooter = signal<string | undefined>(undefined);
+  activeSession = signal<RegisterSessionDto | null>(null);
+
+  readonly canOpenRegister = this.auth.hasPermission('registers.open');
 
   tabs = signal<SaleTab[]>([]);
   activeTabId = signal<string | null>(null);
@@ -150,8 +163,13 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   readonly isSaleCompleted = computed(
     () => this.activeSale()?.status === SaleStatus.COMPLETED,
   );
+  readonly isRegisterOpen = computed(() => this.activeSession()?.status === 'OPEN');
+  readonly canOperateSale = computed(
+    () => this.isRegisterOpen() && !this.isSaleCompleted(),
+  );
   readonly canSaveSale = computed(
     () =>
+      this.isRegisterOpen() &&
       !this.isSaleCompleted() &&
       !this.isSavingSale() &&
       (this.activeSale()?.items.length ?? 0) > 0,
@@ -169,15 +187,25 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.initialized = false;
+    this.initializing = false;
+    this.initPromise = null;
+    this.posReady.set(false);
   }
 
   ionViewWillEnter(): void {
-    if (!this.registerId()) return;
-    void this.whenReady().then(() => {
-      const tabId = this.activeTabId() ?? this.tabs()[0]?.id;
-      if (tabId && !this.activeSale()?.id) {
-        void this.activateSale(tabId);
+    void this.loadActiveSession().then(() => {
+      if (!this.branchId() || !this.registerId()) {
+        this.loadPosContext();
+        return;
       }
+
+      void this.whenReady().then(() => {
+        const tabId = this.activeTabId() ?? this.tabs()[0]?.id;
+        if (tabId && !this.activeSale()?.id) {
+          void this.activateSale(tabId);
+        }
+      });
     });
   }
 
@@ -188,6 +216,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   onSearchKeydown(event: KeyboardEvent): void {
+    if (!this.canOperateSale()) return;
     if (event.key === 'Enter' && this.searchResults().length > 0) {
       this.addProduct(this.searchResults()[0]!);
       this.clearSearch();
@@ -196,6 +225,10 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
 
   async onNewTab(): Promise<void> {
     if (this.isCreatingTab()) return;
+    if (!this.isRegisterOpen()) {
+      await this.showRegisterClosedWarning();
+      return;
+    }
     this.isCreatingTab.set(true);
     try {
       await this.whenReady();
@@ -226,7 +259,9 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
       } else {
         this.activeTabId.set(null);
         this.activeSale.set(null);
-        void this.createNewTab();
+        if (this.isRegisterOpen()) {
+          void this.createNewTab();
+        }
       }
     }
   }
@@ -236,7 +271,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   updateQuantity(item: SaleItemDto, delta: number): void {
-    if (this.isSaleCompleted()) return;
+    if (!this.canOperateSale()) return;
     const sale = this.activeSale();
     if (!sale) return;
 
@@ -252,7 +287,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   removeItem(item: SaleItemDto): void {
-    if (this.isSaleCompleted()) return;
+    if (!this.canOperateSale()) return;
     const sale = this.activeSale();
     if (!sale) return;
     const items = sale.items.filter((i) => i.productId !== item.productId);
@@ -285,7 +320,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
       });
       this.tabs.update((tabs) => tabs.filter((tab) => tab.id !== current.id));
       this.activeTabId.set(null);
-
+      await this.loadActiveSession();
       await this.showToast('Venta guardada. Stock actualizado.', 'success');
     } catch (err: unknown) {
       const message = (err as { error?: { message?: string } })?.error?.message;
@@ -315,7 +350,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   async onSuspend(): Promise<void> {
-    if (this.isSaleCompleted()) return;
+    if (!this.canOperateSale()) return;
     const sale = this.activeSale();
     if (!sale?.id) return;
     this.saleService.suspendSale(sale.id).subscribe({
@@ -324,7 +359,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
         const nextTab = this.tabs()[0];
         if (nextTab) {
           await this.activateSale(nextTab.id);
-        } else {
+        } else if (this.isRegisterOpen()) {
           await this.createNewTab();
         }
       },
@@ -339,6 +374,10 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
 
   private async addProductAsync(product: ProductSearchResult): Promise<void> {
     await this.whenReady();
+    if (!this.isRegisterOpen()) {
+      await this.showRegisterClosedWarning();
+      return;
+    }
     if (this.isSaleCompleted()) {
       await this.showToast('La venta ya está guardada. Abra una nueva pestaña.', 'warning');
       return;
@@ -411,7 +450,11 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     this.keyboard.onAction.pipe(takeUntil(this.destroy$)).subscribe(({ action }) => {
       switch (action) {
         case 'sale.new':
-          void this.onNewTab();
+          if (this.isRegisterOpen()) {
+            void this.onNewTab();
+          } else {
+            void this.showRegisterClosedWarning();
+          }
           break;
         case 'product.search':
           document.querySelector<HTMLInputElement>('ion-searchbar input')?.focus();
@@ -426,7 +469,10 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
           void this.onSuspend();
           break;
         case 'sale.cancel':
-          if (this.activeSale() && !this.isSaleCompleted()) this.updateSaleItems([]);
+          if (this.canOperateSale()) this.updateSaleItems([]);
+          break;
+        case 'register.toggle':
+          void this.toggleRegisterSession();
           break;
       }
     });
@@ -435,15 +481,16 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   private loadPosContext(): void {
     this.configService.getPosContext().subscribe({
       next: (res) => {
-        this.branchId.set(res.data.branchId);
-        this.registerId.set(res.data.registerId);
-        this.registerName.set(res.data.registerName);
-        this.businessName.set(res.data.businessName ?? res.data.branchName);
-        this.ticketHeader.set(res.data.ticketHeader);
-        this.ticketFooter.set(res.data.ticketFooter);
-        void this.whenReady();
+        this.branchId.set(res.branchId);
+        this.registerId.set(res.registerId);
+        this.registerName.set(res.registerName);
+        this.businessName.set(res.businessName ?? res.branchName);
+        this.ticketHeader.set(res.ticketHeader);
+        this.ticketFooter.set(res.ticketFooter);
+        void this.loadActiveSession().then(() => void this.whenReady());
       },
       error: async () => {
+        this.initPromise = null;
         await this.showToast('No se pudo cargar la configuración de caja', 'danger');
       },
     });
@@ -451,31 +498,55 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
 
   private whenReady(): Promise<void> {
     if (this.initialized) return Promise.resolve();
-    if (this.initPromise) return this.initPromise;
-    this.initPromise = this.initializePos();
+
+    const registerId = this.registerId();
+    const branchId = this.branchId();
+    if (!registerId || !branchId) {
+      return Promise.resolve();
+    }
+
+    if (!this.initPromise) {
+      this.initPromise = this.initializePos().finally(() => {
+        if (!this.initialized) {
+          this.initPromise = null;
+        }
+      });
+    }
+
     return this.initPromise;
   }
 
   private async initializePos(): Promise<void> {
-    if (this.initialized || this.initializing) return;
+    if (this.initialized) return;
 
     const registerId = this.registerId();
     const branchId = this.branchId();
     if (!registerId || !branchId) return;
 
+    if (this.initializing) return;
     this.initializing = true;
+
     try {
       await this.refreshTabsFromServer();
 
-      if (this.tabs().length === 0) {
-        await this.createNewTab();
+      if (this.isRegisterOpen()) {
+        if (this.tabs().length === 0) {
+          await this.createNewTab();
+        } else {
+          const tabId = this.activeTabId() ?? this.tabs()[0]!.id;
+          await this.activateSale(tabId);
+        }
       } else {
-        const tabId = this.activeTabId() ?? this.tabs()[0]!.id;
-        await this.activateSale(tabId);
+        this.activeTabId.set(null);
+        this.activeSale.set(null);
       }
 
       this.initialized = true;
       this.posReady.set(true);
+    } catch {
+      this.initialized = false;
+      this.posReady.set(false);
+      await this.showToast('No se pudo iniciar el punto de venta', 'danger');
     } finally {
       this.initializing = false;
     }
@@ -493,6 +564,11 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     const branchId = this.branchId();
     const registerId = this.registerId();
     if (!branchId || !registerId) return;
+
+    if (!this.isRegisterOpen()) {
+      await this.showRegisterClosedWarning();
+      return;
+    }
 
     const order = this.tabs().length;
 
@@ -562,7 +638,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
 
   private updateSaleItems(items: SaleItemDto[]): void {
     const sale = this.activeSale();
-    if (!sale?.id || sale.status === SaleStatus.COMPLETED) return;
+    if (!sale?.id || sale.status === SaleStatus.COMPLETED || !this.isRegisterOpen()) return;
 
     const { subtotal, taxAmount, total } = this.sumSaleTotals(items);
     const saleId = sale.id;
@@ -627,6 +703,62 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
         tab.id === saleId ? { ...tab, itemCount, total } : tab,
       ),
     );
+  }
+
+  async toggleRegisterSession(): Promise<void> {
+    if (this.isRegisterOpen()) {
+      await this.showToast('Cierre la caja desde Apertura y cierre de caja', 'warning');
+      return;
+    }
+    await this.openRegisterModal();
+  }
+
+  async openRegisterModal(): Promise<void> {
+    const registerId = this.registerId();
+    if (!registerId || !this.canOpenRegister) return;
+
+    const modal = await this.modalCtrl.create({
+      component: RegisterSessionModal,
+      componentProps: {
+        mode: 'open',
+        registerId,
+        registerName: this.registerName(),
+      },
+      cssClass: 'pv-form-modal',
+    });
+    await modal.present();
+    const { role } = await modal.onDidDismiss();
+    if (role === 'saved') {
+      await this.loadActiveSession();
+      if (!this.initialized) {
+        await this.whenReady();
+      } else if (this.isRegisterOpen() && this.tabs().length === 0) {
+        await this.createNewTab();
+      }
+      await this.showToast('Caja abierta correctamente', 'success');
+    }
+  }
+
+  private loadActiveSession(): Promise<void> {
+    const registerId = this.registerId();
+    if (!registerId) return Promise.resolve();
+
+    return new Promise((resolve) => {
+      this.registerService.getActiveSession(registerId).subscribe({
+        next: (session) => {
+          this.activeSession.set(session);
+          resolve();
+        },
+        error: () => {
+          this.activeSession.set(null);
+          resolve();
+        },
+      });
+    });
+  }
+
+  private async showRegisterClosedWarning(): Promise<void> {
+    await this.showToast('Debe abrir la caja antes de realizar ventas', 'warning');
   }
 
   private async showToast(

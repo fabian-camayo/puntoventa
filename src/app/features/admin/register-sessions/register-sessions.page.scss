@@ -1,0 +1,140 @@
+.active-session-banner,
+.closed-session-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+
+  ion-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .banner-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-size: 0.85rem;
+    color: var(--pv-text-secondary);
+  }
+
+  .banner-action {
+    flex-shrink: 0;
+    margin: 0;
+    --padding-start: 6px;
+    --padding-end: 6px;
+  }
+}
+
+.active-session-banner {
+  background: color-mix(in srgb, #16a34a 10%, var(--pv-bg-primary));
+  border-color: color-mix(in srgb, #16a34a 30%, var(--pv-border));
+
+  ion-icon {
+    color: #16a34a;
+  }
+}
+
+.closed-session-banner {
+  background: color-mix(in srgb, #64748b 10%, var(--pv-bg-primary));
+  color: var(--pv-text-secondary);
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+
+  ion-chip {
+    cursor: pointer;
+    margin: 0;
+  }
+}
+
+.list-card {
+  overflow: hidden;
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  padding: 24px;
+  text-align: center;
+  color: var(--pv-text-secondary);
+
+  ion-icon {
+    font-size: 4rem;
+    opacity: 0.5;
+    margin-bottom: 12px;
+  }
+}
+
+.table-header,
+.session-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr 100px 100px 90px 90px;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.table-header {
+  padding: 10px 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--pv-text-secondary);
+  background: var(--pv-bg-secondary);
+  border-bottom: 1px solid var(--pv-border);
+}
+
+.session-grid {
+  font-size: 0.9rem;
+}
+
+.col-date {
+  font-size: 0.85rem;
+  color: var(--pv-text-secondary);
+}
+
+.diff-negative {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px;
+  border-top: 1px solid var(--pv-border);
+}
+
+.page-info {
+  color: var(--pv-text-secondary);
+}
+
+@media (max-width: 900px) {
+  .table-header {
+    display: none;
+  }
+
+  .session-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+  }
+
+  .col-date {
+    grid-column: 1 / -1;
+  }
+}

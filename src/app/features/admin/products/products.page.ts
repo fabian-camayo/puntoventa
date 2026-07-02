@@ -145,11 +145,13 @@ export class ProductsPage implements OnInit, OnDestroy {
         branchId: this.branchId(),
         categories: this.categories(),
       },
+      cssClass: 'pv-form-modal',
     });
     await modal.present();
     const { role } = await modal.onDidDismiss();
     if (role === 'saved') {
       await this.loadProducts();
+      await this.loadCategories(this.branchId()!);
       await this.showToast('PRODUCTS.SAVED_OK', 'success');
     }
   }
@@ -164,11 +166,14 @@ export class ProductsPage implements OnInit, OnDestroy {
         product,
         categories: this.categories(),
       },
+      cssClass: 'pv-form-modal',
     });
     await modal.present();
     const { role } = await modal.onDidDismiss();
     if (role === 'saved') {
       await this.loadProducts();
+      const branchId = this.branchId();
+      if (branchId) this.loadCategories(branchId);
       await this.showToast('PRODUCTS.SAVED_OK', 'success');
     }
   }
@@ -213,8 +218,8 @@ export class ProductsPage implements OnInit, OnDestroy {
   private loadBranchContext(): void {
     this.configService.getPosContext().subscribe({
       next: (res) => {
-        this.branchId.set(res.data.branchId);
-        this.loadCategories(res.data.branchId);
+        this.branchId.set(res.branchId);
+        this.loadCategories(res.branchId);
         this.loadProducts();
       },
       error: async () => {
@@ -224,8 +229,8 @@ export class ProductsPage implements OnInit, OnDestroy {
   }
 
   private loadCategories(branchId: string): void {
-    this.categoryService.list(branchId).subscribe({
-      next: (items) => this.categories.set(items),
+    this.categoryService.listAll(branchId).subscribe({
+      next: (items) => this.categories.set(items.filter((c) => c.isActive)),
       error: () => this.categories.set([]),
     });
   }

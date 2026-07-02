@@ -1,0 +1,124 @@
+.modal-header ion-toolbar {
+  --background: var(--pv-bg-primary);
+  --border-width: 0 0 1px 0;
+  --border-color: var(--pv-border);
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--pv-bg-app);
+}
+
+.save-btn {
+  --background: var(--pv-accent);
+  --color: #fff;
+  font-weight: 600;
+}
+
+.modal-content {
+  --background: var(--pv-bg-app);
+}
+
+.form-layout {
+  padding: 16px 20px 32px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.form-section {
+  background: var(--pv-bg-primary);
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--pv-text-primary);
+
+  ion-icon {
+    color: var(--pv-accent);
+  }
+}
+
+.field-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--pv-text-secondary);
+    text-transform: uppercase;
+  }
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  color: var(--pv-text-secondary);
+}
+
+.field-item {
+  --background: var(--pv-bg-secondary);
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-md);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  background: var(--pv-bg-secondary);
+  border-radius: var(--pv-radius-md);
+
+  label {
+    font-size: 0.7rem;
+    color: var(--pv-text-secondary);
+    text-transform: uppercase;
+  }
+
+  strong {
+    color: var(--pv-text-primary);
+  }
+}
+
+.difference-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: var(--pv-radius-md);
+  font-weight: 600;
+
+  &.positive {
+    background: color-mix(in srgb, #16a34a 12%, transparent);
+    color: #16a34a;
+  }
+
+  &.negative {
+    background: color-mix(in srgb, #dc2626 12%, transparent);
+    color: #dc2626;
+  }
+}
+
+@media (max-width: 600px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -4,7 +4,7 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
-import { SaleStatus } from '@prisma/client';
+import { SaleStatus, CashMovementType, RegisterSessionStatus } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
@@ -13,7 +13,7 @@ import { AuditService } from '../../audit/application/audit.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { CheckoutDto } from './dto/checkout.dto';
-import { JwtPayload } from '@puntoventa/shared';
+import { PaymentMethod, JwtPayload } from '@puntoventa/shared';
 
 @Injectable()
 export class SalesService {
@@ -24,6 +24,8 @@ export class SalesService {
   ) {}
 
   async createTab(dto: CreateSaleDto, user: JwtPayload) {
+    await this.assertRegisterIsOpen(dto.registerId);
+
     const tabId = dto.tabId ?? uuidv4();
 
     const sale = await this.prisma.sale.create({
@@ -96,6 +98,10 @@ export class SalesService {
 
     if (existing.status === SaleStatus.COMPLETED || existing.status === SaleStatus.VOIDED) {
       throw new BadRequestException('No se puede modificar una venta finalizada');
+    }
+
+    if (dto.items) {
+      await this.assertRegisterIsOpen(existing.registerId);
     }
 
     if (dto.version !== undefined && dto.version !== existing.version) {
@@ -187,6 +193,16 @@ export class SalesService {
     const documentNumber = await this.generateDocumentNumber(existing.branchId);
 
     const result = await this.prisma.executeInTransaction(async (tx) => {
+      const openSession = await tx.registerSession.findFirst({
+        where: {
+          registerId: existing.registerId,
+          status: RegisterSessionStatus.OPEN,
+        },
+      });
+      if (!openSession) {
+        throw new BadRequestException('Debe abrir la caja antes de cobrar una venta');
+      }
+
       for (const item of existing.items) {
         const product = await tx.product.findUnique({ where: { id: item.productId } });
         if (product?.trackInventory) {
@@ -242,11 +258,12 @@ export class SalesService {
 
       const totalPaid = dto.payments.reduce((sum, p) => sum + p.amount, 0);
 
-      return tx.sale.update({
+      const sale = await tx.sale.update({
         where: { id },
         data: {
           status: SaleStatus.COMPLETED,
           documentNumber,
+          registerSessionId: openSession.id,
           amountPaid: totalPaid,
           changeAmount: Math.max(0, totalPaid - Number(existing.total)),
           completedAt: new Date(),
@@ -254,6 +271,23 @@ export class SalesService {
         },
         include: { items: { include: { product: true } }, payments: true, customer: true },
       });
+
+      for (const payment of dto.payments) {
+        if (payment.method === PaymentMethod.CASH && payment.amount > 0) {
+          await tx.cashMovement.create({
+            data: {
+              registerSessionId: openSession.id,
+              userId: user.sub,
+              type: CashMovementType.SALE,
+              amount: payment.amount,
+              description: `Venta ${documentNumber}`,
+              reference: documentNumber,
+            },
+          });
+        }
+      }
+
+      return sale;
     });
 
     await this.auditService.log({
@@ -350,5 +384,14 @@ export class SalesService {
       version: sale.version,
       completedAt: sale.completedAt?.toISOString(),
     };
+  }
+
+  private async assertRegisterIsOpen(registerId: string): Promise<void> {
+    const session = await this.prisma.registerSession.findFirst({
+      where: { registerId, status: RegisterSessionStatus.OPEN },
+    });
+    if (!session) {
+      throw new BadRequestException('Debe abrir la caja antes de realizar ventas');
+    }
   }
 }

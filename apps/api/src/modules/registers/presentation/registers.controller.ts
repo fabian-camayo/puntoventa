@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { RegistersService } from '../application/registers.service';
+import { RegisterSessionStatus } from '@prisma/client';
 import { CreateRegisterDto } from '../application/dto/create-register.dto';
 import { UpdateRegisterDto } from '../application/dto/update-register.dto';
 import { OpenSessionDto } from '../application/dto/open-session.dto';
@@ -26,6 +27,32 @@ import { JwtPayload } from '@puntoventa/shared';
 @ApiBearerAuth()
 export class RegistersController {
   constructor(private readonly registersService: RegistersService) {}
+
+  @Get('sessions')
+  @RequirePermissions('registers.view')
+  @ApiOperation({ summary: 'Listar sesiones de caja' })
+  listSessions(
+    @Query('branchId') branchId: string,
+    @Query('registerId') registerId?: string,
+    @Query('status') status?: RegisterSessionStatus,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.registersService.listSessions({
+      branchId,
+      registerId,
+      status,
+      page,
+      limit,
+    });
+  }
+
+  @Get('sessions/:sessionId')
+  @RequirePermissions('registers.view')
+  @ApiOperation({ summary: 'Obtener detalle de sesión de caja' })
+  getSession(@Param('sessionId') sessionId: string) {
+    return this.registersService.getSessionById(sessionId);
+  }
 
   @Get()
   @RequirePermissions('registers.view')

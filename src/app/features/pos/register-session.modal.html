@@ -1,0 +1,80 @@
+<ion-header class="modal-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" class="close-btn" (click)="dismiss()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      {{ (mode === 'open' ? 'REGISTERS.OPEN_TITLE' : 'REGISTERS.CLOSE_TITLE') | translate }}
+      @if (registerName) {
+        — {{ registerName }}
+      }
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button class="save-btn" (click)="save()" [disabled]="saving()">
+        @if (saving()) {
+          <ion-spinner name="crescent"></ion-spinner>
+        } @else {
+          <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+          {{ (mode === 'open' ? 'REGISTERS.OPEN_ACTION' : 'REGISTERS.CLOSE_ACTION') | translate }}
+        }
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="modal-content">
+  <form [formGroup]="form" class="form-layout">
+    <section class="form-section">
+      <div class="section-title">
+        <ion-icon [name]="mode === 'open' ? 'cash-outline' : 'lock-closed-outline'"></ion-icon>
+        <span>{{ (mode === 'open' ? 'REGISTERS.OPEN_SECTION' : 'REGISTERS.CLOSE_SECTION') | translate }}</span>
+      </div>
+
+      @if (mode === 'open') {
+        <div class="field-box">
+          <label>{{ 'REGISTERS.OPENING_AMOUNT' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-input type="number" formControlName="openingAmount" min="0"></ion-input>
+          </ion-item>
+          <small class="field-hint">{{ 'REGISTERS.OPENING_HINT' | translate }}</small>
+        </div>
+      } @else if (session) {
+        <div class="summary-grid">
+          <div class="summary-item">
+            <label>{{ 'REGISTERS.OPENING_AMOUNT' | translate }}</label>
+            <strong>{{ (session.openingAmount) | number:'1.0-2' }}</strong>
+          </div>
+          <div class="summary-item">
+            <label>{{ 'REGISTERS.EXPECTED_AMOUNT' | translate }}</label>
+            <strong>{{ (session.expectedAmount ?? 0) | number:'1.0-2' }}</strong>
+          </div>
+          <div class="summary-item">
+            <label>{{ 'REGISTERS.SALES_TOTAL' | translate }}</label>
+            <strong>{{ (session.salesTotal ?? 0) | number:'1.0-2' }}</strong>
+          </div>
+        </div>
+
+        <div class="field-box">
+          <label>{{ 'REGISTERS.CLOSING_AMOUNT' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-input type="number" formControlName="closingAmount" min="0"></ion-input>
+          </ion-item>
+        </div>
+
+        <div class="difference-box" [class.positive]="difference() >= 0" [class.negative]="difference() < 0">
+          <span>{{ 'REGISTERS.DIFFERENCE' | translate }}</span>
+          <strong>{{ difference() | number:'1.0-2' }}</strong>
+        </div>
+      }
+
+      <div class="field-box">
+        <label>{{ 'REGISTERS.NOTES' | translate }}</label>
+        <ion-item lines="none" class="field-item">
+          <ion-textarea formControlName="notes" [autoGrow]="true" rows="2"></ion-textarea>
+        </ion-item>
+      </div>
+    </section>
+  </form>
+</ion-content>

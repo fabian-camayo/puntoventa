@@ -1,0 +1,118 @@
+<ion-header class="modal-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" class="close-btn" (click)="dismiss()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      {{ 'ROLES.PERMISSIONS_TITLE' | translate }} — {{ role.name }}
+    </ion-title>
+    @if (!readOnly) {
+      <ion-buttons slot="end">
+        <ion-button class="save-btn" (click)="save()" [disabled]="saving() || loading()">
+          @if (saving()) {
+            <ion-spinner name="crescent"></ion-spinner>
+          } @else {
+            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+            {{ 'COMMON.SAVE' | translate }}
+          }
+        </ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="modal-content">
+  <div class="form-layout">
+    <div class="summary-bar">
+      <ion-icon name="key-outline"></ion-icon>
+      <span>{{ 'ROLES.SELECTED_COUNT' | translate }}: <strong>{{ selectedCount() }}</strong></span>
+      <span class="summary-hint">
+        {{ (readOnly ? 'ROLES.PERMISSIONS_VIEW_ONLY' : 'ROLES.PERMISSIONS_MATRIX_HINT') | translate }}
+      </span>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>{{ 'COMMON.LOADING' | translate }}</p>
+      </div>
+    } @else {
+      <div class="matrix-card">
+        <div class="matrix-table">
+          <div class="matrix-header">
+            <span class="col-module">{{ 'PERMISSIONS.MODULE' | translate }}</span>
+            @for (action of standardActions; track action) {
+              <span class="col-action">
+                <span class="action-label">{{ 'PERMISSIONS.ACTIONS.' + action | translate }}</span>
+                @if (!readOnly) {
+                  <ion-checkbox
+                    [checked]="isActionColumnFullySelected(action)"
+                    [indeterminate]="isActionColumnPartiallySelected(action)"
+                    (ionChange)="toggleActionColumn(action, $event.detail.checked)"
+                    [title]="'ROLES.SELECT_COLUMN' | translate"
+                  ></ion-checkbox>
+                }
+              </span>
+            }
+            <span class="col-extra">{{ 'PERMISSIONS.EXTRA_ACTIONS' | translate }}</span>
+          </div>
+
+          @for (group of sortedGroups(); track group.module) {
+            <div class="matrix-row" [class.row-active]="moduleSelectedCount(group) > 0">
+              <div class="col-module">
+                <div class="module-info">
+                  <strong>{{ 'PERMISSIONS.MODULES.' + group.module | translate }}</strong>
+                  <small>{{ moduleSelectedCount(group) }}/{{ group.permissions.length }}</small>
+                </div>
+                @if (!readOnly) {
+                  <ion-checkbox
+                    [checked]="isModuleFullySelected(group)"
+                    (ionChange)="toggleModule(group, $event.detail.checked)"
+                    [title]="'ROLES.SELECT_ALL' | translate"
+                  ></ion-checkbox>
+                }
+              </div>
+
+              @for (action of standardActions; track action) {
+                <div class="col-action" [attr.data-label]="'PERMISSIONS.ACTIONS.' + action | translate">
+                  <span class="mobile-action-label">{{ 'PERMISSIONS.ACTIONS.' + action | translate }}</span>
+                  @if (getPermission(group, action); as permission) {
+                    <ion-checkbox
+                      [checked]="isSelected(permission)"
+                      [disabled]="readOnly"
+                      (ionChange)="togglePermission(permission, $event.detail.checked)"
+                      [attr.aria-label]="('PERMISSIONS.MODULES.' + group.module | translate) + ' - ' + ('PERMISSIONS.ACTIONS.' + action | translate)"
+                    ></ion-checkbox>
+                  } @else {
+                    <span class="na-cell">—</span>
+                  }
+                </div>
+              }
+
+              <div class="col-extra">
+                @if (getExtraPermissions(group).length === 0) {
+                  <span class="na-cell">—</span>
+                } @else {
+                  <div class="extra-actions">
+                    @for (permission of getExtraPermissions(group); track permission.id) {
+                      <label class="extra-action">
+                        <ion-checkbox
+                          [checked]="isSelected(permission)"
+                          [disabled]="readOnly"
+                          (ionChange)="togglePermission(permission, $event.detail.checked)"
+                        ></ion-checkbox>
+                        <span>{{ 'PERMISSIONS.ACTIONS.' + permission.action | translate }}</span>
+                      </label>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</ion-content>

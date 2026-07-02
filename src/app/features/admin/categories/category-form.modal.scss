@@ -1,0 +1,122 @@
+.modal-header ion-toolbar {
+  --background: var(--pv-bg-primary);
+  --border-width: 0 0 1px 0;
+  --border-color: var(--pv-border);
+  --min-height: 56px;
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--pv-bg-app);
+}
+
+.close-btn {
+  --color: var(--pv-text-secondary);
+}
+
+.save-btn {
+  --background: var(--pv-accent);
+  --color: #fff;
+  --border-radius: var(--pv-radius-md);
+  font-weight: 600;
+}
+
+.modal-content {
+  --background: var(--pv-bg-app);
+  flex: 1;
+}
+
+.form-layout {
+  padding: 16px 20px 32px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.form-section {
+  background: var(--pv-bg-primary);
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-lg);
+  box-shadow: var(--pv-shadow-sm);
+  padding: 16px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--pv-text-primary);
+
+  ion-icon {
+    color: var(--pv-accent);
+    font-size: 1.2rem;
+  }
+}
+
+.fields-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.field-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--pv-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  &.span-2 {
+    grid-column: span 2;
+  }
+
+  &.span-3 {
+    grid-column: 1 / -1;
+  }
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  color: var(--pv-text-secondary);
+}
+
+.field-item {
+  --background: var(--pv-bg-secondary);
+  --border-radius: var(--pv-radius-md);
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-md);
+}
+
+.toggle-row {
+  margin-top: 12px;
+}
+
+.toggle-item {
+  --background: var(--pv-bg-secondary);
+  --border-radius: var(--pv-radius-md);
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-md);
+}
+
+@media (max-width: 768px) {
+  .fields-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field-box.span-2,
+  .field-box.span-3 {
+    grid-column: auto;
+  }
+}

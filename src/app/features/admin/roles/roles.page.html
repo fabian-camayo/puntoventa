@@ -1,0 +1,142 @@
+<ion-content class="page-content">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+    <div class="page-title-bar">
+      <h1>
+        <ion-icon name="shield-outline"></ion-icon>
+        {{ 'ADMIN.ROLES' | translate }}
+      </h1>
+      @if (canCreate) {
+        <ion-button (click)="openCreate()">
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          {{ 'ROLES.NEW' | translate }}
+        </ion-button>
+      }
+    </div>
+
+    <div class="permissions-hint pv-card">
+      <ion-icon name="key-outline"></ion-icon>
+      <p>{{ 'ROLES.PERMISSIONS_HINT' | translate }}</p>
+    </div>
+
+    <div class="pv-toolbar-card">
+      <ion-searchbar
+        [value]="searchQuery()"
+        [placeholder]="'ROLES.SEARCH_PLACEHOLDER' | translate"
+        [debounce]="0"
+        (ionInput)="onSearchInput($event)"
+      ></ion-searchbar>
+      <div class="filter-chips">
+        <ion-chip [color]="!showInactive() ? 'primary' : 'medium'" (click)="setActiveFilter(true)">
+          <ion-label>{{ 'ROLES.ACTIVE_ONLY' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip [color]="showInactive() ? 'primary' : 'medium'" (click)="setActiveFilter(false)">
+          <ion-label>{{ 'ROLES.ALL' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip outline="true">
+          <ion-label>{{ total() }} {{ 'ROLES.RECORDS' | translate }}</ion-label>
+        </ion-chip>
+      </div>
+    </div>
+
+    <div class="pv-card list-card">
+      @if (loading()) {
+        <div class="loading-state">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>{{ 'COMMON.LOADING' | translate }}</p>
+        </div>
+      } @else if (roles().length === 0) {
+        <div class="empty-state">
+          <ion-icon name="shield-outline"></ion-icon>
+          <h2>{{ 'ROLES.EMPTY_TITLE' | translate }}</h2>
+          <p>{{ 'ROLES.EMPTY_HINT' | translate }}</p>
+          @if (canCreate) {
+            <ion-button (click)="openCreate()">
+              <ion-icon name="add-outline" slot="start"></ion-icon>
+              {{ 'ROLES.NEW' | translate }}
+            </ion-button>
+          }
+        </div>
+      } @else {
+        <div class="table-header">
+          <span class="col-code">{{ 'ROLES.CODE' | translate }}</span>
+          <span class="col-name">{{ 'ROLES.NAME' | translate }}</span>
+          <span class="col-desc">{{ 'ROLES.DESCRIPTION' | translate }}</span>
+          <span class="col-status">{{ 'ROLES.STATUS' | translate }}</span>
+          <span class="col-permissions">{{ 'ROLES.PERMISSIONS' | translate }}</span>
+          <span class="col-actions"></span>
+        </div>
+
+        <ion-list class="roles-list" lines="full">
+          @for (role of roles(); track role.id) {
+            <ion-item
+              class="role-row"
+              [class.inactive]="!role.isActive"
+              button
+              [detail]="false"
+              (click)="openEdit(role)"
+            >
+              <div class="role-grid">
+                <span class="col-code mono">
+                  {{ role.code }}
+                  @if (role.isSystem) {
+                    <ion-badge color="tertiary" class="system-badge">{{ 'ROLES.SYSTEM' | translate }}</ion-badge>
+                  }
+                </span>
+                <div class="col-name">
+                  <strong>{{ role.name }}</strong>
+                </div>
+                <span class="col-desc">{{ role.description ?? '—' }}</span>
+                <span class="col-status">
+                  <ion-badge [color]="role.isActive ? 'success' : 'medium'">
+                    {{ (role.isActive ? 'ROLES.ACTIVE' : 'ROLES.INACTIVE') | translate }}
+                  </ion-badge>
+                </span>
+                <div class="col-permissions" (click)="$event.stopPropagation()">
+                  @if (canViewPermissions) {
+                    <ion-button
+                      class="permissions-btn"
+                      fill="outline"
+                      size="small"
+                      (click)="openPermissions(role)"
+                    >
+                      <ion-icon name="key-outline" slot="start"></ion-icon>
+                      {{ 'ROLES.MANAGE_PERMISSIONS' | translate }}
+                    </ion-button>
+                  }
+                </div>
+                <div class="col-actions" (click)="$event.stopPropagation()">
+                  @if (canUpdate) {
+                    <ion-button fill="clear" size="small" (click)="openEdit(role)">
+                      <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  }
+                  @if (canDelete && role.isActive && !role.isSystem) {
+                    <ion-button fill="clear" color="danger" size="small" (click)="confirmDelete(role)">
+                      <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  }
+                </div>
+              </div>
+            </ion-item>
+          }
+        </ion-list>
+
+        <div class="pagination">
+          <ion-button fill="outline" [disabled]="page() <= 1" (click)="prevPage()">
+            <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+            {{ 'COMMON.BACK' | translate }}
+          </ion-button>
+          <span class="page-info">{{ page() }} / {{ totalPages() }}</span>
+          <ion-button fill="outline" [disabled]="page() >= totalPages()" (click)="nextPage()">
+            {{ 'COMMON.NEXT' | translate }}
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      }
+    </div>
+  </div>
+</ion-content>

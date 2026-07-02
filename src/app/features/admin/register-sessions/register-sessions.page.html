@@ -1,0 +1,137 @@
+<ion-content class="page-content">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+    <div class="page-title-bar">
+      <h1>
+        <ion-icon name="cash-outline"></ion-icon>
+        {{ 'ADMIN.REGISTER_SESSIONS' | translate }}
+      </h1>
+    </div>
+
+    @if (activeSession(); as session) {
+      <div class="active-session-banner pv-card">
+        <ion-icon name="lock-open-outline"></ion-icon>
+        <div class="banner-text">
+          <strong>{{ 'REGISTERS.SESSION_OPEN' | translate }}</strong>
+          <p>
+            {{ registerName() }} · {{ 'REGISTERS.OPENING_AMOUNT' | translate }}:
+            {{ session.openingAmount | appCurrency:'1.0-0' }} ·
+            {{ 'REGISTERS.EXPECTED_AMOUNT' | translate }}:
+            {{ (session.expectedAmount ?? 0) | appCurrency:'1.0-0' }}
+          </p>
+        </div>
+        @if (canClose) {
+          <ion-button
+            fill="clear"
+            color="warning"
+            size="small"
+            class="banner-action"
+            [attr.aria-label]="'REGISTERS.CLOSE_ACTION' | translate"
+            [title]="'REGISTERS.CLOSE_ACTION' | translate"
+            (click)="closeRegister()"
+          >
+            <ion-icon slot="icon-only" name="lock-closed-outline"></ion-icon>
+          </ion-button>
+        }
+      </div>
+    } @else {
+      <div class="closed-session-banner pv-card">
+        <ion-icon name="lock-closed-outline"></ion-icon>
+        <span class="banner-text">{{ 'REGISTERS.SESSION_CLOSED' | translate }}</span>
+        @if (canOpen) {
+          <ion-button
+            fill="clear"
+            size="small"
+            class="banner-action"
+            [attr.aria-label]="'REGISTERS.OPEN_ACTION' | translate"
+            [title]="'REGISTERS.OPEN_ACTION' | translate"
+            (click)="openRegister()"
+          >
+            <ion-icon slot="icon-only" name="lock-open-outline"></ion-icon>
+          </ion-button>
+        }
+      </div>
+    }
+
+    <div class="pv-toolbar-card">
+      <div class="filter-chips">
+        <ion-chip [color]="statusFilter() === 'ALL' ? 'primary' : 'medium'" (click)="setStatusFilter('ALL')">
+          <ion-label>{{ 'REGISTERS.FILTER_ALL' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip [color]="statusFilter() === 'OPEN' ? 'primary' : 'medium'" (click)="setStatusFilter('OPEN')">
+          <ion-label>{{ 'REGISTERS.FILTER_OPEN' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip [color]="statusFilter() === 'CLOSED' ? 'primary' : 'medium'" (click)="setStatusFilter('CLOSED')">
+          <ion-label>{{ 'REGISTERS.FILTER_CLOSED' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip outline="true">
+          <ion-label>{{ total() }} {{ 'REGISTERS.RECORDS' | translate }}</ion-label>
+        </ion-chip>
+      </div>
+    </div>
+
+    <div class="pv-card list-card">
+      @if (loading()) {
+        <div class="loading-state">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>{{ 'COMMON.LOADING' | translate }}</p>
+        </div>
+      } @else if (sessions().length === 0) {
+        <div class="empty-state">
+          <ion-icon name="cash-outline"></ion-icon>
+          <h2>{{ 'REGISTERS.EMPTY_TITLE' | translate }}</h2>
+          <p>{{ 'REGISTERS.EMPTY_HINT' | translate }}</p>
+        </div>
+      } @else {
+        <div class="table-header">
+          <span class="col-date">{{ 'REGISTERS.OPENED_AT' | translate }}</span>
+          <span class="col-register">{{ 'REGISTERS.REGISTER' | translate }}</span>
+          <span class="col-user">{{ 'REGISTERS.CASHIER' | translate }}</span>
+          <span class="col-open">{{ 'REGISTERS.OPENING_AMOUNT' | translate }}</span>
+          <span class="col-close">{{ 'REGISTERS.CLOSING_AMOUNT' | translate }}</span>
+          <span class="col-diff">{{ 'REGISTERS.DIFFERENCE' | translate }}</span>
+          <span class="col-status">{{ 'REGISTERS.STATUS' | translate }}</span>
+        </div>
+
+        <ion-list lines="full">
+          @for (session of sessions(); track session.id) {
+            <ion-item button [detail]="false" (click)="openDetail(session)">
+              <div class="session-grid">
+                <span class="col-date">{{ formatDate(session.openedAt) }}</span>
+                <span class="col-register">{{ session.registerName ?? '—' }}</span>
+                <span class="col-user">{{ session.userName ?? '—' }}</span>
+                <span class="col-open">{{ session.openingAmount | appCurrency:'1.0-0' }}</span>
+                <span class="col-close">
+                  {{ session.closingAmount != null ? (session.closingAmount | appCurrency:'1.0-0') : '—' }}
+                </span>
+                <span class="col-diff" [class.diff-negative]="(session.difference ?? 0) < 0">
+                  {{ session.difference != null ? (session.difference | appCurrency:'1.0-0') : '—' }}
+                </span>
+                <span class="col-status">
+                  <ion-badge [color]="session.status === 'OPEN' ? 'success' : 'medium'">
+                    {{ (session.status === 'OPEN' ? 'REGISTERS.STATUS_OPEN' : 'REGISTERS.STATUS_CLOSED') | translate }}
+                  </ion-badge>
+                </span>
+              </div>
+            </ion-item>
+          }
+        </ion-list>
+
+        <div class="pagination">
+          <ion-button fill="outline" [disabled]="page() <= 1" (click)="prevPage()">
+            <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+            {{ 'COMMON.BACK' | translate }}
+          </ion-button>
+          <span class="page-info">{{ page() }} / {{ totalPages() }}</span>
+          <ion-button fill="outline" [disabled]="page() >= totalPages()" (click)="nextPage()">
+            {{ 'COMMON.NEXT' | translate }}
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      }
+    </div>
+  </div>
+</ion-content>

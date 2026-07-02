@@ -56,7 +56,15 @@ export class RegisterRepository {
   findOpenSession(registerId: string) {
     return this.prisma.registerSession.findFirst({
       where: { registerId, status: RegisterSessionStatus.OPEN },
-      include: { user: { select: { id: true, username: true, firstName: true, lastName: true } } },
+      include: {
+        user: { select: { id: true, username: true, firstName: true, lastName: true } },
+        register: { select: { id: true, code: true, name: true } },
+        cashMovements: true,
+        sales: {
+          where: { status: 'COMPLETED' },
+          select: { id: true, total: true, documentNumber: true },
+        },
+      },
     });
   }
 
@@ -67,8 +75,54 @@ export class RegisterRepository {
         register: true,
         user: { select: { id: true, username: true, firstName: true, lastName: true } },
         cashMovements: true,
+        sales: {
+          where: { status: 'COMPLETED' },
+          select: { id: true, total: true, documentNumber: true },
+        },
       },
     });
+  }
+
+  findSessions(params: {
+    branchId: string;
+    registerId?: string;
+    status?: RegisterSessionStatus;
+    page?: number;
+    limit?: number;
+  }) {
+    const page = params.page ?? 1;
+    const limit = params.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.RegisterSessionWhereInput = {
+      register: { branchId: params.branchId },
+      ...(params.registerId ? { registerId: params.registerId } : {}),
+      ...(params.status ? { status: params.status } : {}),
+    };
+
+    return Promise.all([
+      this.prisma.registerSession.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { openedAt: 'desc' },
+        include: {
+          register: { select: { id: true, code: true, name: true } },
+          user: { select: { id: true, username: true, firstName: true, lastName: true } },
+          sales: {
+            where: { status: 'COMPLETED' },
+            select: { id: true, total: true },
+          },
+        },
+      }),
+      this.prisma.registerSession.count({ where }),
+    ]).then(([items, total]) => ({
+      items,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    }));
   }
 
   private buildSearchWhere(search: string): Prisma.RegisterWhereInput {

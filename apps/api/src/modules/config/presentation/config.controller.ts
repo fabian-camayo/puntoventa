@@ -47,7 +47,7 @@ export class ConfigController {
   }
 
   @Get('pos-context')
-  @RequirePermissions('sales.create', 'sales.view')
+  @RequirePermissions('sales.create', 'sales.view', 'config.view')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener contexto POS (sucursal y caja activa)' })
   getPosContext() {

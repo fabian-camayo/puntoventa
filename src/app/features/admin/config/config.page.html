@@ -1,0 +1,202 @@
+<ion-content class="page-content">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+    <div class="page-title-bar">
+      <h1>
+        <ion-icon name="settings-outline"></ion-icon>
+        {{ 'ADMIN.CONFIG' | translate }}
+      </h1>
+      @if (canUpdate) {
+        <ion-button (click)="save()" [disabled]="saving() || loading()">
+          @if (saving()) {
+            <ion-spinner name="crescent"></ion-spinner>
+          } @else {
+            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+            {{ 'COMMON.SAVE' | translate }}
+          }
+        </ion-button>
+      }
+    </div>
+
+    <div class="config-tabs pv-card">
+      <ion-segment [value]="activeTab()" (ionChange)="activeTab.set($any($event.detail.value))">
+        <ion-segment-button value="general">
+          <ion-label>{{ 'CONFIG.TAB_GENERAL' | translate }}</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="billing">
+          <ion-label>{{ 'CONFIG.TAB_BILLING' | translate }}</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="app">
+          <ion-label>{{ 'CONFIG.TAB_APP' | translate }}</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state pv-card">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>{{ 'COMMON.LOADING' | translate }}</p>
+      </div>
+    } @else {
+      <form [formGroup]="form" class="config-form">
+        @if (activeTab() === 'general') {
+          @if (posContext(); as ctx) {
+            <section class="form-section pv-card">
+              <div class="section-title">
+                <ion-icon name="storefront-outline"></ion-icon>
+                <span>{{ 'CONFIG.SECTION_OPERATION' | translate }}</span>
+              </div>
+              <div class="context-grid">
+                <div class="context-item">
+                  <label>{{ 'CONFIG.BRANCH' | translate }}</label>
+                  <strong>{{ ctx.branchName }}</strong>
+                </div>
+                <div class="context-item">
+                  <label>{{ 'CONFIG.REGISTER' | translate }}</label>
+                  <strong>{{ ctx.registerName }} ({{ ctx.registerCode }})</strong>
+                </div>
+                <div class="context-item">
+                  <label>{{ 'CONFIG.APP_MODE' | translate }}</label>
+                  <strong>{{ appModeLabel(appConfig()?.mode) | translate }}</strong>
+                </div>
+              </div>
+            </section>
+          }
+
+          <section class="form-section pv-card">
+            <div class="section-title">
+              <ion-icon name="business-outline"></ion-icon>
+              <span>{{ 'CONFIG.SECTION_BUSINESS' | translate }}</span>
+            </div>
+            <div class="fields-grid">
+              <div class="field-box span-2">
+                <label>{{ 'CONFIG.BUSINESS_NAME' | translate }}</label>
+                <ion-item lines="none" class="field-item">
+                  <ion-input formControlName="businessName"></ion-input>
+                </ion-item>
+              </div>
+              <div class="field-box">
+                <label>{{ 'CONFIG.TAX_ID' | translate }}</label>
+                <ion-item lines="none" class="field-item">
+                  <ion-input formControlName="taxId"></ion-input>
+                </ion-item>
+              </div>
+              <div class="field-box span-3">
+                <label>{{ 'CONFIG.ADDRESS' | translate }}</label>
+                <ion-item lines="none" class="field-item">
+                  <ion-input formControlName="address"></ion-input>
+                </ion-item>
+              </div>
+              <div class="field-box">
+                <label>{{ 'CONFIG.PHONE' | translate }}</label>
+                <ion-item lines="none" class="field-item">
+                  <ion-input formControlName="phone" type="tel"></ion-input>
+                </ion-item>
+              </div>
+              <div class="field-box span-2">
+                <label>{{ 'CONFIG.EMAIL' | translate }}</label>
+                <ion-item lines="none" class="field-item">
+                  <ion-input formControlName="email" type="email"></ion-input>
+                </ion-item>
+              </div>
+            </div>
+          </section>
+        }
+
+        @if (activeTab() === 'billing') {
+          <section class="form-section pv-card">
+            <div class="section-title">
+              <ion-icon name="cash-outline"></ion-icon>
+              <span>{{ 'CONFIG.SECTION_CURRENCY' | translate }}</span>
+            </div>
+            <div class="fields-grid">
+              <div class="field-box">
+                <label>{{ 'CONFIG.CURRENCY' | translate }}</label>
+                <ion-item lines="none" class="field-item">
+                  <ion-input formControlName="currency" maxlength="3"></ion-input>
+                </ion-item>
+              </div>
+              <div class="field-box">
+                <label>{{ 'CONFIG.CURRENCY_SYMBOL' | translate }}</label>
+                <ion-item lines="none" class="field-item">
+                  <ion-input formControlName="currencySymbol" maxlength="5"></ion-input>
+                </ion-item>
+              </div>
+              <div class="field-box">
+                <label>{{ 'CONFIG.TAX_RATE' | translate }}</label>
+                <ion-item lines="none" class="field-item">
+                  <ion-input type="number" formControlName="taxRate" min="0" max="100"></ion-input>
+                </ion-item>
+              </div>
+            </div>
+            <div class="toggle-row">
+              <ion-item lines="none" class="toggle-item">
+                <ion-toggle formControlName="allowNegativeStock" labelPlacement="start">
+                  {{ 'CONFIG.ALLOW_NEGATIVE_STOCK' | translate }}
+                </ion-toggle>
+              </ion-item>
+            </div>
+          </section>
+
+          <section class="form-section pv-card">
+            <div class="section-title">
+              <ion-icon name="receipt-outline"></ion-icon>
+              <span>{{ 'CONFIG.SECTION_RECEIPT' | translate }}</span>
+            </div>
+            <div class="fields-grid">
+              <div class="field-box span-3">
+                <label>{{ 'CONFIG.TICKET_HEADER' | translate }}</label>
+                <ion-item lines="none" class="field-item">
+                  <ion-textarea formControlName="ticketHeader" [autoGrow]="true" rows="2"></ion-textarea>
+                </ion-item>
+              </div>
+              <div class="field-box span-3">
+                <label>{{ 'CONFIG.TICKET_FOOTER' | translate }}</label>
+                <ion-item lines="none" class="field-item">
+                  <ion-textarea formControlName="ticketFooter" [autoGrow]="true" rows="2"></ion-textarea>
+                </ion-item>
+              </div>
+            </div>
+          </section>
+        }
+
+        @if (activeTab() === 'app') {
+          <section class="form-section pv-card">
+            <div class="section-title">
+              <ion-icon name="color-palette-outline"></ion-icon>
+              <span>{{ 'CONFIG.SECTION_APP' | translate }}</span>
+            </div>
+            <div class="fields-grid">
+              <div class="field-box">
+                <label>{{ 'CONFIG.LANGUAGE' | translate }}</label>
+                <ion-item lines="none" class="field-item">
+                  <ion-select formControlName="language" interface="popover">
+                    <ion-select-option value="es">{{ 'CONFIG.LANG_ES' | translate }}</ion-select-option>
+                    <ion-select-option value="en">{{ 'CONFIG.LANG_EN' | translate }}</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </div>
+              <div class="field-box">
+                <label>{{ 'CONFIG.THEME' | translate }}</label>
+                <ion-item lines="none" class="field-item">
+                  <ion-select formControlName="theme" interface="popover">
+                    <ion-select-option value="light">{{ 'CONFIG.THEME_LIGHT' | translate }}</ion-select-option>
+                    <ion-select-option value="dark">{{ 'CONFIG.THEME_DARK' | translate }}</ion-select-option>
+                    <ion-select-option value="system">{{ 'CONFIG.THEME_SYSTEM' | translate }}</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </div>
+            </div>
+          </section>
+        }
+
+        @if (!canUpdate) {
+          <p class="read-only-hint">{{ 'CONFIG.READ_ONLY_HINT' | translate }}</p>
+        }
+      </form>
+    }
+  </div>
+</ion-content>
