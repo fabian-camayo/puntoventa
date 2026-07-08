@@ -18,6 +18,8 @@ import {
   IonItem,
   IonText,
   IonSpinner,
+  IonSelect,
+  IonSelectOption,
   ModalController,
   ToastController,
   ViewWillEnter,
@@ -57,6 +59,7 @@ import {
   SaleStatus,
   AuthUser,
   RegisterSessionDto,
+  RegisterDto,
 } from '@puntoventa/shared';
 import { SaleTabsComponent } from '../../shared/components/sale-tabs/sale-tabs.component';
 import { AppCurrencyPipe } from '../../shared/pipes/app-currency.pipe';
@@ -99,6 +102,8 @@ interface ActiveSale extends SaleDto {
     IonItem,
     IonText,
     IonSpinner,
+    IonSelect,
+    IonSelectOption,
     FormsModule,
     TranslateModule,
     SaleTabsComponent,
@@ -134,8 +139,11 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   ticketHeader = signal<string | undefined>(undefined);
   ticketFooter = signal<string | undefined>(undefined);
   activeSession = signal<RegisterSessionDto | null>(null);
+  availableRegisters = signal<RegisterDto[]>([]);
+  noRegisterAssigned = signal(false);
 
   readonly canOpenRegister = this.auth.hasPermission('registers.open');
+  readonly canSelectRegister = computed(() => this.availableRegisters().length > 1);
 
   tabs = signal<SaleTab[]>([]);
   activeTabId = signal<string | null>(null);
@@ -482,18 +490,89 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     this.configService.getPosContext().subscribe({
       next: (res) => {
         this.branchId.set(res.branchId);
-        this.registerId.set(res.registerId);
-        this.registerName.set(res.registerName);
         this.businessName.set(res.businessName ?? res.branchName);
         this.ticketHeader.set(res.ticketHeader);
         this.ticketFooter.set(res.ticketFooter);
-        void this.loadActiveSession().then(() => void this.whenReady());
+        void this.loadAvailableRegisters(
+          res.branchId,
+          res.registerId,
+          res.registerName,
+          res.registerBoundToTerminal ?? false,
+        );
       },
       error: async () => {
         this.initPromise = null;
         await this.showToast('No se pudo cargar la configuración de caja', 'danger');
       },
     });
+  }
+
+  private async loadAvailableRegisters(
+    branchId: string,
+    defaultRegisterId: string,
+    defaultRegisterName: string,
+    boundToTerminal: boolean,
+  ): Promise<void> {
+    const isAdmin = this.auth.hasPermission('registers.admin');
+
+    let registers: RegisterDto[] = [];
+    try {
+      registers = await firstValueFrom(this.registerService.listMine(branchId));
+    } catch {
+      registers = [];
+    }
+
+    // Usuario normal: solo puede ver/abrir la caja asignada a él que además
+    // pertenezca a este equipo (terminal). El admin ve todas las cajas.
+    if (!isAdmin && boundToTerminal) {
+      registers = registers.filter((r) => r.id === defaultRegisterId);
+    }
+
+    this.availableRegisters.set(registers);
+
+    if (registers.length === 0) {
+      this.noRegisterAssigned.set(true);
+      this.registerId.set(null);
+      this.registerName.set('');
+      this.posReady.set(true);
+      return;
+    }
+
+    this.noRegisterAssigned.set(false);
+
+    const preferred =
+      registers.find((r) => r.id === defaultRegisterId) ?? registers[0]!;
+    this.registerId.set(preferred.id);
+    this.registerName.set(
+      preferred.id === defaultRegisterId ? defaultRegisterName : preferred.name,
+    );
+
+    await this.loadActiveSession();
+    await this.whenReady();
+  }
+
+  async selectRegister(registerId: string): Promise<void> {
+    if (!registerId || registerId === this.registerId()) return;
+
+    const register = this.availableRegisters().find((r) => r.id === registerId);
+    if (!register) return;
+
+    this.initialized = false;
+    this.initializing = false;
+    this.initPromise = null;
+    this.posReady.set(false);
+    this.tabs.set([]);
+    this.activeTabId.set(null);
+    this.activeSale.set(null);
+    this.searchResults.set([]);
+    this.searchQuery.set('');
+
+    this.registerId.set(register.id);
+    this.registerName.set(register.name);
+
+    await this.loadActiveSession();
+    await this.whenReady();
+    this.posReady.set(true);
   }
 
   private whenReady(): Promise<void> {

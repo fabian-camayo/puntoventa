@@ -43,6 +43,22 @@
   }
 }
 
+.register-select {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  min-width: 120px;
+  max-width: 220px;
+  font-weight: 700;
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-md);
+  background: var(--pv-bg-primary);
+}
+
+.register-state-text {
+  font-weight: 600;
+  color: var(--pv-text-secondary);
+}
+
 .pos-loading {
   flex: 1;
   display: flex;

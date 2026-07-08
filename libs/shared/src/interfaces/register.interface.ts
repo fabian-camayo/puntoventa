@@ -1,9 +1,19 @@
+export interface RegisterAssignedUser {
+  id: string;
+  username: string;
+  fullName: string;
+}
+
 export interface RegisterDto {
   id: string;
   code: string;
   name: string;
+  description?: string;
   branchId: string;
   isActive: boolean;
+  hasOpenSession?: boolean;
+  assignedUsers?: RegisterAssignedUser[];
+  assignedUserIds?: string[];
 }
 
 export interface RegisterSessionDto {
@@ -36,4 +46,18 @@ export interface CloseRegisterRequest {
   sessionId: string;
   closingAmount: number;
   notes?: string;
+}
+
+export interface TerminalDto {
+  id: string;
+  branchId: string;
+  registerId?: string;
+  registerName?: string;
+  registerCode?: string;
+  deviceId: string;
+  name: string;
+  ipAddress?: string;
+  isActive: boolean;
+  lastSeenAt?: string;
+  createdAt: string;
 }

@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { RegisterSessionStatus, Prisma } from '@prisma/client';
 import { RegisterDto, RegisterSessionDto } from '@puntoventa/shared';
@@ -23,12 +24,31 @@ export class RegistersService {
     private readonly auditService: AuditService,
   ) {}
 
-  async findAll(branchId: string, params?: { page?: number; limit?: number; search?: string }) {
-    const result = await this.registerRepository.findByBranch(branchId, params);
+  async findAll(
+    branchId: string,
+    actor: JwtPayload,
+    params?: { page?: number; limit?: number; search?: string },
+  ) {
+    const canSeeAll = actor.permissions?.includes('registers.admin');
+    const result = await this.registerRepository.findByBranch(branchId, {
+      ...params,
+      userId: canSeeAll ? undefined : actor.sub,
+    });
     return {
       ...result,
       items: result.items.map((r) => this.mapRegisterToDto(r)),
     };
+  }
+
+  async findMine(branchId: string, actor: JwtPayload): Promise<RegisterDto[]> {
+    const canSeeAll = actor.permissions?.includes('registers.admin');
+    const result = await this.registerRepository.findByBranch(branchId, {
+      limit: 200,
+      userId: canSeeAll ? undefined : actor.sub,
+    });
+    return result.items
+      .filter((r) => r.isActive)
+      .map((r) => this.mapRegisterToDto(r));
   }
 
   async findById(id: string): Promise<RegisterDto> {
@@ -51,6 +71,10 @@ export class RegistersService {
       isActive: dto.isActive ?? true,
     });
 
+    if (dto.userIds) {
+      await this.registerRepository.setAssignedUsers(register.id, dto.userIds);
+    }
+
     await this.auditService.log({
       userId: actor.sub,
       action: 'CREATE',
@@ -60,14 +84,22 @@ export class RegistersService {
       newValues: { code: dto.code } as Prisma.InputJsonValue,
     });
 
-    return this.mapRegisterToDto(register);
+    return this.findById(register.id);
   }
 
   async update(id: string, dto: UpdateRegisterDto, actor: JwtPayload) {
     const existing = await this.registerRepository.findById(id);
     if (!existing) throw new NotFoundException('Caja no encontrada');
 
-    const register = await this.registerRepository.update(id, dto);
+    await this.registerRepository.update(id, {
+      name: dto.name,
+      description: dto.description,
+      isActive: dto.isActive,
+    });
+
+    if (dto.userIds) {
+      await this.registerRepository.setAssignedUsers(id, dto.userIds);
+    }
 
     await this.auditService.log({
       userId: actor.sub,
@@ -77,13 +109,60 @@ export class RegistersService {
       entityId: id,
     });
 
-    return this.mapRegisterToDto(register);
+    return this.findById(id);
   }
 
-  async openSession(dto: OpenSessionDto, actor: JwtPayload): Promise<RegisterSessionDto> {
+  async assignUsers(id: string, userIds: string[], actor: JwtPayload): Promise<RegisterDto> {
+    const existing = await this.registerRepository.findById(id);
+    if (!existing) throw new NotFoundException('Caja no encontrada');
+
+    await this.registerRepository.setAssignedUsers(id, userIds);
+
+    await this.auditService.log({
+      userId: actor.sub,
+      action: 'UPDATE',
+      module: 'registers',
+      entityType: 'Register',
+      entityId: id,
+      newValues: { assignedUsers: userIds } as Prisma.InputJsonValue,
+    });
+
+    return this.findById(id);
+  }
+
+  async openSession(
+    dto: OpenSessionDto,
+    actor: JwtPayload,
+    deviceId?: string,
+  ): Promise<RegisterSessionDto> {
     const register = await this.registerRepository.findById(dto.registerId);
     if (!register) throw new NotFoundException('Caja no encontrada');
     if (!register.isActive) throw new BadRequestException('La caja está inactiva');
+
+    const isAdmin = actor.permissions?.includes('registers.admin');
+
+    if (!isAdmin) {
+      // 1) La caja debe estar asignada al usuario
+      const assigned = await this.prisma.userRegister.findFirst({
+        where: { userId: actor.sub, registerId: dto.registerId },
+      });
+      if (!assigned) {
+        throw new ForbiddenException('No tiene esta caja asignada');
+      }
+
+      // 2) La caja solo puede abrirse desde el equipo (PC) al que pertenece
+      const boundTerminal = await this.prisma.terminal.findFirst({
+        where: { registerId: dto.registerId, isActive: true },
+      });
+      if (boundTerminal) {
+        const currentDeviceId = deviceId?.trim();
+        if (!currentDeviceId || boundTerminal.deviceId !== currentDeviceId) {
+          throw new ForbiddenException(
+            'Esta caja está asignada a otro equipo. Ábrala desde su computador.',
+          );
+        }
+      }
+    }
 
     const openSession = await this.registerRepository.findOpenSession(dto.registerId);
     if (openSession) {
@@ -178,15 +257,29 @@ export class RegistersService {
     branchId: string;
     code: string;
     name: string;
+    description?: string | null;
     isActive: boolean;
     sessions?: Array<{ id: string; status: RegisterSessionStatus }>;
+    userRegisters?: Array<{
+      user: { id: string; username: string; firstName: string; lastName: string };
+    }>;
   }): RegisterDto {
+    const assignedUsers = (register.userRegisters ?? []).map((ur) => ({
+      id: ur.user.id,
+      username: ur.user.username,
+      fullName: `${ur.user.firstName} ${ur.user.lastName}`.trim() || ur.user.username,
+    }));
+
     return {
       id: register.id,
       code: register.code,
       name: register.name,
+      description: register.description ?? undefined,
       branchId: register.branchId,
       isActive: register.isActive,
+      hasOpenSession: (register.sessions?.length ?? 0) > 0,
+      assignedUsers,
+      assignedUserIds: assignedUsers.map((u) => u.id),
     };
   }
 

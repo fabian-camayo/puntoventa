@@ -20,6 +20,8 @@ import {
   sunnyOutline,
   folderOutline,
   cashOutline,
+  albumsOutline,
+  desktopOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@core/services/auth.service';
 import { ThemeService } from '@core/services/theme.service';
@@ -39,6 +41,8 @@ addIcons({
   sunnyOutline,
   folderOutline,
   cashOutline,
+  albumsOutline,
+  desktopOutline,
 });
 
 export interface NavItem {
@@ -50,6 +54,12 @@ export interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { labelKey: 'MENU.POS', icon: 'cart-outline', route: '/pos' },
+  {
+    labelKey: 'ADMIN.DASHBOARD',
+    icon: 'grid-outline',
+    route: '/admin',
+    permission: 'admin.access',
+  },
   {
     labelKey: 'ADMIN.SALES',
     icon: 'receipt-outline',
@@ -75,10 +85,16 @@ const NAV_ITEMS: NavItem[] = [
     permission: 'registers.view',
   },
   {
-    labelKey: 'ADMIN.DASHBOARD',
-    icon: 'grid-outline',
-    route: '/admin',
-    permission: ['users.view', 'roles.view', 'products.view', 'config.view', 'reports.view', 'sales.view', 'categories.view', 'registers.view'],
+    labelKey: 'ADMIN.REGISTERS',
+    icon: 'albums-outline',
+    route: '/admin/registers',
+    permission: 'registers.admin',
+  },
+  {
+    labelKey: 'ADMIN.TERMINALS',
+    icon: 'desktop-outline',
+    route: '/admin/terminals',
+    permission: 'registers.admin',
   },
   {
     labelKey: 'ADMIN.USERS',
@@ -171,6 +187,9 @@ export class AppMenuComponent implements OnInit {
 
     const items = NAV_ITEMS.filter((item) => {
       if (!item.permission) return true;
+      if (item.permission === 'admin.access') {
+        return this.auth.hasAdminAccess();
+      }
       const perms = Array.isArray(item.permission) ? item.permission : [item.permission];
       return this.auth.hasAnyPermission(...perms);
     });

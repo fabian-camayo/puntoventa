@@ -13,6 +13,7 @@ import { SuppliersModule } from './modules/suppliers/suppliers.module';
 import { PurchasesModule } from './modules/purchases/purchases.module';
 import { SalesModule } from './modules/sales/sales.module';
 import { RegistersModule } from './modules/registers/registers.module';
+import { TerminalsModule } from './modules/terminals/terminals.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { ConfigAppModule } from './modules/config/config.module';
@@ -39,6 +40,7 @@ import { DiscoveryModule } from './modules/discovery/discovery.module';
     PurchasesModule,
     SalesModule,
     RegistersModule,
+    TerminalsModule,
     InventoryModule,
     ReportsModule,
     ConfigAppModule,

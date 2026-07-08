@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsBoolean, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsBoolean, IsUUID, IsArray } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateRegisterDto {
@@ -26,4 +26,10 @@ export class CreateRegisterDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  userIds?: string[];
 }

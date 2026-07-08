@@ -6,6 +6,8 @@ import {
   Body,
   Query,
   Param,
+  Headers,
+  Ip,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -50,8 +52,8 @@ export class ConfigController {
   @RequirePermissions('sales.create', 'sales.view', 'config.view')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener contexto POS (sucursal y caja activa)' })
-  getPosContext() {
-    return this.configService.getPosContext();
+  getPosContext(@Headers('x-device-id') deviceId?: string, @Ip() ip?: string) {
+    return this.configService.getPosContext(deviceId, ip);
   }
 
   @Get('business/:branchId')

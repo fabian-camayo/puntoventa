@@ -9,6 +9,10 @@ export const permissionGuard: CanActivateFn = (route: ActivatedRouteSnapshot) =>
 
   if (!required) return true;
 
+  if (route.routeConfig?.path === '' && route.parent?.routeConfig?.path === 'admin') {
+    if (auth.hasAdminAccess()) return true;
+  }
+
   const permissions = Array.isArray(required) ? required : [required];
   if (auth.hasAnyPermission(...permissions)) {
     return true;

@@ -28,6 +28,32 @@ export class AuthService {
     return !!this.getToken();
   }
 
+  get currentUser(): AuthUser | null {
+    return this.currentUser$.value;
+  }
+
+  hasRole(roleCode: string): boolean {
+    return this.currentUser$.value?.roles?.includes(roleCode) ?? false;
+  }
+
+  isAdmin(): boolean {
+    return this.hasRole('ADMIN');
+  }
+
+  hasAdminAccess(): boolean {
+    if (this.isAdmin()) return true;
+    return this.hasAnyPermission(
+      'users.view',
+      'roles.view',
+      'products.view',
+      'config.view',
+      'reports.view',
+      'sales.view',
+      'categories.view',
+      'registers.view',
+    );
+  }
+
   hasPermission(code: string): boolean {
     return this.permissions$.value.includes(code);
   }
@@ -82,6 +108,32 @@ export class AuthService {
 
   private loadPermissions(): string[] {
     const raw = localStorage.getItem(PERMISSIONS_KEY);
-    return raw ? (JSON.parse(raw) as string[]) : [];
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as string[];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch {
+        // ignore malformed cache
+      }
+    }
+    const fromToken = this.permissionsFromToken();
+    if (fromToken.length > 0) {
+      localStorage.setItem(PERMISSIONS_KEY, JSON.stringify(fromToken));
+    }
+    return fromToken;
+  }
+
+  private permissionsFromToken(): string[] {
+    const token = this.getToken();
+    if (!token) return [];
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1] ?? '')) as { permissions?: string[] };
+      return Array.isArray(payload.permissions) ? payload.permissions : [];
+    } catch {
+      return [];
+    }
   }
 }

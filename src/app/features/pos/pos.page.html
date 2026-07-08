@@ -12,15 +12,32 @@
     <div class="register-status-bar" [class.is-open]="isRegisterOpen()">
       <div class="register-status-info">
         <ion-icon [name]="isRegisterOpen() ? 'lock-open-outline' : 'lock-closed-outline'"></ion-icon>
-        <span>
-          @if (isRegisterOpen()) {
-            {{ 'REGISTERS.SESSION_OPEN' | translate }} — {{ registerName() }}
-          } @else {
-            {{ 'REGISTERS.SESSION_CLOSED' | translate }} — {{ registerName() }}
-          }
-        </span>
+        @if (canSelectRegister()) {
+          <ion-select
+            class="register-select"
+            interface="popover"
+            [value]="registerId()"
+            (ionChange)="selectRegister($event.detail.value)"
+            [selectedText]="registerName()"
+          >
+            @for (reg of availableRegisters(); track reg.id) {
+              <ion-select-option [value]="reg.id">{{ reg.name }}</ion-select-option>
+            }
+          </ion-select>
+          <span class="register-state-text">
+            {{ (isRegisterOpen() ? 'REGISTERS.SESSION_OPEN' : 'REGISTERS.SESSION_CLOSED') | translate }}
+          </span>
+        } @else {
+          <span>
+            @if (isRegisterOpen()) {
+              {{ 'REGISTERS.SESSION_OPEN' | translate }} — {{ registerName() }}
+            } @else {
+              {{ 'REGISTERS.SESSION_CLOSED' | translate }} — {{ registerName() }}
+            }
+          </span>
+        }
       </div>
-      @if (!isRegisterOpen() && canOpenRegister) {
+      @if (!isRegisterOpen() && canOpenRegister && !noRegisterAssigned()) {
         <ion-button size="small" (click)="openRegisterModal()">
           {{ 'REGISTERS.OPEN_ACTION' | translate }}
         </ion-button>
@@ -39,13 +56,18 @@
       @if (!isRegisterOpen()) {
         <div class="register-blocker">
           <ion-icon name="lock-closed-outline"></ion-icon>
-          <h2>{{ 'REGISTERS.SESSION_CLOSED' | translate }}</h2>
-          <p>{{ 'POS.REGISTER_CLOSED_HINT' | translate }}</p>
-          @if (canOpenRegister) {
-            <ion-button (click)="openRegisterModal()">
-              <ion-icon name="lock-open-outline" slot="start"></ion-icon>
-              {{ 'REGISTERS.OPEN_ACTION' | translate }}
-            </ion-button>
+          @if (noRegisterAssigned()) {
+            <h2>{{ 'REGISTERS.SESSION_CLOSED' | translate }}</h2>
+            <p>{{ 'REGISTERS.NO_ASSIGNED' | translate }}</p>
+          } @else {
+            <h2>{{ 'REGISTERS.SESSION_CLOSED' | translate }}</h2>
+            <p>{{ 'POS.REGISTER_CLOSED_HINT' | translate }}</p>
+            @if (canOpenRegister) {
+              <ion-button (click)="openRegisterModal()">
+                <ion-icon name="lock-open-outline" slot="start"></ion-icon>
+                {{ 'REGISTERS.OPEN_ACTION' | translate }}
+              </ion-button>
+            }
           }
         </div>
       }

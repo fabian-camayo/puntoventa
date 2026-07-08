@@ -1,0 +1,126 @@
+.list-card {
+  overflow: hidden;
+}
+
+.terminals-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  background: color-mix(in srgb, var(--pv-accent) 8%, var(--pv-bg-primary));
+  border-color: color-mix(in srgb, var(--pv-accent) 25%, var(--pv-border));
+
+  ion-icon {
+    flex-shrink: 0;
+    font-size: 1.4rem;
+    color: var(--pv-accent);
+    margin-top: 2px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--pv-text-secondary);
+    line-height: 1.45;
+  }
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  padding: 24px;
+  text-align: center;
+  color: var(--pv-text-secondary);
+
+  ion-icon {
+    font-size: 4rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+
+  h2 {
+    margin: 0 0 8px;
+    color: var(--pv-text-primary);
+  }
+}
+
+.table-header,
+.terminal-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 120px 1.2fr 1fr 100px 120px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.table-header {
+  padding: 10px 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--pv-text-secondary);
+  background: var(--pv-bg-secondary);
+  border-bottom: 1px solid var(--pv-border);
+}
+
+.terminals-list {
+  background: transparent;
+}
+
+.terminal-row {
+  --padding-start: 16px;
+  --inner-padding-end: 8px;
+  --min-height: 56px;
+
+  &.inactive {
+    opacity: 0.6;
+  }
+}
+
+.col-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.this-badge {
+  font-size: 0.6rem;
+}
+
+.mono {
+  font-family: ui-monospace, monospace;
+}
+
+.col-seen {
+  font-size: 0.8rem;
+  color: var(--pv-text-secondary);
+}
+
+.col-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+@media (max-width: 960px) {
+  .table-header {
+    display: none;
+  }
+
+  .terminal-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+  }
+
+  .col-name,
+  .col-register {
+    grid-column: 1 / -1;
+  }
+}

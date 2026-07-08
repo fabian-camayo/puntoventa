@@ -6,6 +6,7 @@ import {
   Param,
   Body,
   Query,
+  Headers,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -13,6 +14,7 @@ import { RegistersService } from '../application/registers.service';
 import { RegisterSessionStatus } from '@prisma/client';
 import { CreateRegisterDto } from '../application/dto/create-register.dto';
 import { UpdateRegisterDto } from '../application/dto/update-register.dto';
+import { AssignUsersDto } from '../application/dto/assign-users.dto';
 import { OpenSessionDto } from '../application/dto/open-session.dto';
 import { CloseSessionDto } from '../application/dto/close-session.dto';
 import { JwtAuthGuard } from '../../../presentation/guards/jwt-auth.guard';
@@ -27,6 +29,13 @@ import { JwtPayload } from '@puntoventa/shared';
 @ApiBearerAuth()
 export class RegistersController {
   constructor(private readonly registersService: RegistersService) {}
+
+  @Get('mine')
+  @RequirePermissions('registers.view')
+  @ApiOperation({ summary: 'Listar cajas disponibles para el usuario actual' })
+  findMine(@Query('branchId') branchId: string, @CurrentUser() user: JwtPayload) {
+    return this.registersService.findMine(branchId, user);
+  }
 
   @Get('sessions')
   @RequirePermissions('registers.view')
@@ -59,11 +68,12 @@ export class RegistersController {
   @ApiOperation({ summary: 'Listar cajas registradoras' })
   findAll(
     @Query('branchId') branchId: string,
+    @CurrentUser() user: JwtPayload,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
     @Query('search') search?: string,
   ) {
-    return this.registersService.findAll(branchId, { page, limit, search });
+    return this.registersService.findAll(branchId, user, { page, limit, search });
   }
 
   @Get(':id')
@@ -98,11 +108,26 @@ export class RegistersController {
     return this.registersService.update(id, dto, user);
   }
 
+  @Put(':id/users')
+  @RequirePermissions('registers.admin')
+  @ApiOperation({ summary: 'Asignar usuarios a una caja' })
+  assignUsers(
+    @Param('id') id: string,
+    @Body() dto: AssignUsersDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.registersService.assignUsers(id, dto.userIds, user);
+  }
+
   @Post('sessions/open')
   @RequirePermissions('registers.open')
   @ApiOperation({ summary: 'Abrir sesión de caja' })
-  openSession(@Body() dto: OpenSessionDto, @CurrentUser() user: JwtPayload) {
-    return this.registersService.openSession(dto, user);
+  openSession(
+    @Body() dto: OpenSessionDto,
+    @CurrentUser() user: JwtPayload,
+    @Headers('x-device-id') deviceId?: string,
+  ) {
+    return this.registersService.openSession(dto, user, deviceId);
   }
 
   @Post('sessions/close')

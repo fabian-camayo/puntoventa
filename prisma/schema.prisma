@@ -44,6 +44,7 @@ model Branch {
 
   company             Company              @relation(fields: [companyId], references: [id])
   registers           Register[]
+  terminals           Terminal[]
   products            Product[]
   categories          Category[]
   customers           Customer[]
@@ -76,6 +77,7 @@ model User {
 
   company            Company             @relation(fields: [companyId], references: [id])
   userRoles          UserRole[]
+  userRegisters      UserRegister[]
   registerSessions   RegisterSession[]
   sales              Sale[]
   purchases          Purchase[]
@@ -226,9 +228,42 @@ model Register {
   branch           Branch            @relation(fields: [branchId], references: [id])
   sessions         RegisterSession[]
   sales            Sale[]
+  userRegisters    UserRegister[]
+  terminals        Terminal[]
 
   @@unique([branchId, code])
   @@map("registers")
+}
+
+model Terminal {
+  id         String    @id @default(uuid()) @db.Char(36)
+  branchId   String    @map("branch_id") @db.Char(36)
+  registerId String?   @map("register_id") @db.Char(36)
+  deviceId   String    @unique @map("device_id") @db.VarChar(100)
+  name       String    @db.VarChar(150)
+  ipAddress  String?   @map("ip_address") @db.VarChar(64)
+  isActive   Boolean   @default(true) @map("is_active")
+  lastSeenAt DateTime? @map("last_seen_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  branch   Branch    @relation(fields: [branchId], references: [id])
+  register Register? @relation(fields: [registerId], references: [id])
+
+  @@map("terminals")
+}
+
+model UserRegister {
+  id         String   @id @default(uuid()) @db.Char(36)
+  userId     String   @map("user_id") @db.Char(36)
+  registerId String   @map("register_id") @db.Char(36)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  register Register @relation(fields: [registerId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, registerId])
+  @@map("user_registers")
 }
 
 model RegisterSession {

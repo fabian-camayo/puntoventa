@@ -2,6 +2,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { ConfigService } from '../services/config.service';
+import { DeviceService } from '../services/device.service';
 
 function isStaticAssetRequest(url: string): boolean {
   return url.includes('/assets/') || url.startsWith('./assets');
@@ -18,6 +19,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   const auth = inject(AuthService);
   const config = inject(ConfigService);
+  const device = inject(DeviceService);
   const token = auth.getToken();
 
   let url = req.url;
@@ -26,14 +28,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     url = `${config.apiBaseUrl}${path}`;
   }
 
+  const headers: Record<string, string> = { 'X-Device-Id': device.getDeviceId() };
   if (token) {
-    req = req.clone({
-      url,
-      setHeaders: { Authorization: `Bearer ${token}` },
-    });
-  } else {
-    req = req.clone({ url });
+    headers['Authorization'] = `Bearer ${token}`;
   }
+
+  req = req.clone({ url, setHeaders: headers });
 
   return next(req);
 };

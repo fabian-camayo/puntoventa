@@ -69,4 +69,18 @@ export const ADMIN_ROUTES: Routes = [
     canActivate: [permissionGuard],
     data: { permission: 'registers.view' },
   },
+  {
+    path: 'registers',
+    loadComponent: () =>
+      import('./registers/registers.page').then((m) => m.RegistersPage),
+    canActivate: [permissionGuard],
+    data: { permission: 'registers.admin' },
+  },
+  {
+    path: 'terminals',
+    loadComponent: () =>
+      import('./terminals/terminals.page').then((m) => m.TerminalsPage),
+    canActivate: [permissionGuard],
+    data: { permission: 'registers.admin' },
+  },
 ];

@@ -95,7 +95,7 @@ export class ConfigService {
     return this.getBusinessConfig(branchId);
   }
 
-  async getPosContext(): Promise<PosContextDto> {
+  async getPosContext(deviceId?: string, ipAddress?: string): Promise<PosContextDto> {
     const branchSetting = await this.appSettingRepository.findByKey('app.branch_id');
     const registerSetting = await this.appSettingRepository.findByKey('app.register_id');
 
@@ -116,11 +116,23 @@ export class ConfigService {
       throw new NotFoundException('No hay sucursal configurada');
     }
 
-    let register = registerSetting?.value
+    const terminal = await this.resolveTerminal(branch.id, deviceId, ipAddress);
+
+    let register = terminal?.registerId
       ? await this.prisma.register.findFirst({
-          where: { id: registerSetting.value, branchId: branch.id, isActive: true },
+          where: { id: terminal.registerId, branchId: branch.id, isActive: true },
         })
       : null;
+
+    const registerBoundToTerminal = !!register;
+
+    if (!register) {
+      register = registerSetting?.value
+        ? await this.prisma.register.findFirst({
+            where: { id: registerSetting.value, branchId: branch.id, isActive: true },
+          })
+        : null;
+    }
 
     if (!register) {
       register = await this.prisma.register.findFirst({
@@ -136,9 +148,6 @@ export class ConfigService {
     if (branchSetting?.value !== branch.id) {
       await this.appSettingRepository.upsert('app.branch_id', branch.id, 'app');
     }
-    if (registerSetting?.value !== register.id) {
-      await this.appSettingRepository.upsert('app.register_id', register.id, 'app');
-    }
 
     const businessConfig = await this.businessConfigRepository.findByBranchId(branch.id);
 
@@ -148,10 +157,66 @@ export class ConfigService {
       registerId: register.id,
       registerName: register.name,
       registerCode: register.code,
+      registerBoundToTerminal,
       businessName: businessConfig?.businessName ?? branch.name,
       ticketHeader: businessConfig?.ticketHeader ?? undefined,
       ticketFooter: businessConfig?.ticketFooter ?? undefined,
     };
+  }
+
+  private async resolveTerminal(
+    branchId: string,
+    deviceId?: string,
+    ipAddress?: string,
+  ): Promise<{ registerId: string | null } | null> {
+    const cleanIp = this.normalizeIp(ipAddress);
+
+    if (deviceId) {
+      const existing = await this.prisma.terminal.findUnique({ where: { deviceId } });
+      if (existing) {
+        if (existing.isActive) {
+          await this.prisma.terminal.update({
+            where: { deviceId },
+            data: { lastSeenAt: new Date(), ipAddress: cleanIp ?? existing.ipAddress },
+          });
+        }
+        return existing.isActive ? { registerId: existing.registerId } : null;
+      }
+
+      const created = await this.prisma.terminal.create({
+        data: {
+          branchId,
+          deviceId,
+          name: cleanIp ? `Equipo ${cleanIp}` : 'Equipo nuevo',
+          ipAddress: cleanIp,
+          lastSeenAt: new Date(),
+        },
+      });
+      return { registerId: created.registerId };
+    }
+
+    if (cleanIp) {
+      const byIp = await this.prisma.terminal.findFirst({
+        where: { branchId, ipAddress: cleanIp, isActive: true },
+      });
+      if (byIp) {
+        await this.prisma.terminal.update({
+          where: { id: byIp.id },
+          data: { lastSeenAt: new Date() },
+        });
+        return { registerId: byIp.registerId };
+      }
+    }
+
+    return null;
+  }
+
+  private normalizeIp(ip?: string): string | undefined {
+    if (!ip) return undefined;
+    let value = ip.trim();
+    if (value.startsWith('::ffff:')) value = value.slice(7);
+    if (value === '::1') value = '127.0.0.1';
+    return value || undefined;
   }
 
   async getAppSettings(category?: string) {

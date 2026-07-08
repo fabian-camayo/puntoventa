@@ -1,0 +1,95 @@
+<ion-content class="page-content">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+    <div class="page-title-bar">
+      <h1>
+        <ion-icon name="desktop-outline"></ion-icon>
+        {{ 'TERMINALS.TITLE' | translate }}
+      </h1>
+    </div>
+
+    <div class="terminals-hint pv-card">
+      <ion-icon name="wifi-outline"></ion-icon>
+      <p>{{ 'TERMINALS.HINT' | translate }}</p>
+    </div>
+
+    <div class="pv-card list-card">
+      @if (loading()) {
+        <div class="loading-state">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>{{ 'COMMON.LOADING' | translate }}</p>
+        </div>
+      } @else if (terminals().length === 0) {
+        <div class="empty-state">
+          <ion-icon name="desktop-outline"></ion-icon>
+          <h2>{{ 'TERMINALS.EMPTY_TITLE' | translate }}</h2>
+          <p>{{ 'TERMINALS.EMPTY_HINT' | translate }}</p>
+        </div>
+      } @else {
+        <div class="table-header">
+          <span class="col-name">{{ 'TERMINALS.NAME' | translate }}</span>
+          <span class="col-ip">{{ 'TERMINALS.IP' | translate }}</span>
+          <span class="col-register">{{ 'TERMINALS.REGISTER' | translate }}</span>
+          <span class="col-seen">{{ 'TERMINALS.LAST_SEEN' | translate }}</span>
+          <span class="col-status">{{ 'TERMINALS.STATUS' | translate }}</span>
+          <span class="col-actions"></span>
+        </div>
+
+        <ion-list class="terminals-list" lines="full">
+          @for (terminal of terminals(); track terminal.id) {
+            <ion-item class="terminal-row" [class.inactive]="!terminal.isActive">
+              <div class="terminal-grid">
+                <div class="col-name">
+                  <strong>{{ terminal.name }}</strong>
+                  @if (isCurrentDevice(terminal)) {
+                    <ion-badge color="primary" class="this-badge">{{ 'TERMINALS.THIS_DEVICE' | translate }}</ion-badge>
+                  }
+                </div>
+                <span class="col-ip mono">{{ terminal.ipAddress ?? '—' }}</span>
+                <div class="col-register" (click)="$event.stopPropagation()">
+                  @if (canManage) {
+                    <ion-select
+                      interface="popover"
+                      [value]="terminal.registerId ?? null"
+                      [placeholder]="'TERMINALS.NO_REGISTER' | translate"
+                      (ionChange)="onRegisterChange(terminal, $event.detail.value)"
+                    >
+                      <ion-select-option [value]="null">{{ 'TERMINALS.NO_REGISTER' | translate }}</ion-select-option>
+                      @for (reg of registers(); track reg.id) {
+                        <ion-select-option [value]="reg.id">{{ reg.name }}</ion-select-option>
+                      }
+                    </ion-select>
+                  } @else {
+                    <span>{{ terminal.registerName ?? '—' }}</span>
+                  }
+                </div>
+                <span class="col-seen">{{ formatDate(terminal.lastSeenAt) }}</span>
+                <span class="col-status">
+                  <ion-badge [color]="terminal.isActive ? 'success' : 'medium'">
+                    {{ (terminal.isActive ? 'TERMINALS.ACTIVE' : 'TERMINALS.INACTIVE') | translate }}
+                  </ion-badge>
+                </span>
+                <div class="col-actions" (click)="$event.stopPropagation()">
+                  @if (canManage) {
+                    <ion-button fill="clear" size="small" (click)="rename(terminal)">
+                      <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                    <ion-button fill="clear" size="small" (click)="toggleActive(terminal)">
+                      <ion-icon [name]="terminal.isActive ? 'wifi-outline' : 'wifi-outline'" slot="icon-only"></ion-icon>
+                    </ion-button>
+                    <ion-button fill="clear" color="danger" size="small" (click)="confirmDelete(terminal)">
+                      <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  }
+                </div>
+              </div>
+            </ion-item>
+          }
+        </ion-list>
+      }
+    </div>
+  </div>
+</ion-content>

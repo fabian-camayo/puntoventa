@@ -8,7 +8,21 @@ export class RegisterRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   findById(id: string) {
-    return this.prisma.register.findUnique({ where: { id } });
+    return this.prisma.register.findUnique({
+      where: { id },
+      include: {
+        sessions: {
+          where: { status: RegisterSessionStatus.OPEN },
+          take: 1,
+          orderBy: { openedAt: 'desc' },
+        },
+        userRegisters: {
+          include: {
+            user: { select: { id: true, username: true, firstName: true, lastName: true } },
+          },
+        },
+      },
+    });
   }
 
   create(data: Prisma.RegisterCreateInput) {
@@ -19,13 +33,35 @@ export class RegisterRepository {
     return this.prisma.register.update({ where: { id }, data });
   }
 
-  findByBranch(branchId: string, params?: PaginationQuery) {
+  async setAssignedUsers(registerId: string, userIds: string[]): Promise<void> {
+    await this.prisma.$transaction([
+      this.prisma.userRegister.deleteMany({ where: { registerId } }),
+      ...(userIds.length
+        ? [
+            this.prisma.userRegister.createMany({
+              data: userIds.map((userId) => ({ registerId, userId })),
+              skipDuplicates: true,
+            }),
+          ]
+        : []),
+    ]);
+  }
+
+  findAssignedRegisterIds(userId: string): Promise<{ registerId: string }[]> {
+    return this.prisma.userRegister.findMany({
+      where: { userId },
+      select: { registerId: true },
+    });
+  }
+
+  findByBranch(branchId: string, params?: PaginationQuery & { userId?: string }) {
     const page = params?.page ?? 1;
     const limit = params?.limit ?? 20;
     const skip = (page - 1) * limit;
 
     const where: Prisma.RegisterWhereInput = {
       branchId,
+      ...(params?.userId ? { userRegisters: { some: { userId: params.userId } } } : {}),
       ...(params?.search ? this.buildSearchWhere(params.search) : {}),
     };
 
@@ -40,6 +76,11 @@ export class RegisterRepository {
             where: { status: RegisterSessionStatus.OPEN },
             take: 1,
             orderBy: { openedAt: 'desc' },
+          },
+          userRegisters: {
+            include: {
+              user: { select: { id: true, username: true, firstName: true, lastName: true } },
+            },
           },
         },
       }),
