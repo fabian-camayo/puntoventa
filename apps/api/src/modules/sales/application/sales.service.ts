@@ -338,6 +338,7 @@ export class SalesService {
       discountAmount: Prisma.Decimal;
       discountPercent: Prisma.Decimal;
       taxRate: Prisma.Decimal;
+      taxAmount: Prisma.Decimal;
       subtotal: Prisma.Decimal;
       total: Prisma.Decimal;
       notes: string | null;
@@ -364,6 +365,7 @@ export class SalesService {
         discountAmount: Number(i.discountAmount),
         discountPercent: Number(i.discountPercent),
         taxRate: Number(i.taxRate),
+        taxAmount: Number(i.taxAmount),
         subtotal: Number(i.subtotal),
         total: Number(i.total),
         notes: i.notes ?? undefined,

@@ -103,6 +103,44 @@
   margin-top: 12px;
 }
 
+.tax-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tax-toggle .toggle-item {
+  --background: var(--pv-bg-secondary);
+  --border-radius: var(--pv-radius-md);
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-md);
+  margin: 0;
+}
+
+.tax-rate-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--pv-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+}
+
+.tax-exempt-note {
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--pv-radius-md);
+  background: color-mix(in srgb, var(--pv-text-secondary) 8%, var(--pv-bg-secondary));
+  color: var(--pv-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 .toggle-item {
   --background: var(--pv-bg-secondary);
   --border-radius: var(--pv-radius-md);

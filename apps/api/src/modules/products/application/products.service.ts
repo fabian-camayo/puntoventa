@@ -148,6 +148,7 @@ export class ProductsService {
       barcode: string | null;
       name: string;
       salePrice: Prisma.Decimal;
+      taxRate: Prisma.Decimal | null;
       unit: string;
       inventoryItems?: Array<{ quantity: Prisma.Decimal }>;
     },
@@ -161,6 +162,7 @@ export class ProductsService {
       salePrice: Number(product.salePrice),
       stock: stock ? Number(stock.quantity) : 0,
       unit: product.unit,
+      taxRate: product.taxRate != null ? Number(product.taxRate) : undefined,
     };
   }
 
@@ -190,7 +192,7 @@ export class ProductsService {
       description: product.description ?? undefined,
       salePrice: Number(product.salePrice),
       costPrice: Number(product.costPrice),
-      taxRate: product.taxRate ? Number(product.taxRate) : undefined,
+      taxRate: product.taxRate != null ? Number(product.taxRate) : undefined,
       unit: product.unit,
       categoryId: product.categoryId ?? undefined,
       categoryName: product.category?.name,

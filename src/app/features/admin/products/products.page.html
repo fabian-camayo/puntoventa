@@ -55,6 +55,7 @@
           <span class="col-name">{{ 'PRODUCTS.NAME' | translate }}</span>
           <span class="col-category">{{ 'PRODUCTS.CATEGORY' | translate }}</span>
           <span class="col-price">{{ 'PRODUCTS.SALE_PRICE' | translate }}</span>
+          <span class="col-tax">{{ 'PRODUCTS.TAX_RATE' | translate }}</span>
           @if (canViewCosts) {
             <span class="col-cost">{{ 'PRODUCTS.COST_PRICE' | translate }}</span>
           }
@@ -82,6 +83,13 @@
                 </div>
                 <span class="col-category">{{ product.categoryName ?? '—' }}</span>
                 <span class="col-price">{{ product.salePrice | appCurrency:'1.0-0' }}</span>
+                <span class="col-tax muted">
+                  @if ((product.taxRate ?? 0) === 0) {
+                    {{ 'PRODUCTS.TAX_EXEMPT' | translate }}
+                  } @else {
+                    {{ product.taxRate }}%
+                  }
+                </span>
                 @if (canViewCosts) {
                   <span class="col-cost muted">{{ product.costPrice | appCurrency:'1.0-0' }}</span>
                 }

@@ -47,13 +47,22 @@ export class ReceiptPrintService {
 
   const itemsHtml = sale.items
       .map(
-        (item) => `
+        (item) => {
+          const taxRate = item.taxRate ?? 0;
+          const taxAmount = item.taxAmount ?? 0;
+          const taxLabel = taxRate > 0 ? `${taxRate}%` : 'Exento';
+          return `
         <tr>
-          <td>${this.escape(item.productName ?? item.sku ?? 'Producto')}</td>
+          <td>
+            ${this.escape(item.productName ?? item.sku ?? 'Producto')}
+            ${taxRate > 0 ? `<div class="item-tax">IVA ${taxRate}%: ${fmt(taxAmount)}</div>` : ''}
+          </td>
           <td class="num">${item.quantity}</td>
           <td class="num">${fmt(item.unitPrice)}</td>
+          <td class="num">${taxLabel}</td>
           <td class="num">${fmt(item.total)}</td>
-        </tr>`,
+        </tr>`;
+        },
       )
       .join('');
 
@@ -78,8 +87,9 @@ export class ReceiptPrintService {
     .divider { border-top: 1px dashed #333; margin: 8px 0; }
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 3px 0; vertical-align: top; }
-    th { text-align: left; border-bottom: 1px solid #333; }
-    .num { text-align: right; white-space: nowrap; }
+    th { text-align: left; border-bottom: 1px solid #333; font-size: 10px; }
+    .num { text-align: right; white-space: nowrap; font-size: 11px; }
+    .item-tax { font-size: 10px; color: #555; margin-top: 2px; }
     .totals { margin-top: 8px; }
     .totals div { display: flex; justify-content: space-between; margin: 2px 0; }
     .total-line { font-size: 14px; font-weight: bold; margin-top: 4px; }
@@ -107,6 +117,7 @@ export class ReceiptPrintService {
         <th>Producto</th>
         <th class="num">Cant</th>
         <th class="num">P.U.</th>
+        <th class="num">IVA</th>
         <th class="num">Total</th>
       </tr>
     </thead>

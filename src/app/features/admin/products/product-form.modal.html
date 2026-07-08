@@ -76,11 +76,24 @@
             </ion-item>
           </div>
         }
-        <div class="field-box">
-          <label>{{ 'PRODUCTS.TAX_RATE' | translate }}</label>
-          <ion-item lines="none" class="field-item">
-            <ion-input type="number" formControlName="taxRate"></ion-input>
-          </ion-item>
+        <div class="field-box span-2 tax-fields">
+          <div class="tax-toggle">
+            <ion-item lines="none" class="toggle-item">
+              <ion-toggle formControlName="applyTax" labelPlacement="start">
+                {{ 'PRODUCTS.APPLY_TAX' | translate }}
+              </ion-toggle>
+            </ion-item>
+          </div>
+          @if (form.controls.applyTax.value) {
+            <div class="tax-rate-field">
+              <label>{{ 'PRODUCTS.TAX_RATE' | translate }}</label>
+              <ion-item lines="none" class="field-item">
+                <ion-input type="number" formControlName="taxRate" min="0" max="100"></ion-input>
+              </ion-item>
+            </div>
+          } @else {
+            <p class="tax-exempt-note">{{ 'PRODUCTS.NO_TAX' | translate }}</p>
+          }
         </div>
       </div>
     </section>

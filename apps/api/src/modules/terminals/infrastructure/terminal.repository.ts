@@ -3,7 +3,18 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 
 const REGISTER_INCLUDE = {
-  register: { select: { id: true, code: true, name: true } },
+  register: {
+    select: {
+      id: true,
+      code: true,
+      name: true,
+      sessions: {
+        where: { status: 'OPEN' as const },
+        take: 1,
+        select: { id: true },
+      },
+    },
+  },
 } as const;
 
 @Injectable()

@@ -39,7 +39,7 @@
 .table-header,
 .register-grid {
   display: grid;
-  grid-template-columns: 120px 1.3fr 1.4fr 120px 80px;
+  grid-template-columns: 100px 1.1fr 1.2fr 1.1fr 90px 90px 100px 56px;
   align-items: center;
   gap: 8px;
   width: 100%;
@@ -98,6 +98,25 @@
     font-size: 1rem;
     flex-shrink: 0;
   }
+}
+
+.col-users {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.col-terminal {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.inline-badge {
+  align-self: flex-start;
+  font-size: 0.65rem;
 }
 
 .col-actions {

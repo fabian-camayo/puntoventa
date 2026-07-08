@@ -54,6 +54,9 @@
           <span class="col-code">{{ 'REGISTERS.CODE' | translate }}</span>
           <span class="col-name">{{ 'REGISTERS.NAME' | translate }}</span>
           <span class="col-users">{{ 'REGISTERS.ASSIGNED_USERS' | translate }}</span>
+          <span class="col-terminal">{{ 'TERMINALS.EQUIPMENT' | translate }}</span>
+          <span class="col-register-conn">{{ 'TERMINALS.REGISTER_CONNECTION' | translate }}</span>
+          <span class="col-barcode">{{ 'TERMINALS.BARCODE_READER' | translate }}</span>
           <span class="col-status">{{ 'REGISTERS.STATUS' | translate }}</span>
           <span class="col-actions"></span>
         </div>
@@ -78,6 +81,26 @@
                 <span class="col-users">
                   <ion-icon name="people-outline"></ion-icon>
                   {{ assignedNames(register) }}
+                </span>
+                <span class="col-terminal">
+                  @if (register.connectedTerminalName) {
+                    {{ register.connectedTerminalName }}
+                    <ion-badge [color]="register.isTerminalOnline ? 'success' : 'medium'" class="inline-badge">
+                      {{ (register.isTerminalOnline ? 'TERMINALS.ONLINE' : 'TERMINALS.OFFLINE') | translate }}
+                    </ion-badge>
+                  } @else {
+                    —
+                  }
+                </span>
+                <span class="col-register-conn">
+                  <ion-badge [color]="connectionColor(register.registerConnectionStatus)">
+                    {{ connectionKey(register.registerConnectionStatus) | translate }}
+                  </ion-badge>
+                </span>
+                <span class="col-barcode">
+                  <ion-badge [color]="connectionColor(register.barcodeReaderStatus)">
+                    {{ connectionKey(register.barcodeReaderStatus) | translate }}
+                  </ion-badge>
                 </span>
                 <span class="col-status">
                   @if (register.hasOpenSession) {

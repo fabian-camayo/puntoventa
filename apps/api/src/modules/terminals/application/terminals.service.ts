@@ -1,13 +1,29 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { TerminalDto, JwtPayload } from '@puntoventa/shared';
+import {
+  TerminalDto,
+  isTerminalOnline,
+  getBarcodeReaderStatus,
+  getRegisterConnectionStatus,
+} from '@puntoventa/shared';
 import { TerminalRepository } from '../infrastructure/terminal.repository';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
 import { UpdateTerminalDto } from './dto/update-terminal.dto';
+import { TerminalHeartbeatDto } from './dto/terminal-heartbeat.dto';
+import { JwtPayload } from '@puntoventa/shared';
 
 type TerminalWithRegister = Prisma.TerminalGetPayload<{
-  include: { register: { select: { id: true; code: true; name: true } } };
+  include: {
+    register: {
+      select: {
+        id: true;
+        code: true;
+        name: true;
+        sessions: { where: { status: 'OPEN' }; take: 1; select: { id: true } };
+      };
+    };
+  };
 }>;
 
 @Injectable()
@@ -21,6 +37,40 @@ export class TerminalsService {
   async findAll(branchId: string): Promise<TerminalDto[]> {
     const terminals = await this.terminalRepository.findByBranch(branchId);
     return terminals.map((t) => this.mapToDto(t));
+  }
+
+  async heartbeat(
+    deviceId: string,
+    dto: TerminalHeartbeatDto,
+    ipAddress?: string,
+  ): Promise<{ ok: true; serverTime: string }> {
+    const terminal = await this.terminalRepository.findByDeviceId(deviceId);
+    if (!terminal || !terminal.isActive) {
+      throw new NotFoundException('Equipo no registrado');
+    }
+
+    const now = new Date();
+    const data: Prisma.TerminalUpdateInput = {
+      lastSeenAt: now,
+      ...(ipAddress ? { ipAddress } : {}),
+      ...(dto.barcodeScanned ? { lastScanAt: now } : {}),
+    };
+
+    if (dto.registerId && dto.registerId !== terminal.registerId) {
+      const register = await this.prisma.register.findFirst({
+        where: { id: dto.registerId, branchId: terminal.branchId },
+      });
+      if (register) {
+        data.register = { connect: { id: dto.registerId } };
+      }
+    }
+
+    await this.prisma.terminal.update({
+      where: { deviceId },
+      data,
+    });
+
+    return { ok: true, serverTime: now.toISOString() };
   }
 
   async update(id: string, dto: UpdateTerminalDto, actor: JwtPayload): Promise<TerminalDto> {
@@ -56,7 +106,8 @@ export class TerminalsService {
       newValues: { registerId: dto.registerId, name: dto.name } as Prisma.InputJsonValue,
     });
 
-    return this.mapToDto(updated);
+    const withDetails = await this.terminalRepository.findById(updated.id);
+    return this.mapToDto(withDetails!);
   }
 
   async remove(id: string, actor: JwtPayload): Promise<void> {
@@ -75,6 +126,9 @@ export class TerminalsService {
   }
 
   private mapToDto(terminal: TerminalWithRegister): TerminalDto {
+    const online = terminal.isActive && isTerminalOnline(terminal.lastSeenAt);
+    const hasOpenRegisterSession = (terminal.register?.sessions?.length ?? 0) > 0;
+
     return {
       id: terminal.id,
       branchId: terminal.branchId,
@@ -86,7 +140,12 @@ export class TerminalsService {
       ipAddress: terminal.ipAddress ?? undefined,
       isActive: terminal.isActive,
       lastSeenAt: terminal.lastSeenAt?.toISOString(),
+      lastScanAt: terminal.lastScanAt?.toISOString(),
       createdAt: terminal.createdAt.toISOString(),
+      isOnline: online,
+      registerConnectionStatus: getRegisterConnectionStatus(online, terminal.registerId),
+      barcodeReaderStatus: getBarcodeReaderStatus(terminal.lastScanAt, online),
+      hasOpenRegisterSession,
     };
   }
 }

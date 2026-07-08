@@ -244,6 +244,7 @@ model Terminal {
   ipAddress  String?   @map("ip_address") @db.VarChar(64)
   isActive   Boolean   @default(true) @map("is_active")
   lastSeenAt DateTime? @map("last_seen_at")
+  lastScanAt DateTime? @map("last_scan_at")
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @updatedAt @map("updated_at")
 

@@ -7,6 +7,7 @@ import {
   IsUUID,
   IsEnum,
   Min,
+  Max,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ProductType } from '@prisma/client';
@@ -59,6 +60,8 @@ export class CreateProductDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
+  @Min(0)
+  @Max(100)
   @Type(() => Number)
   taxRate?: number;
 

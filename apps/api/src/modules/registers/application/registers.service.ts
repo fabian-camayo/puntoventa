@@ -7,6 +7,11 @@ import {
 } from '@nestjs/common';
 import { RegisterSessionStatus, Prisma } from '@prisma/client';
 import { RegisterDto, RegisterSessionDto } from '@puntoventa/shared';
+import {
+  isTerminalOnline,
+  getBarcodeReaderStatus,
+  getRegisterConnectionStatus,
+} from '@puntoventa/shared';
 import { RegisterRepository } from '../infrastructure/register.repository';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
@@ -263,12 +268,22 @@ export class RegistersService {
     userRegisters?: Array<{
       user: { id: string; username: string; firstName: string; lastName: string };
     }>;
+    terminals?: Array<{
+      id: string;
+      name: string;
+      registerId: string | null;
+      lastSeenAt: Date | null;
+      lastScanAt: Date | null;
+    }>;
   }): RegisterDto {
     const assignedUsers = (register.userRegisters ?? []).map((ur) => ({
       id: ur.user.id,
       username: ur.user.username,
       fullName: `${ur.user.firstName} ${ur.user.lastName}`.trim() || ur.user.username,
     }));
+
+    const boundTerminal = (register.terminals ?? []).find((t) => t.registerId === register.id);
+    const terminalOnline = boundTerminal ? isTerminalOnline(boundTerminal.lastSeenAt) : false;
 
     return {
       id: register.id,
@@ -280,6 +295,13 @@ export class RegistersService {
       hasOpenSession: (register.sessions?.length ?? 0) > 0,
       assignedUsers,
       assignedUserIds: assignedUsers.map((u) => u.id),
+      connectedTerminalName: boundTerminal?.name,
+      isTerminalOnline: terminalOnline,
+      registerConnectionStatus: getRegisterConnectionStatus(terminalOnline, boundTerminal?.registerId),
+      barcodeReaderStatus: getBarcodeReaderStatus(
+        boundTerminal?.lastScanAt,
+        terminalOnline,
+      ),
     };
   }
 

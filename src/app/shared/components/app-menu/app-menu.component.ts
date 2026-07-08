@@ -94,7 +94,7 @@ const NAV_ITEMS: NavItem[] = [
     labelKey: 'ADMIN.TERMINALS',
     icon: 'desktop-outline',
     route: '/admin/terminals',
-    permission: 'registers.admin',
+    permission: 'registers.view',
   },
   {
     labelKey: 'ADMIN.USERS',

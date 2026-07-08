@@ -26,7 +26,7 @@ import {
   cashOutline,
   peopleOutline,
 } from 'ionicons/icons';
-import { RegisterDto } from '@puntoventa/shared';
+import { RegisterDto, DeviceConnectionStatus } from '@puntoventa/shared';
 import { RegisterService } from '@core/services/register.service';
 import { ConfigService } from '@core/services/config.service';
 import { AuthService } from '@core/services/auth.service';
@@ -162,6 +162,28 @@ export class RegistersPage implements OnInit, OnDestroy {
     if (users.length === 0) return '—';
     if (users.length <= 3) return users.map((u) => u.fullName).join(', ');
     return `${users.slice(0, 3).map((u) => u.fullName).join(', ')} +${users.length - 3}`;
+  }
+
+  connectionColor(status?: DeviceConnectionStatus): string {
+    switch (status) {
+      case 'CONNECTED':
+        return 'success';
+      case 'DISCONNECTED':
+        return 'danger';
+      default:
+        return 'medium';
+    }
+  }
+
+  connectionKey(status?: DeviceConnectionStatus): string {
+    switch (status) {
+      case 'CONNECTED':
+        return 'TERMINALS.CONNECTED';
+      case 'DISCONNECTED':
+        return 'TERMINALS.DISCONNECTED';
+      default:
+        return 'TERMINALS.UNKNOWN';
+    }
   }
 
   private setupSearch(): void {

@@ -36,6 +36,7 @@ import {
 } from '@core/services/product.service';
 import { CategoryDto } from '@core/services/category.service';
 import { AuthService } from '@core/services/auth.service';
+import { ConfigService } from '@core/services/config.service';
 
 addIcons({
   closeOutline,
@@ -72,6 +73,7 @@ export class ProductFormModal implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly productService = inject(ProductService);
   private readonly auth = inject(AuthService);
+  private readonly configService = inject(ConfigService);
   private readonly modalCtrl = inject(ModalController);
   private readonly toast = inject(ToastController);
 
@@ -80,6 +82,7 @@ export class ProductFormModal implements OnInit {
   @Input() categories: CategoryDto[] = [];
 
   saving = signal(false);
+  defaultTaxRate = signal(19);
   isEdit = false;
 
   readonly canViewCosts = this.auth.hasPermission('products.view_costs');
@@ -92,7 +95,8 @@ export class ProductFormModal implements OnInit {
     description: [''],
     salePrice: [0, [Validators.required, Validators.min(0)]],
     costPrice: [0, [Validators.min(0)]],
-    taxRate: [19, [Validators.min(0)]],
+    applyTax: [true],
+    taxRate: [19, [Validators.min(0), Validators.max(100)]],
     unit: ['UND', [Validators.required]],
     categoryId: [''],
     minStock: [0, [Validators.min(0)]],
@@ -100,10 +104,13 @@ export class ProductFormModal implements OnInit {
     isActive: [true],
   });
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.isEdit = !!this.product;
+    await this.loadDefaultTaxRate();
 
     if (this.product) {
+      const rate = this.product.taxRate ?? 0;
+      const applyTax = rate > 0;
       this.form.patchValue({
         sku: this.product.sku,
         name: this.product.name,
@@ -111,7 +118,8 @@ export class ProductFormModal implements OnInit {
         description: this.product.description ?? '',
         salePrice: this.product.salePrice,
         costPrice: this.product.costPrice ?? 0,
-        taxRate: this.product.taxRate ?? 19,
+        applyTax,
+        taxRate: applyTax ? rate : this.defaultTaxRate(),
         unit: this.product.unit,
         categoryId: this.product.categoryId ?? '',
         minStock: this.product.minStock ?? 0,
@@ -119,13 +127,47 @@ export class ProductFormModal implements OnInit {
         isActive: this.product.isActive,
       });
       this.form.controls.sku.disable();
+    } else {
+      this.form.patchValue({
+        applyTax: true,
+        taxRate: this.defaultTaxRate(),
+      });
     }
+
+    this.syncTaxRateControl(this.form.controls.applyTax.value);
+    this.form.controls.applyTax.valueChanges.subscribe((applyTax) => {
+      this.syncTaxRateControl(applyTax);
+    });
 
     if (!this.canModifyPrices) {
       this.form.controls.salePrice.disable();
     }
     if (!this.canViewCosts) {
       this.form.controls.costPrice.disable();
+    }
+  }
+
+  private async loadDefaultTaxRate(): Promise<void> {
+    if (!this.branchId) return;
+    try {
+      const config = await firstValueFrom(
+        this.configService.getBusinessConfig(this.branchId),
+      );
+      this.defaultTaxRate.set(config.taxRate);
+    } catch {
+      // keep fallback default
+    }
+  }
+
+  private syncTaxRateControl(applyTax: boolean): void {
+    const taxControl = this.form.controls.taxRate;
+    if (applyTax) {
+      taxControl.enable({ emitEvent: false });
+      if (!taxControl.value) {
+        taxControl.setValue(this.defaultTaxRate(), { emitEvent: false });
+      }
+    } else {
+      taxControl.disable({ emitEvent: false });
     }
   }
 
@@ -144,7 +186,7 @@ export class ProductFormModal implements OnInit {
 
     const salePrice = Number(raw.salePrice);
     const costPrice = Number(raw.costPrice);
-    const taxRate = Number(raw.taxRate);
+    const taxRate = raw.applyTax ? Number(raw.taxRate) : 0;
     const minStock = Number(raw.minStock);
 
     try {

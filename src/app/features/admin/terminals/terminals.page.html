@@ -16,6 +16,35 @@
       <p>{{ 'TERMINALS.HINT' | translate }}</p>
     </div>
 
+    <div class="connection-summary">
+      <div class="summary-card">
+        <ion-icon name="wifi-outline"></ion-icon>
+        <div>
+          <strong>{{ summaryOnline() }}</strong>
+          <span>{{ 'TERMINALS.SUMMARY_ONLINE' | translate }}</span>
+        </div>
+      </div>
+      <div class="summary-card">
+        <ion-icon name="cash-outline"></ion-icon>
+        <div>
+          <strong>{{ summaryRegisterConnected() }}</strong>
+          <span>{{ 'TERMINALS.SUMMARY_REGISTER' | translate }}</span>
+        </div>
+      </div>
+      <div class="summary-card">
+        <ion-icon name="barcode-outline"></ion-icon>
+        <div>
+          <strong>{{ summaryBarcodeActive() }}</strong>
+          <span>{{ 'TERMINALS.SUMMARY_BARCODE' | translate }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="validate-hint pv-card">
+      <ion-icon name="scan-outline"></ion-icon>
+      <p>{{ 'TERMINALS.VALIDATE_HINT' | translate }}</p>
+    </div>
+
     <div class="pv-card list-card">
       @if (loading()) {
         <div class="loading-state">
@@ -31,10 +60,11 @@
       } @else {
         <div class="table-header">
           <span class="col-name">{{ 'TERMINALS.NAME' | translate }}</span>
-          <span class="col-ip">{{ 'TERMINALS.IP' | translate }}</span>
+          <span class="col-online">{{ 'TERMINALS.EQUIPMENT' | translate }}</span>
+          <span class="col-register-conn">{{ 'TERMINALS.REGISTER_CONNECTION' | translate }}</span>
+          <span class="col-barcode">{{ 'TERMINALS.BARCODE_READER' | translate }}</span>
           <span class="col-register">{{ 'TERMINALS.REGISTER' | translate }}</span>
           <span class="col-seen">{{ 'TERMINALS.LAST_SEEN' | translate }}</span>
-          <span class="col-status">{{ 'TERMINALS.STATUS' | translate }}</span>
           <span class="col-actions"></span>
         </div>
 
@@ -44,11 +74,29 @@
               <div class="terminal-grid">
                 <div class="col-name">
                   <strong>{{ terminal.name }}</strong>
+                  <small class="mono">{{ terminal.ipAddress ?? '—' }}</small>
                   @if (isCurrentDevice(terminal)) {
                     <ion-badge color="primary" class="this-badge">{{ 'TERMINALS.THIS_DEVICE' | translate }}</ion-badge>
                   }
                 </div>
-                <span class="col-ip mono">{{ terminal.ipAddress ?? '—' }}</span>
+                <span class="col-online">
+                  <ion-badge [color]="terminal.isOnline ? 'success' : 'medium'">
+                    {{ (terminal.isOnline ? 'TERMINALS.ONLINE' : 'TERMINALS.OFFLINE') | translate }}
+                  </ion-badge>
+                </span>
+                <span class="col-register-conn">
+                  <ion-badge [color]="connectionColor(terminal.registerConnectionStatus)">
+                    {{ connectionKey(terminal.registerConnectionStatus) | translate }}
+                  </ion-badge>
+                </span>
+                <span class="col-barcode">
+                  <ion-badge [color]="connectionColor(terminal.barcodeReaderStatus)">
+                    {{ connectionKey(terminal.barcodeReaderStatus) | translate }}
+                  </ion-badge>
+                  @if (terminal.lastScanAt) {
+                    <small>{{ formatDate(terminal.lastScanAt) }}</small>
+                  }
+                </span>
                 <div class="col-register" (click)="$event.stopPropagation()">
                   @if (canManage) {
                     <ion-select
@@ -67,18 +115,13 @@
                   }
                 </div>
                 <span class="col-seen">{{ formatDate(terminal.lastSeenAt) }}</span>
-                <span class="col-status">
-                  <ion-badge [color]="terminal.isActive ? 'success' : 'medium'">
-                    {{ (terminal.isActive ? 'TERMINALS.ACTIVE' : 'TERMINALS.INACTIVE') | translate }}
-                  </ion-badge>
-                </span>
                 <div class="col-actions" (click)="$event.stopPropagation()">
                   @if (canManage) {
                     <ion-button fill="clear" size="small" (click)="rename(terminal)">
                       <ion-icon name="create-outline" slot="icon-only"></ion-icon>
                     </ion-button>
                     <ion-button fill="clear" size="small" (click)="toggleActive(terminal)">
-                      <ion-icon [name]="terminal.isActive ? 'wifi-outline' : 'wifi-outline'" slot="icon-only"></ion-icon>
+                      <ion-icon name="wifi-outline" slot="icon-only"></ion-icon>
                     </ion-button>
                     <ion-button fill="clear" color="danger" size="small" (click)="confirmDelete(terminal)">
                       <ion-icon name="trash-outline" slot="icon-only"></ion-icon>

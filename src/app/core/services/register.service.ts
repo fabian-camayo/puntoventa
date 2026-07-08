@@ -27,6 +27,11 @@ export interface UpdateTerminalPayload {
   isActive?: boolean;
 }
 
+export interface TerminalHeartbeatPayload {
+  barcodeScanned?: boolean;
+  registerId?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class RegisterService {
   private readonly http = inject(HttpClient);
@@ -96,6 +101,15 @@ export class RegisterService {
 
   deleteTerminal(id: string): Observable<unknown> {
     return this.http.delete(`${this.config.apiBaseUrl}/terminals/${id}`);
+  }
+
+  sendHeartbeat(payload: TerminalHeartbeatPayload): Observable<{ ok: true; serverTime: string }> {
+    return this.http
+      .post<{ data: { ok: true; serverTime: string } }>(
+        `${this.config.apiBaseUrl}/terminals/heartbeat`,
+        payload,
+      )
+      .pipe(map((r) => r.data));
   }
 
   getActiveSession(registerId: string): Observable<RegisterSessionDto | null> {

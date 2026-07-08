@@ -20,6 +20,7 @@ import {
   IonSpinner,
   IonSelect,
   IonSelectOption,
+  IonInput,
   ModalController,
   ToastController,
   ViewWillEnter,
@@ -50,6 +51,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ConfigService } from '../../core/services/config.service';
 import { RegisterService } from '../../core/services/register.service';
 import { ReceiptPrintService } from '../../core/services/receipt-print.service';
+import { TerminalHeartbeatService } from '../../core/services/terminal-heartbeat.service';
 import {
   SaleDto,
   SaleTab,
@@ -104,6 +106,7 @@ interface ActiveSale extends SaleDto {
     IonSpinner,
     IonSelect,
     IonSelectOption,
+    IonInput,
     FormsModule,
     TranslateModule,
     SaleTabsComponent,
@@ -118,6 +121,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   private readonly configService = inject(ConfigService);
   private readonly registerService = inject(RegisterService);
   private readonly receiptPrint = inject(ReceiptPrintService);
+  private readonly terminalHeartbeat = inject(TerminalHeartbeatService);
   private readonly modalCtrl = inject(ModalController);
   private readonly toast = inject(ToastController);
   private readonly destroy$ = new Subject<void>();
@@ -151,6 +155,8 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   searchResults = signal<ProductSearchResult[]>([]);
   searchQuery = signal('');
   isSearching = signal(false);
+  amountReceived = signal<number | null>(null);
+  amountInputFocused = signal(false);
 
   readonly itemCount = computed(() =>
     this.activeSale()?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0,
@@ -168,6 +174,20 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   readonly total = computed(() =>
     this.activeSale()?.items.reduce((sum, item) => sum + item.total, 0) ?? 0,
   );
+  readonly changeAmount = computed(() => {
+    const received = this.amountReceived();
+    if (received === null) return 0;
+    const change = received - this.total();
+    return Math.max(0, Math.round(change * 100) / 100);
+  });
+  readonly hasSufficientPayment = computed(() => {
+    const received = this.amountReceived();
+    return received !== null && received >= this.total();
+  });
+  readonly showInsufficientPayment = computed(() => {
+    const received = this.amountReceived();
+    return received !== null && received < this.total();
+  });
   readonly isSaleCompleted = computed(
     () => this.activeSale()?.status === SaleStatus.COMPLETED,
   );
@@ -180,7 +200,8 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
       this.isRegisterOpen() &&
       !this.isSaleCompleted() &&
       !this.isSavingSale() &&
-      (this.activeSale()?.items.length ?? 0) > 0,
+      (this.activeSale()?.items.length ?? 0) > 0 &&
+      this.hasSufficientPayment(),
   );
   readonly canPrintReceipt = computed(
     () => this.isSaleCompleted() && !!this.activeSale()?.documentNumber,
@@ -193,6 +214,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   ngOnDestroy(): void {
+    this.terminalHeartbeat.stop();
     this.destroy$.next();
     this.destroy$.complete();
     this.initialized = false;
@@ -221,6 +243,16 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     const value = (event.detail as { value?: string }).value ?? '';
     this.searchQuery.set(value);
     this.search$.next(value);
+  }
+
+  onAmountReceivedInput(event: CustomEvent): void {
+    const raw = (event.detail as { value?: string | null }).value?.trim() ?? '';
+    if (!raw) {
+      this.amountReceived.set(null);
+      return;
+    }
+    const parsed = Number.parseFloat(raw);
+    this.amountReceived.set(Number.isFinite(parsed) && parsed >= 0 ? parsed : null);
   }
 
   onSearchKeydown(event: KeyboardEvent): void {
@@ -313,10 +345,13 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
       const current = this.activeSale();
       if (!current?.id || current.items.length === 0) return;
 
+      const paid = this.amountReceived();
+      if (paid === null) return;
+
       const completed = await firstValueFrom(
         this.saleService.checkout(current.id, {
           version: current.version ?? 0,
-          payments: [{ method: PaymentMethod.CASH, amount: this.total() }],
+          payments: [{ method: PaymentMethod.CASH, amount: paid }],
         }),
       );
 
@@ -414,7 +449,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
         unitPrice: product.salePrice,
         discountAmount: 0,
         discountPercent: 0,
-        taxRate: 16,
+        taxRate: product.taxRate ?? 0,
         subtotal: 0,
         total: 0,
       });
@@ -446,6 +481,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
         if (Array.isArray(result)) {
           this.searchResults.set(result);
         } else if (result) {
+          this.terminalHeartbeat.reportBarcodeScan();
           this.addProduct(result);
           this.clearSearch();
         } else {
@@ -569,6 +605,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
 
     this.registerId.set(register.id);
     this.registerName.set(register.name);
+    this.terminalHeartbeat.start(register.id);
 
     await this.loadActiveSession();
     await this.whenReady();
@@ -622,6 +659,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
 
       this.initialized = true;
       this.posReady.set(true);
+      this.terminalHeartbeat.start(this.registerId());
     } catch {
       this.initialized = false;
       this.posReady.set(false);
@@ -677,6 +715,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
       this.tabs.update((current) => [...current, newTab]);
       this.activeTabId.set(sale.id);
       this.activeSale.set({ ...sale, items: [], tabLabel });
+      this.amountReceived.set(null);
     } catch (err: unknown) {
       const status = (err as { status?: number })?.status;
       const message = (err as { error?: { message?: string } })?.error?.message;
@@ -709,6 +748,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
         items: sale.items ?? [],
         tabLabel: tab?.label ?? 'Venta',
       });
+      this.resetAmountReceived(sale);
     } catch {
       if (this.activeTabId() !== tabId) return;
       await this.showToast('No se pudo cargar la venta', 'danger');
@@ -863,6 +903,14 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
 
   private roundMoney(value: number): number {
     return Math.round(value * 100) / 100;
+  }
+
+  private resetAmountReceived(sale: SaleDto): void {
+    if (sale.status === SaleStatus.COMPLETED) {
+      this.amountReceived.set(sale.amountPaid ?? 0);
+      return;
+    }
+    this.amountReceived.set(null);
   }
 
   private sumSaleTotals(items: SaleItemDto[]): {

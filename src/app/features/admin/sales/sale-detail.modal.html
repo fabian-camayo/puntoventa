@@ -42,7 +42,15 @@
       <ion-item>
         <ion-label>
           <h2>{{ item.productName }}</h2>
-          <p>{{ item.quantity }} × {{ item.unitPrice | appCurrency:'1.0-0' }}</p>
+          <p>
+            {{ item.quantity }} × {{ item.unitPrice | appCurrency:'1.0-0' }}
+            ·
+            @if ((item.taxRate ?? 0) > 0) {
+              IVA {{ item.taxRate }}% ({{ (item.taxAmount ?? 0) | appCurrency:'1.0-0' }})
+            } @else {
+              {{ 'PRODUCTS.TAX_EXEMPT' | translate }}
+            }
+          </p>
         </ion-label>
         <ion-text slot="end">{{ item.total | appCurrency:'1.0-0' }}</ion-text>
       </ion-item>

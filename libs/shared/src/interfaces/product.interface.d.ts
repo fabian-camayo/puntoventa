@@ -23,5 +23,6 @@ export interface ProductSearchResult {
     salePrice: number;
     stock: number;
     unit: string;
+    taxRate?: number;
 }
 //# sourceMappingURL=product.interface.d.ts.map

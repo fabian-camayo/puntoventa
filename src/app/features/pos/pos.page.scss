@@ -76,7 +76,7 @@
 
 .pos-content {
   --background: transparent;
-  --padding-bottom: 96px;
+  --padding-bottom: 112px;
 }
 
 .pos-container {
@@ -252,21 +252,6 @@
   color: var(--pv-text-secondary);
 }
 
-.summary-total {
-  margin-top: 8px;
-  padding-top: 12px;
-  border-top: 1px dashed var(--pv-border);
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--pv-text-primary);
-}
-
-.summary-total-amount {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: var(--pv-accent);
-}
-
 .pos-actions-bar {
   left: 16px;
   right: 16px;
@@ -274,7 +259,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 20px;
   padding: 12px 16px;
   background: var(--pv-bg-primary);
   border: 1px solid var(--pv-border);
@@ -283,31 +268,171 @@
   z-index: 10;
 }
 
-.total-section {
+.checkout-panel {
   display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding: 0 8px;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  padding-right: 20px;
+  border-right: 1px solid var(--pv-border);
+
+  &--full {
+    min-width: 0;
+    flex: 1;
+    max-width: 520px;
+  }
 }
 
-.total-label {
-  font-size: 0.8rem;
-  font-weight: 600;
+.checkout-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 18px;
+  min-height: 56px;
+
+  &:not(:last-child) {
+    border-right: 1px solid var(--pv-border);
+  }
+
+  &:first-child {
+    padding-left: 0;
+  }
+
+  &:last-child {
+    padding-right: 0;
+  }
+
+  &--total {
+    min-width: 110px;
+    flex-shrink: 0;
+  }
+
+  &--received {
+    flex: 1;
+    min-width: 150px;
+    max-width: 200px;
+  }
+
+  &--change {
+    min-width: 100px;
+    flex-shrink: 0;
+    padding: 6px 14px;
+    margin-left: 2px;
+    border-right: none !important;
+    border-radius: var(--pv-radius-md);
+    background: color-mix(in srgb, var(--pv-bg-secondary) 70%, transparent);
+
+    &.has-change {
+      background: color-mix(in srgb, var(--pv-success) 14%, var(--pv-bg-secondary));
+
+      .checkout-change-amount {
+        color: var(--pv-success);
+      }
+    }
+
+    &.insufficient {
+      background: color-mix(in srgb, var(--ion-color-danger) 12%, var(--pv-bg-secondary));
+
+      .checkout-change-amount {
+        color: var(--ion-color-danger);
+      }
+    }
+  }
+}
+
+.checkout-label {
+  font-size: 0.68rem;
+  font-weight: 700;
   color: var(--pv-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
+  line-height: 1;
 }
 
-.total-amount {
-  font-size: 1.75rem;
+.checkout-total-amount {
+  font-size: 1.65rem;
   font-weight: 800;
   color: var(--pv-accent);
   letter-spacing: -0.02em;
+  line-height: 1.1;
+  white-space: nowrap;
+
+  &.is-zero {
+    color: var(--pv-text-secondary);
+    font-weight: 600;
+  }
 }
 
-.total-amount.total-zero {
+.checkout-value {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--pv-text-primary);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.received-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+  width: 100%;
+  min-height: 40px;
+  background: var(--pv-bg-secondary);
+  border: 2px solid var(--pv-border);
+  border-radius: 999px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+
+  &.is-focused {
+    border-color: var(--pv-accent);
+    background: var(--pv-bg-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pv-accent) 18%, transparent);
+  }
+}
+
+.received-prefix {
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--pv-text-secondary);
-  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.amount-received-input {
+  flex: 1;
+  min-width: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  --background: transparent;
+  --highlight-color-focused: transparent;
+  --highlight-color-valid: transparent;
+  --highlight-color-invalid: transparent;
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-align: right;
+  color: var(--pv-text-primary);
+}
+
+:host ::ng-deep .amount-received-input input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+.checkout-change-amount {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--pv-text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .actions-section {
@@ -377,11 +502,46 @@
 }
 
 @media (max-width: 768px) {
+  .pos-content {
+    --padding-bottom: 168px;
+  }
+
   .pos-actions-bar {
     left: 8px;
     right: 8px;
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
+  }
+
+  .checkout-panel {
+    max-width: none;
+    padding-right: 0;
+    border-right: none;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--pv-border);
+    justify-content: space-between;
+  }
+
+  .checkout-block {
+    padding: 0 10px;
+    min-height: 52px;
+
+    &--total {
+      min-width: 0;
+      flex: 1;
+    }
+
+    &--received {
+      flex: 1.4;
+      max-width: none;
+    }
+
+    &--change {
+      flex: 1;
+      min-width: 0;
+      margin-left: 0;
+    }
   }
 
   .actions-section ion-button {

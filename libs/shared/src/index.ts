@@ -4,6 +4,7 @@ export * from './constants/permissions';
 export * from './constants/app-modes';
 export * from './constants/currency';
 export * from './constants/keyboard-shortcuts';
+export * from './constants/device-connectivity';
 export * from './interfaces/api-response.interface';
 export * from './interfaces/auth.interface';
 export * from './interfaces/pagination.interface';

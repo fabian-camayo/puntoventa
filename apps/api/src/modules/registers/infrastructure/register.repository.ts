@@ -21,6 +21,16 @@ export class RegisterRepository {
             user: { select: { id: true, username: true, firstName: true, lastName: true } },
           },
         },
+        terminals: {
+          where: { isActive: true },
+          select: {
+            id: true,
+            name: true,
+            registerId: true,
+            lastSeenAt: true,
+            lastScanAt: true,
+          },
+        },
       },
     });
   }
@@ -80,6 +90,16 @@ export class RegisterRepository {
           userRegisters: {
             include: {
               user: { select: { id: true, username: true, firstName: true, lastName: true } },
+            },
+          },
+          terminals: {
+            where: { isActive: true },
+            select: {
+              id: true,
+              name: true,
+              registerId: true,
+              lastSeenAt: true,
+              lastScanAt: true,
             },
           },
         },

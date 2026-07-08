@@ -93,7 +93,15 @@
             <ion-item button (click)="addProduct(product)" detail="false" [disabled]="!canOperateSale()">
               <ion-label>
                 <h2>{{ product.name }}</h2>
-                <p>{{ product.sku }} · {{ product.salePrice | appCurrency:'1.0-0' }}</p>
+                <p>
+                  {{ product.sku }} · {{ product.salePrice | appCurrency:'1.0-0' }}
+                  ·
+                  @if ((product.taxRate ?? 0) > 0) {
+                    IVA {{ product.taxRate }}%
+                  } @else {
+                    {{ 'PRODUCTS.TAX_EXEMPT' | translate }}
+                  }
+                </p>
               </ion-label>
               <ion-badge slot="end" [class]="getStockClass(product.stock)">
                 {{ product.stock }}
@@ -131,7 +139,15 @@
             <ion-item class="cart-item">
               <ion-label>
                 <h2>{{ item.productName }}</h2>
-                <p>{{ item.unitPrice | appCurrency:'1.0-0' }} c/u</p>
+                <p>
+                  {{ item.unitPrice | appCurrency:'1.0-0' }} c/u
+                  ·
+                  @if ((item.taxRate ?? 0) > 0) {
+                    IVA {{ item.taxRate }}%
+                  } @else {
+                    {{ 'PRODUCTS.TAX_EXEMPT' | translate }}
+                  }
+                </p>
               </ion-label>
 
               <div class="qty-controls" slot="end">
@@ -171,18 +187,59 @@
             <span>{{ 'POS.TAX' | translate }}</span>
             <span>{{ saleTax() | appCurrency:'1.0-0' }}</span>
           </div>
-          <div class="summary-row summary-total">
-            <span>{{ 'POS.TOTAL' | translate }}</span>
-            <span class="summary-total-amount">{{ total() | appCurrency:'1.0-0' }}</span>
-          </div>
         </div>
       </section>
     </div>
 
     <div class="pos-actions-bar" slot="fixed">
-      <div class="total-section">
-        <div class="total-label">{{ 'POS.TOTAL' | translate }}</div>
-        <div class="total-amount" [class.total-zero]="total() === 0">{{ total() | appCurrency:'1.0-0' }}</div>
+      <div class="checkout-panel" [class.checkout-panel--full]="canOperateSale() && total() > 0 || isSaleCompleted()">
+        <div class="checkout-block checkout-block--total">
+          <span class="checkout-label">{{ 'POS.TOTAL' | translate }}</span>
+          <span class="checkout-total-amount" [class.is-zero]="total() === 0">
+            {{ total() | appCurrency:'1.0-0' }}
+          </span>
+        </div>
+
+        @if (isSaleCompleted()) {
+          <div class="checkout-block">
+            <span class="checkout-label">{{ 'POS.AMOUNT_PAID' | translate }}</span>
+            <span class="checkout-value">{{ activeSale()?.amountPaid | appCurrency:'1.0-0' }}</span>
+          </div>
+          <div
+            class="checkout-block checkout-block--change"
+            [class.has-change]="(activeSale()?.changeAmount ?? 0) > 0"
+          >
+            <span class="checkout-label">{{ 'POS.CHANGE' | translate }}</span>
+            <span class="checkout-change-amount">{{ activeSale()?.changeAmount | appCurrency:'1.0-0' }}</span>
+          </div>
+        } @else if (canOperateSale() && total() > 0) {
+          <div class="checkout-block checkout-block--received">
+            <label class="checkout-label" for="amount-received">{{ 'POS.AMOUNT_RECEIVED' | translate }}</label>
+            <div class="received-input-wrap" [class.is-focused]="amountInputFocused()">
+              <span class="received-prefix">$</span>
+              <ion-input
+                id="amount-received"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                [value]="amountReceived() ?? ''"
+                (ionInput)="onAmountReceivedInput($event)"
+                (ionFocus)="amountInputFocused.set(true)"
+                (ionBlur)="amountInputFocused.set(false)"
+                (keydown.enter)="onSaveSale()"
+                class="amount-received-input"
+              ></ion-input>
+            </div>
+          </div>
+          <div
+            class="checkout-block checkout-block--change"
+            [class.has-change]="changeAmount() > 0"
+            [class.insufficient]="showInsufficientPayment()"
+          >
+            <span class="checkout-label">{{ 'POS.CHANGE' | translate }}</span>
+            <span class="checkout-change-amount">{{ changeAmount() | appCurrency:'1.0-0' }}</span>
+          </div>
+        }
       </div>
 
       <div class="actions-section">

@@ -1,3 +1,7 @@
+import type { DeviceConnectionStatus } from '../constants/device-connectivity';
+
+export type { DeviceConnectionStatus };
+
 export interface RegisterAssignedUser {
   id: string;
   username: string;
@@ -14,6 +18,10 @@ export interface RegisterDto {
   hasOpenSession?: boolean;
   assignedUsers?: RegisterAssignedUser[];
   assignedUserIds?: string[];
+  connectedTerminalName?: string;
+  isTerminalOnline?: boolean;
+  registerConnectionStatus?: DeviceConnectionStatus;
+  barcodeReaderStatus?: DeviceConnectionStatus;
 }
 
 export interface RegisterSessionDto {
@@ -59,5 +67,10 @@ export interface TerminalDto {
   ipAddress?: string;
   isActive: boolean;
   lastSeenAt?: string;
+  lastScanAt?: string;
   createdAt: string;
+  isOnline?: boolean;
+  registerConnectionStatus?: DeviceConnectionStatus;
+  barcodeReaderStatus?: DeviceConnectionStatus;
+  hasOpenRegisterSession?: boolean;
 }

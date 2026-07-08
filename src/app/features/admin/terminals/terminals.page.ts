@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import {
   IonButton,
   IonIcon,
@@ -24,14 +24,16 @@ import {
   createOutline,
   wifiOutline,
   cashOutline,
+  barcodeOutline,
+  scanOutline,
 } from 'ionicons/icons';
-import { RegisterDto, TerminalDto } from '@puntoventa/shared';
+import { RegisterDto, TerminalDto, DeviceConnectionStatus } from '@puntoventa/shared';
 import { RegisterService } from '@core/services/register.service';
 import { ConfigService } from '@core/services/config.service';
 import { AuthService } from '@core/services/auth.service';
 import { DeviceService } from '@core/services/device.service';
 
-addIcons({ desktopOutline, trashOutline, createOutline, wifiOutline, cashOutline });
+addIcons({ desktopOutline, trashOutline, createOutline, wifiOutline, cashOutline, barcodeOutline, scanOutline });
 
 @Component({
   selector: 'app-terminals',
@@ -69,12 +71,22 @@ export class TerminalsPage implements OnInit, OnDestroy {
   terminals = signal<TerminalDto[]>([]);
   registers = signal<RegisterDto[]>([]);
   loading = signal(false);
+  private refreshTimer: ReturnType<typeof setInterval> | null = null;
+
+  readonly summaryOnline = computed(() => this.terminals().filter((t) => t.isOnline).length);
+  readonly summaryRegisterConnected = computed(() =>
+    this.terminals().filter((t) => t.registerConnectionStatus === 'CONNECTED').length,
+  );
+  readonly summaryBarcodeActive = computed(() =>
+    this.terminals().filter((t) => t.barcodeReaderStatus === 'CONNECTED').length,
+  );
 
   ngOnInit(): void {
     this.configService.getPosContext().pipe(takeUntil(this.destroy$)).subscribe({
       next: (ctx) => {
         this.branchId.set(ctx.branchId);
         void this.loadData();
+        this.startAutoRefresh();
       },
       error: async () => {
         await this.showToast('No se pudo cargar la sucursal', 'danger');
@@ -83,6 +95,7 @@ export class TerminalsPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.stopAutoRefresh();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -99,6 +112,40 @@ export class TerminalsPage implements OnInit, OnDestroy {
   formatDate(value?: string): string {
     if (!value) return '—';
     return new Date(value).toLocaleString('es-CO');
+  }
+
+  connectionColor(status?: DeviceConnectionStatus): string {
+    switch (status) {
+      case 'CONNECTED':
+        return 'success';
+      case 'DISCONNECTED':
+        return 'danger';
+      default:
+        return 'medium';
+    }
+  }
+
+  connectionKey(status?: DeviceConnectionStatus): string {
+    switch (status) {
+      case 'CONNECTED':
+        return 'TERMINALS.CONNECTED';
+      case 'DISCONNECTED':
+        return 'TERMINALS.DISCONNECTED';
+      default:
+        return 'TERMINALS.UNKNOWN';
+    }
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.refreshTimer = setInterval(() => void this.loadData(), 30_000);
+  }
+
+  private stopAutoRefresh(): void {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+      this.refreshTimer = null;
+    }
   }
 
   async onRegisterChange(terminal: TerminalDto, registerId: string | null): Promise<void> {

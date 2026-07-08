@@ -44,13 +44,13 @@
 .table-header,
 .product-grid {
   display: grid;
-  grid-template-columns: 100px 1.5fr 1fr 110px 80px 100px 88px;
+  grid-template-columns: 100px 1.5fr 1fr 110px 72px 80px 100px 88px;
   align-items: center;
   gap: 8px;
   width: 100%;
 
   &.with-cost {
-    grid-template-columns: 100px 1.5fr 1fr 110px 110px 80px 100px 88px;
+    grid-template-columns: 100px 1.5fr 1fr 110px 110px 72px 80px 100px 88px;
   }
 }
 
@@ -154,6 +154,7 @@
   .col-sku::before { content: 'SKU: '; color: var(--pv-text-secondary); }
   .col-category::before { content: 'Cat.: '; color: var(--pv-text-secondary); }
   .col-price::before { content: 'Precio: '; color: var(--pv-text-secondary); }
+  .col-tax::before { content: 'IVA: '; color: var(--pv-text-secondary); }
   .col-cost::before { content: 'Costo: '; color: var(--pv-text-secondary); }
   .col-stock::before { content: 'Stock: '; color: var(--pv-text-secondary); }
 

@@ -24,4 +24,5 @@ export interface ProductSearchResult {
   salePrice: number;
   stock: number;
   unit: string;
+  taxRate?: number;
 }

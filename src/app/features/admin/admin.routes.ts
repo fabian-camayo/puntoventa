@@ -81,6 +81,6 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./terminals/terminals.page').then((m) => m.TerminalsPage),
     canActivate: [permissionGuard],
-    data: { permission: 'registers.admin' },
+    data: { permission: 'registers.view' },
   },
 ];
