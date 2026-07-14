@@ -9,40 +9,38 @@
       (newTab)="onNewTab()"
     ></app-sale-tabs>
 
-    <div class="register-status-bar" [class.is-open]="isRegisterOpen()">
-      <div class="register-status-info">
-        <ion-icon [name]="isRegisterOpen() ? 'lock-open-outline' : 'lock-closed-outline'"></ion-icon>
-        @if (canSelectRegister()) {
-          <ion-select
-            class="register-select"
-            interface="popover"
-            [value]="registerId()"
-            (ionChange)="selectRegister($event.detail.value)"
-            [selectedText]="registerName()"
-          >
-            @for (reg of availableRegisters(); track reg.id) {
-              <ion-select-option [value]="reg.id">{{ reg.name }}</ion-select-option>
-            }
-          </ion-select>
-          <span class="register-state-text">
-            {{ (isRegisterOpen() ? 'REGISTERS.SESSION_OPEN' : 'REGISTERS.SESSION_CLOSED') | translate }}
-          </span>
-        } @else {
-          <span>
-            @if (isRegisterOpen()) {
-              {{ 'REGISTERS.SESSION_OPEN' | translate }} — {{ registerName() }}
-            } @else {
+    @if (!isRegisterOpen()) {
+      <div class="register-status-bar">
+        <div class="register-status-info">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          @if (canSelectRegister()) {
+            <ion-select
+              class="register-select"
+              interface="popover"
+              [value]="registerId()"
+              (ionChange)="selectRegister($event.detail.value)"
+              [selectedText]="registerName()"
+            >
+              @for (reg of availableRegisters(); track reg.id) {
+                <ion-select-option [value]="reg.id">{{ reg.name }}</ion-select-option>
+              }
+            </ion-select>
+            <span class="register-state-text">
+              {{ 'REGISTERS.SESSION_CLOSED' | translate }}
+            </span>
+          } @else {
+            <span>
               {{ 'REGISTERS.SESSION_CLOSED' | translate }} — {{ registerName() }}
-            }
-          </span>
+            </span>
+          }
+        </div>
+        @if (canOpenRegister && !noRegisterAssigned()) {
+          <ion-button size="small" (click)="openRegisterModal()">
+            {{ 'REGISTERS.OPEN_ACTION' | translate }}
+          </ion-button>
         }
       </div>
-      @if (!isRegisterOpen() && canOpenRegister && !noRegisterAssigned()) {
-        <ion-button size="small" (click)="openRegisterModal()">
-          {{ 'REGISTERS.OPEN_ACTION' | translate }}
-        </ion-button>
-      }
-    </div>
+    }
   </div>
 
   @if (!posReady()) {
@@ -72,65 +70,47 @@
         </div>
       }
 
-      <section class="pos-card search-card">
-        <div class="card-head">
-          <ion-icon name="search-outline"></ion-icon>
-          <span>{{ 'POS.SEARCH_PLACEHOLDER' | translate }}</span>
-        </div>
-        <ion-searchbar
-          [value]="searchQuery()"
-          [placeholder]="'POS.SEARCH_PLACEHOLDER' | translate"
-          [debounce]="0"
-          [disabled]="!canOperateSale()"
-          (ionInput)="onSearchInput($event)"
-          (keydown)="onSearchKeydown($event)"
-          class="product-search"
-          autofocus
-        ></ion-searchbar>
-
-        <ion-list class="search-results">
-          @for (product of searchResults(); track product.id) {
-            <ion-item button (click)="addProduct(product)" detail="false" [disabled]="!canOperateSale()">
-              <ion-label>
-                <h2>{{ product.name }}</h2>
-                <p>
-                  {{ product.sku }} · {{ product.salePrice | appCurrency:'1.0-0' }}
-                  ·
-                  @if ((product.taxRate ?? 0) > 0) {
-                    IVA {{ product.taxRate }}%
-                  } @else {
-                    {{ 'PRODUCTS.TAX_EXEMPT' | translate }}
-                  }
-                </p>
-              </ion-label>
-              <ion-badge slot="end" [class]="getStockClass(product.stock)">
-                {{ product.stock }}
-              </ion-badge>
-            </ion-item>
-          } @empty {
-            @if (searchQuery().length > 0 && !isSearching()) {
-              <ion-item>
-                <ion-label color="medium">{{ 'POS.NO_RESULTS' | translate }}</ion-label>
-              </ion-item>
-            }
-          }
-        </ion-list>
-      </section>
-
       <section class="pos-card cart-card">
-        <div class="card-head cart-head">
-          <div class="cart-title">
-            <ion-icon name="cart-outline"></ion-icon>
-            <span>{{ 'POS.CURRENT_SALE' | translate }}</span>
-          </div>
-          @if (isSaleCompleted()) {
-            <ion-chip color="success">
-              <ion-label>{{ 'POS.SALE_SAVED' | translate }}: {{ activeSale()?.documentNumber }}</ion-label>
-            </ion-chip>
-          } @else {
-            <ion-chip color="primary">
-              <ion-label>{{ itemCount() }} {{ 'POS.ITEMS' | translate }}</ion-label>
-            </ion-chip>
+        <div class="cart-search">
+          <ion-searchbar
+            [value]="searchQuery()"
+            [placeholder]="'POS.SEARCH_PLACEHOLDER' | translate"
+            [debounce]="0"
+            [disabled]="!canOperateSale()"
+            (ionInput)="onSearchInput($event)"
+            (keydown)="onSearchKeydown($event)"
+            class="product-search"
+            autofocus
+          ></ion-searchbar>
+
+          @if (searchQuery().length > 0) {
+            <ion-list class="search-results">
+              @for (product of searchResults(); track product.id) {
+                <ion-item button (click)="addProduct(product)" detail="false" [disabled]="!canOperateSale()">
+                  <ion-label>
+                    <h2>{{ product.name }}</h2>
+                    <p>
+                      {{ product.sku }} · {{ product.salePrice | appCurrency:'1.0-0' }}
+                      ·
+                      @if ((product.taxRate ?? 0) > 0) {
+                        IVA {{ product.taxRate }}%
+                      } @else {
+                        {{ 'PRODUCTS.TAX_EXEMPT' | translate }}
+                      }
+                    </p>
+                  </ion-label>
+                  <ion-badge slot="end" [class]="getStockClass(product.stock)">
+                    {{ product.stock }}
+                  </ion-badge>
+                </ion-item>
+              } @empty {
+                @if (!isSearching()) {
+                  <ion-item>
+                    <ion-label color="medium">{{ 'POS.NO_RESULTS' | translate }}</ion-label>
+                  </ion-item>
+                }
+              }
+            </ion-list>
           }
         </div>
 
@@ -248,7 +228,7 @@
           (click)="onSuspend()"
           [disabled]="itemCount() === 0 || !canOperateSale()"
         >
-          <ion-icon name="pause-outline" slot="start"></ion-icon>
+          <ion-icon name="trash-outline" slot="start"></ion-icon>
           {{ 'POS.SUSPEND' | translate }}
         </ion-button>
         <ion-button

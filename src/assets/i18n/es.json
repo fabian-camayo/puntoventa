@@ -50,7 +50,7 @@
     "AMOUNT_PAID": "Pagado",
     "AMOUNT_RECEIVED": "Recibido",
     "CHANGE": "Cambio",
-    "SUSPEND": "Suspender",
+    "SUSPEND": "Eliminar venta",
     "CHECKOUT": "Cobrar",
     "SAVE_SALE": "Guardar venta",
     "PRINT_RECEIPT": "Imprimir factura",
