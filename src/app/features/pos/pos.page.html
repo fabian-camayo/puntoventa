@@ -193,36 +193,68 @@
             <span class="checkout-change-amount">{{ activeSale()?.changeAmount | appCurrency:'1.0-0' }}</span>
           </div>
         } @else if (canOperateSale() && total() > 0) {
-          <div class="checkout-block checkout-block--received">
-            <label class="checkout-label" for="amount-received">{{ 'POS.AMOUNT_RECEIVED' | translate }}</label>
-            <div class="received-input-wrap" [class.is-focused]="amountInputFocused()">
-              <span class="received-prefix">$</span>
-              <ion-input
-                id="amount-received"
-                type="number"
-                inputmode="decimal"
-                min="0"
-                [value]="amountReceived() ?? ''"
-                (ionInput)="onAmountReceivedInput($event)"
-                (ionFocus)="amountInputFocused.set(true)"
-                (ionBlur)="amountInputFocused.set(false)"
-                (keydown.enter)="onSaveSale()"
-                class="amount-received-input"
-              ></ion-input>
+          <div class="checkout-block checkout-block--payments">
+            <span class="checkout-label">{{ 'POS.PAYMENTS' | translate }}</span>
+            <div class="payment-lines">
+              @for (line of paymentLines(); track line.key) {
+                <div class="payment-line">
+                  <ion-select
+                    interface="popover"
+                    [value]="line.paymentTypeId"
+                    (ionChange)="onPaymentTypeChange(line.key, $event.detail.value)"
+                    class="payment-type-select"
+                  >
+                    @for (type of paymentTypes(); track type.id) {
+                      <ion-select-option [value]="type.id">{{ type.name }}</ion-select-option>
+                    }
+                  </ion-select>
+                  <div class="received-input-wrap payment-amount-wrap" [class.is-focused]="amountInputFocused()">
+                    <span class="received-prefix">$</span>
+                    <ion-input
+                      type="number"
+                      inputmode="decimal"
+                      min="0"
+                      [value]="line.amount ?? ''"
+                      (ionInput)="onPaymentAmountInput(line.key, $event)"
+                      (ionFocus)="amountInputFocused.set(true)"
+                      (ionBlur)="amountInputFocused.set(false)"
+                      (keydown.enter)="onSaveSale()"
+                      class="amount-received-input"
+                    ></ion-input>
+                  </div>
+                  @if (paymentLines().length > 1) {
+                    <ion-button fill="clear" color="danger" size="small" (click)="removePaymentLine(line.key)">
+                      <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  }
+                </div>
+              }
+              <ion-button fill="clear" size="small" class="add-payment-btn" (click)="addPaymentLine()">
+                <ion-icon name="add-outline" slot="start"></ion-icon>
+                {{ 'POS.ADD_PAYMENT' | translate }}
+              </ion-button>
             </div>
           </div>
-          <div
-            class="checkout-block checkout-block--change"
-            [class.has-change]="changeAmount() > 0"
-            [class.insufficient]="showInsufficientPayment()"
-          >
-            <span class="checkout-label">{{ 'POS.CHANGE' | translate }}</span>
-            <span class="checkout-change-amount">{{ changeAmount() | appCurrency:'1.0-0' }}</span>
-          </div>
+          @if (hasCashPayment()) {
+            <div
+              class="checkout-block checkout-block--change"
+              [class.has-change]="changeAmount() > 0"
+              [class.insufficient]="showInsufficientPayment()"
+            >
+              <span class="checkout-label">{{ 'POS.CHANGE' | translate }}</span>
+              <span class="checkout-change-amount">{{ changeAmount() | appCurrency:'1.0-0' }}</span>
+            </div>
+          }
         }
       </div>
 
       <div class="actions-section">
+        @if (canCashMovement && isRegisterOpen()) {
+          <ion-button fill="outline" (click)="openCashMovementModal()">
+            <ion-icon name="cash-outline" slot="start"></ion-icon>
+            {{ 'POS.CASH_MOVEMENT' | translate }}
+          </ion-button>
+        }
         <ion-button
           fill="outline"
           (click)="onSuspend()"

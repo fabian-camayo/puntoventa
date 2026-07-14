@@ -22,6 +22,7 @@ import {
   cashOutline,
   albumsOutline,
   desktopOutline,
+  cardOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@core/services/auth.service';
 import { ThemeService } from '@core/services/theme.service';
@@ -43,6 +44,7 @@ addIcons({
   cashOutline,
   albumsOutline,
   desktopOutline,
+  cardOutline,
 });
 
 export interface NavItem {
@@ -77,6 +79,12 @@ const NAV_ITEMS: NavItem[] = [
     icon: 'folder-outline',
     route: '/admin/categories',
     permission: 'categories.view',
+  },
+  {
+    labelKey: 'ADMIN.PAYMENT_TYPES',
+    icon: 'card-outline',
+    route: '/admin/payment-types',
+    permission: 'payment_types.view',
   },
   {
     labelKey: 'ADMIN.REGISTER_SESSIONS',

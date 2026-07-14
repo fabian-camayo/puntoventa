@@ -56,6 +56,33 @@ export interface CloseRegisterRequest {
   notes?: string;
 }
 
+export type CashMovementTypeDto =
+  | 'INCOME'
+  | 'EXPENSE'
+  | 'WITHDRAWAL'
+  | 'DEPOSIT'
+  | 'SALE'
+  | 'REFUND';
+
+export interface CashMovementDto {
+  id: string;
+  registerSessionId: string;
+  userId: string;
+  type: CashMovementTypeDto;
+  amount: number;
+  description?: string;
+  reference?: string;
+  createdAt: string;
+  userName?: string;
+}
+
+export interface CreateCashMovementRequest {
+  type: 'WITHDRAWAL' | 'DEPOSIT';
+  amount: number;
+  description?: string;
+  reference?: string;
+}
+
 export interface TerminalDto {
   id: string;
   branchId: string;

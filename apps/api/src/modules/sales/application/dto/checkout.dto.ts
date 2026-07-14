@@ -1,15 +1,26 @@
-import { IsArray, IsEnum, IsNumber, IsOptional, IsString, ValidateNested, IsInt } from 'class-validator';
+import {
+  IsArray,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  ValidateNested,
+  IsInt,
+  Min,
+  ArrayMinSize,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PaymentMethod } from '@puntoventa/shared';
 
 class PaymentInput {
-  @ApiProperty({ enum: PaymentMethod })
-  @IsEnum(PaymentMethod)
-  method!: PaymentMethod;
+  @ApiProperty()
+  @IsUUID()
+  paymentTypeId!: string;
 
   @ApiProperty()
+  @Type(() => Number)
   @IsNumber()
+  @Min(0.01)
   amount!: number;
 
   @ApiPropertyOptional()
@@ -21,11 +32,13 @@ class PaymentInput {
 export class CheckoutDto {
   @ApiProperty({ type: [PaymentInput] })
   @IsArray()
+  @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => PaymentInput)
   payments!: PaymentInput[];
 
   @ApiProperty()
+  @Type(() => Number)
   @IsInt()
   version!: number;
 }

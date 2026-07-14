@@ -1,5 +1,4 @@
 import { SaleStatus } from '../enums/sale-status.enum';
-import { PaymentMethod } from '../enums/payment-method.enum';
 
 export interface SaleTab {
   id: string;
@@ -31,7 +30,10 @@ export interface SaleItemDto {
 }
 
 export interface SalePaymentDto {
-  method: PaymentMethod;
+  paymentTypeId: string;
+  paymentTypeName?: string;
+  paymentTypeCode?: string;
+  affectsCash?: boolean;
   amount: number;
   reference?: string;
 }

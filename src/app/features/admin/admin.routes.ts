@@ -16,6 +16,7 @@ export const ADMIN_ROUTES: Routes = [
         'reports.view',
         'sales.view',
         'categories.view',
+        'payment_types.view',
         'registers.view',
       ],
     },
@@ -47,6 +48,13 @@ export const ADMIN_ROUTES: Routes = [
       import('./categories/categories.page').then((m) => m.CategoriesPage),
     canActivate: [permissionGuard],
     data: { permission: 'categories.view' },
+  },
+  {
+    path: 'payment-types',
+    loadComponent: () =>
+      import('./payment-types/payment-types.page').then((m) => m.PaymentTypesPage),
+    canActivate: [permissionGuard],
+    data: { permission: 'payment_types.view' },
   },
   {
     path: 'sales',

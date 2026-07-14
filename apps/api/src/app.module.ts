@@ -12,6 +12,7 @@ import { CustomersModule } from './modules/customers/customers.module';
 import { SuppliersModule } from './modules/suppliers/suppliers.module';
 import { PurchasesModule } from './modules/purchases/purchases.module';
 import { SalesModule } from './modules/sales/sales.module';
+import { PaymentTypesModule } from './modules/payment-types/payment-types.module';
 import { RegistersModule } from './modules/registers/registers.module';
 import { TerminalsModule } from './modules/terminals/terminals.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
@@ -39,6 +40,7 @@ import { DiscoveryModule } from './modules/discovery/discovery.module';
     SuppliersModule,
     PurchasesModule,
     SalesModule,
+    PaymentTypesModule,
     RegistersModule,
     TerminalsModule,
     InventoryModule,

@@ -14,6 +14,7 @@ import {
   cashOutline,
   albumsOutline,
   desktopOutline,
+  cardOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@core/services/auth.service';
 
@@ -28,6 +29,7 @@ addIcons({
   cashOutline,
   albumsOutline,
   desktopOutline,
+  cardOutline,
 });
 
 interface DashboardCard {
@@ -52,6 +54,7 @@ export class AdminDashboardPage {
     { route: '/admin/sales', labelKey: 'ADMIN.SALES', icon: 'receipt-outline', permission: 'sales.view', color: '#2563eb' },
     { route: '/admin/products', labelKey: 'ADMIN.PRODUCTS', icon: 'cube-outline', permission: 'products.view', color: '#16a34a' },
     { route: '/admin/categories', labelKey: 'ADMIN.CATEGORIES', icon: 'folder-outline', permission: 'categories.view', color: '#0d9488' },
+    { route: '/admin/payment-types', labelKey: 'ADMIN.PAYMENT_TYPES', icon: 'card-outline', permission: 'payment_types.view', color: '#db2777' },
     { route: '/admin/users', labelKey: 'ADMIN.USERS', icon: 'people-outline', permission: 'users.view', color: '#7c3aed' },
     { route: '/admin/roles', labelKey: 'ADMIN.ROLES', icon: 'shield-outline', permission: 'roles.view', color: '#d97706' },
     { route: '/admin/register-sessions', labelKey: 'ADMIN.REGISTER_SESSIONS', icon: 'cash-outline', permission: 'registers.view', color: '#0891b2' },

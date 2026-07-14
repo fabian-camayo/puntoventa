@@ -13,7 +13,7 @@ import { AuditService } from '../../audit/application/audit.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { CheckoutDto } from './dto/checkout.dto';
-import { PaymentMethod, JwtPayload } from '@puntoventa/shared';
+import { JwtPayload } from '@puntoventa/shared';
 
 @Injectable()
 export class SalesService {
@@ -247,16 +247,52 @@ export class SalesService {
       }
 
       await tx.salePayment.deleteMany({ where: { saleId: id } });
+
+      const paymentTypeIds = [...new Set(dto.payments.map((p) => p.paymentTypeId))];
+      const paymentTypes = await tx.paymentType.findMany({
+        where: { id: { in: paymentTypeIds }, isActive: true },
+      });
+      if (paymentTypes.length !== paymentTypeIds.length) {
+        throw new BadRequestException('Uno o más tipos de pago no son válidos');
+      }
+      const paymentTypeMap = new Map(paymentTypes.map((pt) => [pt.id, pt]));
+
+      const saleTotal = Number(existing.total);
+      let nonCashPaid = 0;
+      let cashTendered = 0;
+
+      for (const payment of dto.payments) {
+        if (payment.amount <= 0) {
+          throw new BadRequestException('El monto de cada pago debe ser mayor a cero');
+        }
+        const type = paymentTypeMap.get(payment.paymentTypeId)!;
+        if (type.affectsCash) {
+          cashTendered += payment.amount;
+        } else {
+          nonCashPaid += payment.amount;
+        }
+      }
+
+      const cashRequired = Math.max(0, Math.round((saleTotal - nonCashPaid) * 100) / 100);
+      const totalPaid = Math.round((nonCashPaid + cashTendered) * 100) / 100;
+      if (totalPaid + 0.001 < saleTotal) {
+        throw new BadRequestException('El pago es insuficiente para cubrir el total de la venta');
+      }
+      if (cashTendered + 0.001 < cashRequired) {
+        throw new BadRequestException('El efectivo recibido es insuficiente');
+      }
+
+      const changeAmount = Math.max(0, Math.round((cashTendered - cashRequired) * 100) / 100);
+      const cashIntoRegister = Math.round((cashTendered - changeAmount) * 100) / 100;
+
       await tx.salePayment.createMany({
         data: dto.payments.map((p) => ({
           saleId: id,
-          method: p.method,
+          paymentTypeId: p.paymentTypeId,
           amount: p.amount,
           reference: p.reference,
         })),
       });
-
-      const totalPaid = dto.payments.reduce((sum, p) => sum + p.amount, 0);
 
       const sale = await tx.sale.update({
         where: { id },
@@ -265,26 +301,28 @@ export class SalesService {
           documentNumber,
           registerSessionId: openSession.id,
           amountPaid: totalPaid,
-          changeAmount: Math.max(0, totalPaid - Number(existing.total)),
+          changeAmount,
           completedAt: new Date(),
           version: { increment: 1 },
         },
-        include: { items: { include: { product: true } }, payments: true, customer: true },
+        include: {
+          items: { include: { product: true } },
+          payments: { include: { paymentType: true } },
+          customer: true,
+        },
       });
 
-      for (const payment of dto.payments) {
-        if (payment.method === PaymentMethod.CASH && payment.amount > 0) {
-          await tx.cashMovement.create({
-            data: {
-              registerSessionId: openSession.id,
-              userId: user.sub,
-              type: CashMovementType.SALE,
-              amount: payment.amount,
-              description: `Venta ${documentNumber}`,
-              reference: documentNumber,
-            },
-          });
-        }
+      if (cashIntoRegister > 0) {
+        await tx.cashMovement.create({
+          data: {
+            registerSessionId: openSession.id,
+            userId: user.sub,
+            type: CashMovementType.SALE,
+            amount: cashIntoRegister,
+            description: `Venta ${documentNumber}`,
+            reference: documentNumber,
+          },
+        });
       }
 
       return sale;
@@ -344,7 +382,18 @@ export class SalesService {
       notes: string | null;
       product?: { name: string; sku: string };
     }>;
-    payments?: Array<{ method: string; amount: Prisma.Decimal; reference: string | null }>;
+    payments?: Array<{
+      amount: Prisma.Decimal;
+      reference: string | null;
+      paymentTypeId?: string;
+      paymentType?: {
+        id: string;
+        code: string;
+        name: string;
+        affectsCash: boolean;
+      };
+      method?: string;
+    }>;
   }) {
     return {
       id: sale.id,
@@ -371,7 +420,10 @@ export class SalesService {
         notes: i.notes ?? undefined,
       })),
       payments: sale.payments?.map((p) => ({
-        method: p.method,
+        paymentTypeId: p.paymentTypeId ?? p.paymentType?.id ?? '',
+        paymentTypeName: p.paymentType?.name,
+        paymentTypeCode: p.paymentType?.code,
+        affectsCash: p.paymentType?.affectsCash,
         amount: Number(p.amount),
         reference: p.reference ?? undefined,
       })),

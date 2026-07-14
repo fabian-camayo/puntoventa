@@ -56,6 +56,24 @@ async function main(): Promise<void> {
 
   console.log(`Caja creada: ${register.name}`);
 
+  const paymentTypes = [
+    { code: 'CASH', name: 'Efectivo', affectsCash: true, sortOrder: 1 },
+    { code: 'CARD', name: 'Tarjeta', affectsCash: false, sortOrder: 2 },
+    { code: 'TRANSFER', name: 'Transferencia', affectsCash: false, sortOrder: 3 },
+  ];
+  for (const pt of paymentTypes) {
+    await prisma.paymentType.upsert({
+      where: { code: pt.code },
+      update: {
+        name: pt.name,
+        affectsCash: pt.affectsCash,
+        sortOrder: pt.sortOrder,
+        isActive: true,
+      },
+      create: pt,
+    });
+  }
+
   for (const perm of DEFAULT_PERMISSIONS) {
     await prisma.permission.upsert({
       where: { code: buildPermissionCode(perm.module, perm.action) },
@@ -104,8 +122,11 @@ async function main(): Promise<void> {
   }
 
   const cashierPermissions = allPermissions.filter((p) =>
-    ['sales', 'products', 'customers', 'registers'].includes(p.module) &&
-    ['view', 'create', 'open', 'close'].includes(p.action),
+    (
+      (['sales', 'products', 'customers', 'registers'].includes(p.module) &&
+        ['view', 'create', 'open', 'close', 'cash_movement'].includes(p.action)) ||
+      (p.module === 'payment_types' && p.action === 'view')
+    ),
   );
   for (const permission of cashierPermissions) {
     await prisma.rolePermission.upsert({

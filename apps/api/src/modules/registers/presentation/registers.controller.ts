@@ -17,6 +17,7 @@ import { UpdateRegisterDto } from '../application/dto/update-register.dto';
 import { AssignUsersDto } from '../application/dto/assign-users.dto';
 import { OpenSessionDto } from '../application/dto/open-session.dto';
 import { CloseSessionDto } from '../application/dto/close-session.dto';
+import { CreateCashMovementDto } from '../application/dto/create-cash-movement.dto';
 import { JwtAuthGuard } from '../../../presentation/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../../presentation/guards/permissions.guard';
 import { RequirePermissions } from '../../../presentation/decorators/permissions.decorator';
@@ -54,6 +55,24 @@ export class RegistersController {
       page,
       limit,
     });
+  }
+
+  @Get('sessions/:sessionId/movements')
+  @RequirePermissions('registers.view', 'registers.cash_movement')
+  @ApiOperation({ summary: 'Listar movimientos de efectivo de una sesión' })
+  listCashMovements(@Param('sessionId') sessionId: string) {
+    return this.registersService.listCashMovements(sessionId);
+  }
+
+  @Post('sessions/:sessionId/movements')
+  @RequirePermissions('registers.cash_movement')
+  @ApiOperation({ summary: 'Registrar retiro o ingreso de efectivo' })
+  createCashMovement(
+    @Param('sessionId') sessionId: string,
+    @Body() dto: CreateCashMovementDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.registersService.createCashMovement(sessionId, dto, user);
   }
 
   @Get('sessions/:sessionId')

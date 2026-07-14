@@ -297,6 +297,12 @@
     max-width: 200px;
   }
 
+  &--payments {
+    flex: 1.6;
+    min-width: 220px;
+    max-width: 420px;
+  }
+
   &--change {
     min-width: 100px;
     flex-shrink: 0;
@@ -372,6 +378,46 @@
     background: var(--pv-bg-primary);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--pv-accent) 18%, transparent);
   }
+}
+
+.payment-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.payment-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.payment-type-select {
+  min-width: 110px;
+  max-width: 140px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-md);
+  background: var(--pv-bg-secondary);
+}
+
+.payment-amount-wrap {
+  flex: 1;
+  min-width: 90px;
+  border-radius: var(--pv-radius-md);
+  min-height: 36px;
+}
+
+.add-payment-btn {
+  --padding-start: 4px;
+  margin: 0;
+  align-self: flex-start;
+  font-size: 0.8rem;
+  height: 28px;
 }
 
 .received-prefix {

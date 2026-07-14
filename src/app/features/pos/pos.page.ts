@@ -12,7 +12,6 @@ import {
   IonIcon,
   IonSearchbar,
   IonBadge,
-  IonChip,
   IonLabel,
   IonList,
   IonItem,
@@ -50,6 +49,7 @@ import { KeyboardService } from '../../core/services/keyboard.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ConfigService } from '../../core/services/config.service';
 import { RegisterService } from '../../core/services/register.service';
+import { PaymentTypeService } from '../../core/services/payment-type.service';
 import { ReceiptPrintService } from '../../core/services/receipt-print.service';
 import { TerminalHeartbeatService } from '../../core/services/terminal-heartbeat.service';
 import {
@@ -57,7 +57,7 @@ import {
   SaleTab,
   SaleItemDto,
   ProductSearchResult,
-  PaymentMethod,
+  PaymentTypeDto,
   SaleStatus,
   AuthUser,
   RegisterSessionDto,
@@ -66,6 +66,7 @@ import {
 import { SaleTabsComponent } from '../../shared/components/sale-tabs/sale-tabs.component';
 import { AppCurrencyPipe } from '../../shared/pipes/app-currency.pipe';
 import { RegisterSessionModal } from './register-session.modal';
+import { CashMovementModal } from './cash-movement.modal';
 
 addIcons({
   addOutline,
@@ -87,6 +88,13 @@ interface ActiveSale extends SaleDto {
   tabLabel: string;
 }
 
+interface PaymentLine {
+  key: string;
+  paymentTypeId: string;
+  amount: number | null;
+  reference: string;
+}
+
 @Component({
   selector: 'app-pos',
   templateUrl: './pos.page.html',
@@ -98,7 +106,6 @@ interface ActiveSale extends SaleDto {
     IonIcon,
     IonSearchbar,
     IonBadge,
-    IonChip,
     IonLabel,
     IonList,
     IonItem,
@@ -120,6 +127,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   private readonly auth = inject(AuthService);
   private readonly configService = inject(ConfigService);
   private readonly registerService = inject(RegisterService);
+  private readonly paymentTypeService = inject(PaymentTypeService);
   private readonly receiptPrint = inject(ReceiptPrintService);
   private readonly terminalHeartbeat = inject(TerminalHeartbeatService);
   private readonly modalCtrl = inject(ModalController);
@@ -147,6 +155,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   noRegisterAssigned = signal(false);
 
   readonly canOpenRegister = this.auth.hasPermission('registers.open');
+  readonly canCashMovement = this.auth.hasPermission('registers.cash_movement');
   readonly canSelectRegister = computed(() => this.availableRegisters().length > 1);
 
   tabs = signal<SaleTab[]>([]);
@@ -155,7 +164,8 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   searchResults = signal<ProductSearchResult[]>([]);
   searchQuery = signal('');
   isSearching = signal(false);
-  amountReceived = signal<number | null>(null);
+  paymentTypes = signal<PaymentTypeDto[]>([]);
+  paymentLines = signal<PaymentLine[]>([]);
   amountInputFocused = signal(false);
 
   readonly itemCount = computed(() =>
@@ -174,19 +184,47 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   readonly total = computed(() =>
     this.activeSale()?.items.reduce((sum, item) => sum + item.total, 0) ?? 0,
   );
+  readonly paymentTypeMap = computed(() => {
+    const map = new Map<string, PaymentTypeDto>();
+    for (const type of this.paymentTypes()) map.set(type.id, type);
+    return map;
+  });
+  readonly cashTendered = computed(() => {
+    const types = this.paymentTypeMap();
+    return this.paymentLines().reduce((sum, line) => {
+      const type = types.get(line.paymentTypeId);
+      if (!type?.affectsCash || line.amount === null) return sum;
+      return sum + line.amount;
+    }, 0);
+  });
+  readonly nonCashPaid = computed(() => {
+    const types = this.paymentTypeMap();
+    return this.paymentLines().reduce((sum, line) => {
+      const type = types.get(line.paymentTypeId);
+      if (!type || type.affectsCash || line.amount === null) return sum;
+      return sum + line.amount;
+    }, 0);
+  });
+  readonly totalPaid = computed(() => this.cashTendered() + this.nonCashPaid());
+  readonly cashRequired = computed(() =>
+    Math.max(0, Math.round((this.total() - this.nonCashPaid()) * 100) / 100),
+  );
+  readonly hasCashPayment = computed(() => {
+    const types = this.paymentTypeMap();
+    return this.paymentLines().some((line) => types.get(line.paymentTypeId)?.affectsCash);
+  });
   readonly changeAmount = computed(() => {
-    const received = this.amountReceived();
-    if (received === null) return 0;
-    const change = received - this.total();
-    return Math.max(0, Math.round(change * 100) / 100);
+    if (!this.hasCashPayment()) return 0;
+    return Math.max(0, Math.round((this.cashTendered() - this.cashRequired()) * 100) / 100);
   });
   readonly hasSufficientPayment = computed(() => {
-    const received = this.amountReceived();
-    return received !== null && received >= this.total();
+    if (this.paymentLines().length === 0) return false;
+    if (this.paymentLines().some((line) => line.amount === null || line.amount <= 0)) return false;
+    return this.totalPaid() + 0.001 >= this.total() && this.cashTendered() + 0.001 >= this.cashRequired();
   });
   readonly showInsufficientPayment = computed(() => {
-    const received = this.amountReceived();
-    return received !== null && received < this.total();
+    if (this.paymentLines().every((line) => line.amount === null)) return false;
+    return !this.hasSufficientPayment();
   });
   readonly isSaleCompleted = computed(
     () => this.activeSale()?.status === SaleStatus.COMPLETED,
@@ -209,6 +247,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
 
   ngOnInit(): void {
     this.loadPosContext();
+    this.loadPaymentTypes();
     this.setupSearch();
     this.setupKeyboard();
   }
@@ -245,14 +284,62 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     this.search$.next(value);
   }
 
-  onAmountReceivedInput(event: CustomEvent): void {
+  onPaymentAmountInput(key: string, event: CustomEvent): void {
     const raw = (event.detail as { value?: string | null }).value?.trim() ?? '';
-    if (!raw) {
-      this.amountReceived.set(null);
-      return;
+    const parsed = raw ? Number.parseFloat(raw) : NaN;
+    const amount = Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+    this.paymentLines.update((lines) =>
+      lines.map((line) => (line.key === key ? { ...line, amount } : line)),
+    );
+  }
+
+  onPaymentTypeChange(key: string, paymentTypeId: string): void {
+    this.paymentLines.update((lines) =>
+      lines.map((line) => (line.key === key ? { ...line, paymentTypeId } : line)),
+    );
+  }
+
+  addPaymentLine(): void {
+    const types = this.paymentTypes();
+    if (types.length === 0) return;
+    const remaining = Math.max(0, this.roundMoney(this.total() - this.totalPaid()));
+    const preferred =
+      types.find((t) => !t.affectsCash) ??
+      types.find((t) => t.affectsCash) ??
+      types[0]!;
+    this.paymentLines.update((lines) => [
+      ...lines,
+      {
+        key: `pay-${Date.now()}-${lines.length}`,
+        paymentTypeId: preferred.id,
+        amount: remaining > 0 ? remaining : null,
+        reference: '',
+      },
+    ]);
+  }
+
+  removePaymentLine(key: string): void {
+    this.paymentLines.update((lines) => {
+      if (lines.length <= 1) return lines;
+      return lines.filter((line) => line.key !== key);
+    });
+  }
+
+  async openCashMovementModal(): Promise<void> {
+    const sessionId = this.activeSession()?.id;
+    if (!sessionId || !this.canCashMovement) return;
+
+    const modal = await this.modalCtrl.create({
+      component: CashMovementModal,
+      componentProps: { sessionId },
+      cssClass: 'pv-form-modal',
+    });
+    await modal.present();
+    const { role } = await modal.onDidDismiss();
+    if (role === 'saved') {
+      await this.loadActiveSession();
+      await this.showToast('Movimiento de caja registrado', 'success');
     }
-    const parsed = Number.parseFloat(raw);
-    this.amountReceived.set(Number.isFinite(parsed) && parsed >= 0 ? parsed : null);
   }
 
   onSearchKeydown(event: KeyboardEvent): void {
@@ -345,13 +432,20 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
       const current = this.activeSale();
       if (!current?.id || current.items.length === 0) return;
 
-      const paid = this.amountReceived();
-      if (paid === null) return;
+      const payments = this.paymentLines()
+        .filter((line) => line.amount !== null && line.amount > 0)
+        .map((line) => ({
+          paymentTypeId: line.paymentTypeId,
+          amount: line.amount as number,
+          reference: line.reference.trim() || undefined,
+        }));
+
+      if (payments.length === 0) return;
 
       const completed = await firstValueFrom(
         this.saleService.checkout(current.id, {
           version: current.version ?? 0,
-          payments: [{ method: PaymentMethod.CASH, amount: paid }],
+          payments,
         }),
       );
 
@@ -715,7 +809,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
       this.tabs.update((current) => [...current, newTab]);
       this.activeTabId.set(sale.id);
       this.activeSale.set({ ...sale, items: [], tabLabel });
-      this.amountReceived.set(null);
+      this.resetPaymentLines();
     } catch (err: unknown) {
       const status = (err as { status?: number })?.status;
       const message = (err as { error?: { message?: string } })?.error?.message;
@@ -748,7 +842,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
         items: sale.items ?? [],
         tabLabel: tab?.label ?? 'Venta',
       });
-      this.resetAmountReceived(sale);
+      this.resetPaymentLines(sale);
     } catch {
       if (this.activeTabId() !== tabId) return;
       await this.showToast('No se pudo cargar la venta', 'danger');
@@ -905,12 +999,48 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     return Math.round(value * 100) / 100;
   }
 
-  private resetAmountReceived(sale: SaleDto): void {
-    if (sale.status === SaleStatus.COMPLETED) {
-      this.amountReceived.set(sale.amountPaid ?? 0);
+  private loadPaymentTypes(): void {
+    this.paymentTypeService.listActive().subscribe({
+      next: (types) => {
+        this.paymentTypes.set(types);
+        if (this.paymentLines().length === 0) {
+          this.resetPaymentLines();
+        }
+      },
+      error: () => {
+        this.paymentTypes.set([]);
+      },
+    });
+  }
+
+  private resetPaymentLines(sale?: SaleDto): void {
+    if (sale?.status === SaleStatus.COMPLETED && sale.payments?.length) {
+      this.paymentLines.set(
+        sale.payments.map((p, index) => ({
+          key: `done-${index}`,
+          paymentTypeId: p.paymentTypeId,
+          amount: p.amount,
+          reference: p.reference ?? '',
+        })),
+      );
       return;
     }
-    this.amountReceived.set(null);
+
+    const cashType =
+      this.paymentTypes().find((t) => t.affectsCash) ?? this.paymentTypes()[0];
+    if (!cashType) {
+      this.paymentLines.set([]);
+      return;
+    }
+
+    this.paymentLines.set([
+      {
+        key: 'pay-0',
+        paymentTypeId: cashType.id,
+        amount: null,
+        reference: '',
+      },
+    ]);
   }
 
   private sumSaleTotals(items: SaleItemDto[]): {

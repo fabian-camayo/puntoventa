@@ -8,7 +8,9 @@
     "SEARCH": "Buscar",
     "LOADING": "Cargando...",
     "ERROR": "Error",
-    "SUCCESS": "Éxito"
+    "SUCCESS": "Éxito",
+    "YES": "Sí",
+    "NO": "No"
   },
   "AUTH": {
     "LOGIN_TITLE": "Iniciar Sesión",
@@ -58,7 +60,18 @@
     "DISCOUNT": "Descuento",
     "CHANGE_CUSTOMER": "Cambiar cliente",
     "PRINT": "Imprimir",
-    "REGISTER_CLOSED_HINT": "Abra la caja para buscar productos, agregar al carrito y cobrar ventas."
+    "REGISTER_CLOSED_HINT": "Abra la caja para buscar productos, agregar al carrito y cobrar ventas.",
+    "PAYMENT_TYPE": "Tipo de pago",
+    "PAYMENTS": "Pagos",
+    "ADD_PAYMENT": "Agregar pago",
+    "PAYMENT_AMOUNT": "Monto",
+    "PAYMENT_REFERENCE": "Referencia",
+    "CASH_MOVEMENT": "Movimiento de caja",
+    "CASH_WITHDRAWAL": "Retiro",
+    "CASH_DEPOSIT": "Ingreso",
+    "CASH_MOVEMENT_AMOUNT": "Monto",
+    "CASH_MOVEMENT_REASON": "Motivo",
+    "CASH_MOVEMENT_OK": "Movimiento registrado"
   },
   "NAV": {
     "THEME": "Cambiar tema"
@@ -74,6 +87,7 @@
     "ROLES": "Roles y Permisos",
     "PRODUCTS": "Productos",
     "CATEGORIES": "Categorías",
+    "PAYMENT_TYPES": "Tipos de pago",
     "SALES": "Ventas",
     "CONFIG": "Configuración",
     "REGISTER_SESSIONS": "Apertura y cierre de caja",
@@ -139,6 +153,27 @@
     "CONTEXT_ERROR": "Error de sucursal",
     "DEACTIVATED_OK": "Categoría desactivada",
     "DEACTIVATE_ERROR": "Error al desactivar"
+  },
+  "PAYMENT_TYPES": {
+    "NEW": "Nuevo tipo de pago",
+    "NEW_TITLE": "Nuevo tipo de pago",
+    "EDIT_TITLE": "Editar tipo de pago",
+    "SEARCH_PLACEHOLDER": "Buscar por código o nombre...",
+    "CODE": "Código",
+    "CODE_HINT": "Se genera automáticamente desde el nombre",
+    "NAME": "Nombre",
+    "SORT_ORDER": "Orden",
+    "STATUS": "Estado",
+    "ACTIVE": "Activo",
+    "INACTIVE": "Inactivo",
+    "ACTIVE_ONLY": "Solo activos",
+    "ALL": "Todos",
+    "RECORDS": "registros",
+    "AFFECTS_CASH": "Afecta efectivo",
+    "AFFECTS_CASH_HINT": "Si está activo, las ventas con este tipo modifican el efectivo de la caja",
+    "SECTION_MAIN": "Datos del tipo de pago",
+    "EMPTY_TITLE": "Sin tipos de pago",
+    "EMPTY_HINT": "Cree tipos de pago como efectivo, tarjeta o transferencia."
   },
   "SALES": {
     "SEARCH_PLACEHOLDER": "Buscar por número de factura o cliente...",

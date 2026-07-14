@@ -11,7 +11,7 @@ export class SaleRepository {
       where: { id },
       include: {
         items: { include: { product: true } },
-        payments: true,
+        payments: { include: { paymentType: true } },
         customer: true,
       },
     });

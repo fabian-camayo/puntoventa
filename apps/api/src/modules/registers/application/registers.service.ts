@@ -5,8 +5,8 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
-import { RegisterSessionStatus, Prisma } from '@prisma/client';
-import { RegisterDto, RegisterSessionDto } from '@puntoventa/shared';
+import { RegisterSessionStatus, Prisma, CashMovementType } from '@prisma/client';
+import { RegisterDto, RegisterSessionDto, CashMovementDto } from '@puntoventa/shared';
 import {
   isTerminalOnline,
   getBarcodeReaderStatus,
@@ -19,7 +19,18 @@ import { CreateRegisterDto } from './dto/create-register.dto';
 import { UpdateRegisterDto } from './dto/update-register.dto';
 import { OpenSessionDto } from './dto/open-session.dto';
 import { CloseSessionDto } from './dto/close-session.dto';
+import { CreateCashMovementDto } from './dto/create-cash-movement.dto';
 import { JwtPayload } from '@puntoventa/shared';
+
+const CASH_OUT_TYPES = new Set<string>([
+  CashMovementType.WITHDRAWAL,
+  CashMovementType.EXPENSE,
+  CashMovementType.REFUND,
+]);
+
+function signedMovementAmount(type: string, amount: number): number {
+  return CASH_OUT_TYPES.has(type) ? -Math.abs(amount) : Math.abs(amount);
+}
 
 @Injectable()
 export class RegistersService {
@@ -204,7 +215,7 @@ export class RegistersService {
     }
 
     const cashTotal = session.cashMovements.reduce(
-      (sum, m) => sum + Number(m.amount),
+      (sum, m) => sum + signedMovementAmount(m.type, Number(m.amount)),
       Number(session.openingAmount),
     );
 
@@ -230,6 +241,58 @@ export class RegistersService {
     });
 
     return this.mapSessionToDto(updated);
+  }
+
+  async listCashMovements(sessionId: string): Promise<CashMovementDto[]> {
+    const session = await this.registerRepository.findSessionById(sessionId);
+    if (!session) throw new NotFoundException('Sesión no encontrada');
+
+    const movements = await this.prisma.cashMovement.findMany({
+      where: { registerSessionId: sessionId },
+      include: { user: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return movements.map((m) => this.mapCashMovementToDto(m));
+  }
+
+  async createCashMovement(
+    sessionId: string,
+    dto: CreateCashMovementDto,
+    actor: JwtPayload,
+  ): Promise<CashMovementDto> {
+    const session = await this.registerRepository.findSessionById(sessionId);
+    if (!session) throw new NotFoundException('Sesión no encontrada');
+    if (session.status !== RegisterSessionStatus.OPEN) {
+      throw new BadRequestException('La sesión de caja no está abierta');
+    }
+
+    const movement = await this.prisma.cashMovement.create({
+      data: {
+        registerSessionId: sessionId,
+        userId: actor.sub,
+        type: dto.type as CashMovementType,
+        amount: dto.amount,
+        description: dto.description?.trim() || undefined,
+        reference: dto.reference?.trim() || undefined,
+      },
+      include: { user: true },
+    });
+
+    await this.auditService.log({
+      userId: actor.sub,
+      action: 'UPDATE',
+      module: 'registers',
+      entityType: 'CashMovement',
+      entityId: movement.id,
+      newValues: {
+        type: dto.type,
+        amount: dto.amount,
+        sessionId,
+      } as Prisma.InputJsonValue,
+    });
+
+    return this.mapCashMovementToDto(movement);
   }
 
   async getActiveSession(registerId: string): Promise<RegisterSessionDto | null> {
@@ -326,7 +389,10 @@ export class RegistersService {
     const salesTotal = session.sales?.reduce((sum, s) => sum + Number(s.total), 0) ?? 0;
     const salesCount = session.sales?.length ?? 0;
     const movementTotal =
-      session.cashMovements?.reduce((sum, m) => sum + Number(m.amount), 0) ?? 0;
+      session.cashMovements?.reduce(
+        (sum, m) => sum + signedMovementAmount(m.type, Number(m.amount)),
+        0,
+      ) ?? 0;
     const computedExpected = Number(session.openingAmount) + movementTotal;
 
     return {
@@ -354,6 +420,32 @@ export class RegistersService {
         : undefined,
       salesCount,
       salesTotal,
+    };
+  }
+
+  private mapCashMovementToDto(movement: {
+    id: string;
+    registerSessionId: string;
+    userId: string;
+    type: CashMovementType | string;
+    amount: Prisma.Decimal;
+    description: string | null;
+    reference: string | null;
+    createdAt: Date;
+    user?: { username: string; firstName: string; lastName: string };
+  }): CashMovementDto {
+    return {
+      id: movement.id,
+      registerSessionId: movement.registerSessionId,
+      userId: movement.userId,
+      type: movement.type as CashMovementDto['type'],
+      amount: Number(movement.amount),
+      description: movement.description ?? undefined,
+      reference: movement.reference ?? undefined,
+      createdAt: movement.createdAt.toISOString(),
+      userName: movement.user
+        ? `${movement.user.firstName} ${movement.user.lastName}`.trim() || movement.user.username
+        : undefined,
     };
   }
 }

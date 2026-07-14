@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
   CloseRegisterRequest,
+  CreateCashMovementRequest,
+  CashMovementDto,
   OpenRegisterRequest,
   PaginatedResult,
   RegisterDto,
@@ -165,6 +167,26 @@ export class RegisterService {
     return this.http
       .get<{ data: RegisterSessionDto }>(
         `${this.config.apiBaseUrl}/registers/sessions/${sessionId}`,
+      )
+      .pipe(map((r) => r.data));
+  }
+
+  listCashMovements(sessionId: string): Observable<CashMovementDto[]> {
+    return this.http
+      .get<{ data: CashMovementDto[] }>(
+        `${this.config.apiBaseUrl}/registers/sessions/${sessionId}/movements`,
+      )
+      .pipe(map((r) => r.data));
+  }
+
+  createCashMovement(
+    sessionId: string,
+    payload: CreateCashMovementRequest,
+  ): Observable<CashMovementDto> {
+    return this.http
+      .post<{ data: CashMovementDto }>(
+        `${this.config.apiBaseUrl}/registers/sessions/${sessionId}/movements`,
+        payload,
       )
       .pipe(map((r) => r.data));
   }
