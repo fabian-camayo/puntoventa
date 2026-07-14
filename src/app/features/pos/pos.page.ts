@@ -57,6 +57,7 @@ import {
   SaleTab,
   SaleItemDto,
   ProductSearchResult,
+  ProductUnitDto,
   PaymentTypeDto,
   SaleStatus,
   AuthUser,
@@ -67,6 +68,7 @@ import { SaleTabsComponent } from '../../shared/components/sale-tabs/sale-tabs.c
 import { AppCurrencyPipe } from '../../shared/pipes/app-currency.pipe';
 import { RegisterSessionModal } from './register-session.modal';
 import { CashMovementModal } from './cash-movement.modal';
+import { CustomerSelectModal } from './customer-select.modal';
 
 addIcons({
   addOutline,
@@ -150,6 +152,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   businessName = signal<string>('');
   ticketHeader = signal<string | undefined>(undefined);
   ticketFooter = signal<string | undefined>(undefined);
+  defaultCustomerId = signal<string | null>(null);
   activeSession = signal<RegisterSessionDto | null>(null);
   availableRegisters = signal<RegisterDto[]>([]);
   noRegisterAssigned = signal(false);
@@ -164,6 +167,8 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   searchResults = signal<ProductSearchResult[]>([]);
   searchQuery = signal('');
   isSearching = signal(false);
+  /** Unidades disponibles por producto (cache desde búsqueda). */
+  productUnitsCache = signal<Record<string, ProductUnitDto[]>>({});
   paymentTypes = signal<PaymentTypeDto[]>([]);
   paymentLines = signal<PaymentLine[]>([]);
   amountInputFocused = signal(false);
@@ -325,6 +330,51 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     });
   }
 
+  async openCustomerPicker(): Promise<void> {
+    const branchId = this.branchId();
+    if (!branchId || !this.canOperateSale()) return;
+
+    const modal = await this.modalCtrl.create({
+      component: CustomerSelectModal,
+      componentProps: {
+        branchId,
+        selectedCustomerId: this.activeSale()?.customerId ?? null,
+      },
+      cssClass: 'pv-form-modal',
+    });
+    await modal.present();
+    const { data, role } = await modal.onDidDismiss();
+    if (role !== 'selected' || !data?.id) return;
+
+    const sale = this.activeSale();
+    if (!sale?.id) return;
+
+    try {
+      const updated = await firstValueFrom(
+        this.saleService.updateSale(sale.id, {
+          customerId: data.id,
+          items: sale.items,
+          subtotal: sale.subtotal,
+          taxAmount: sale.taxAmount,
+          total: sale.total,
+          version: sale.version ?? 0,
+        }),
+      );
+      const tabLabel = updated.customerName ?? sale.tabLabel;
+      this.activeSale.set({
+        ...updated,
+        items: updated.items ?? sale.items,
+        tabLabel,
+      });
+      this.tabs.update((tabs) =>
+        tabs.map((tab) => (tab.id === sale.id ? { ...tab, label: tabLabel } : tab)),
+      );
+    } catch (err: unknown) {
+      const message = (err as { error?: { message?: string } })?.error?.message;
+      await this.showToast(message ?? 'No se pudo cambiar el cliente', 'danger');
+    }
+  }
+
   async openCashMovementModal(): Promise<void> {
     const sessionId = this.activeSession()?.id;
     if (!sessionId || !this.canCashMovement) return;
@@ -397,14 +447,71 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     void this.addProductAsync(product);
   }
 
+  trackSaleItem(item: SaleItemDto): string {
+    return `${item.productId}:${item.unitTypeId ?? ''}`;
+  }
+
+  unitsForProduct(productId: string): ProductUnitDto[] {
+    return this.productUnitsCache()[productId] ?? [];
+  }
+
+  hasMultipleUnits(item: SaleItemDto): boolean {
+    return this.unitsForProduct(item.productId).length > 1;
+  }
+
+  changeItemUnit(item: SaleItemDto, unitTypeId: string): void {
+    if (!this.canOperateSale()) return;
+    const sale = this.activeSale();
+    if (!sale) return;
+
+    const unit = this.unitsForProduct(item.productId).find((u) => u.unitTypeId === unitTypeId);
+    if (!unit) return;
+
+    const duplicate = sale.items.find(
+      (i) =>
+        i.productId === item.productId &&
+        i.unitTypeId === unitTypeId &&
+        this.trackSaleItem(i) !== this.trackSaleItem(item),
+    );
+
+    let items: SaleItemDto[];
+    if (duplicate) {
+      items = sale.items
+        .filter((i) => this.trackSaleItem(i) !== this.trackSaleItem(item))
+        .map((i) =>
+          this.trackSaleItem(i) === this.trackSaleItem(duplicate)
+            ? this.recalculateItem({
+                ...i,
+                quantity: i.quantity + item.quantity,
+              })
+            : i,
+        );
+    } else {
+      items = sale.items.map((i) =>
+        this.trackSaleItem(i) === this.trackSaleItem(item)
+          ? this.recalculateItem({
+              ...i,
+              unitTypeId: unit.unitTypeId,
+              unitTypeCode: unit.unitTypeCode,
+              unitTypeName: unit.unitTypeName,
+              stockFactor: unit.stockFactor,
+            })
+          : i,
+      );
+    }
+
+    this.updateSaleItems(items);
+  }
+
   updateQuantity(item: SaleItemDto, delta: number): void {
     if (!this.canOperateSale()) return;
     const sale = this.activeSale();
     if (!sale) return;
 
+    const key = this.trackSaleItem(item);
     const items = sale.items
       .map((i) => {
-        if (i.productId !== item.productId) return i;
+        if (this.trackSaleItem(i) !== key) return i;
         const qty = Math.max(0, i.quantity + delta);
         return qty === 0 ? null : this.recalculateItem({ ...i, quantity: qty });
       })
@@ -417,7 +524,8 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     if (!this.canOperateSale()) return;
     const sale = this.activeSale();
     if (!sale) return;
-    const items = sale.items.filter((i) => i.productId !== item.productId);
+    const key = this.trackSaleItem(item);
+    const items = sale.items.filter((i) => this.trackSaleItem(i) !== key);
     this.updateSaleItems(items);
   }
 
@@ -525,12 +633,26 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
       return;
     }
 
-    const existing = sale.items.find((i) => i.productId === product.id);
+    if (product.units?.length) {
+      this.productUnitsCache.update((cache) => ({
+        ...cache,
+        [product.id]: product.units!,
+      }));
+    }
+
+    const baseUnit =
+      product.units?.find((u) => u.isBase) ?? product.units?.[0];
+    const unitTypeId = baseUnit?.unitTypeId;
+    const existing = sale.items.find(
+      (i) =>
+        i.productId === product.id &&
+        (i.unitTypeId ?? undefined) === unitTypeId,
+    );
     let items: SaleItemDto[];
 
     if (existing) {
       items = sale.items.map((i) =>
-        i.productId === product.id
+        this.trackSaleItem(i) === this.trackSaleItem(existing)
           ? this.recalculateItem({ ...i, quantity: i.quantity + 1 })
           : i,
       );
@@ -539,6 +661,10 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
         productId: product.id,
         productName: product.name,
         sku: product.sku,
+        unitTypeId,
+        unitTypeCode: baseUnit?.unitTypeCode ?? product.unit,
+        unitTypeName: baseUnit?.unitTypeName,
+        stockFactor: baseUnit?.stockFactor ?? 1,
         quantity: 1,
         unitPrice: product.salePrice,
         discountAmount: 0,
@@ -623,6 +749,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
         this.businessName.set(res.businessName ?? res.branchName);
         this.ticketHeader.set(res.ticketHeader);
         this.ticketFooter.set(res.ticketFooter);
+        this.defaultCustomerId.set(res.defaultCustomerId ?? null);
         void this.loadAvailableRegisters(
           res.branchId,
           res.registerId,
@@ -789,12 +916,13 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
           branchId,
           registerId,
           tabOrder: order,
+          customerId: this.defaultCustomerId() ?? undefined,
         }),
       );
 
       if (!sale?.id) return;
 
-      const tabLabel = `Venta ${order + 1}`;
+      const tabLabel = sale.customerName ?? `Venta ${order + 1}`;
       const newTab: SaleTab = {
         id: sale.id,
         tabId: sale.tabId ?? sale.id,
@@ -803,6 +931,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
         status: sale.status,
         itemCount: 0,
         total: 0,
+        customerName: sale.customerName,
         updatedAt: new Date().toISOString(),
       };
 
@@ -872,6 +1001,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     try {
       const updated = await firstValueFrom(
         this.saleService.updateSale(saleId, {
+          customerId: sale.customerId,
           items: sale.items,
           subtotal: sale.subtotal,
           taxAmount: sale.taxAmount,

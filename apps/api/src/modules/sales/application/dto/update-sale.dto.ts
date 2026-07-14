@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsString,
   IsInt,
+  IsUUID,
   ValidateNested,
   Min,
 } from 'class-validator';
@@ -14,6 +15,11 @@ class SaleItemInput {
   @ApiProperty()
   @IsString()
   productId!: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  unitTypeId?: string;
 
   @ApiProperty()
   @IsNumber()

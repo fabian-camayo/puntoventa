@@ -161,6 +161,7 @@ export class ConfigService {
       businessName: businessConfig?.businessName ?? branch.name,
       ticketHeader: businessConfig?.ticketHeader ?? undefined,
       ticketFooter: businessConfig?.ticketFooter ?? undefined,
+      defaultCustomerId: businessConfig?.defaultCustomerId ?? undefined,
     };
   }
 

@@ -104,12 +104,6 @@
         <span>{{ 'PRODUCTS.SECTION_INVENTORY' | translate }}</span>
       </div>
       <div class="fields-grid">
-        <div class="field-box">
-          <label>{{ 'PRODUCTS.UNIT' | translate }}</label>
-          <ion-item lines="none" class="field-item">
-            <ion-input formControlName="unit"></ion-input>
-          </ion-item>
-        </div>
         <div class="field-box span-2">
           <label>{{ 'PRODUCTS.CATEGORY' | translate }}</label>
           <ion-item lines="none" class="field-item">
@@ -141,6 +135,73 @@
               {{ 'PRODUCTS.ACTIVE' | translate }}
             </ion-toggle>
           </ion-item>
+        }
+      </div>
+    </section>
+
+    <section class="form-section">
+      <div class="section-title">
+        <ion-icon name="resize-outline"></ion-icon>
+        <span>{{ 'PRODUCTS.SECTION_UNITS' | translate }}</span>
+      </div>
+      <p class="section-hint">{{ 'PRODUCTS.EXTRA_UNITS_HINT' | translate }}</p>
+
+      <div class="fields-grid">
+        <div class="field-box span-2">
+          <label>{{ 'PRODUCTS.BASE_UNIT' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-select formControlName="baseUnitTypeId" interface="popover">
+              @for (ut of unitTypes(); track ut.id) {
+                <ion-select-option [value]="ut.id">{{ ut.code }} — {{ ut.name }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+          <small class="field-hint">Factor = 1 (stock se lleva en esta unidad)</small>
+        </div>
+      </div>
+
+      <div class="units-list">
+        <div class="units-header">
+          <strong>{{ 'PRODUCTS.EXTRA_UNITS' | translate }}</strong>
+          <ion-button
+            size="small"
+            fill="outline"
+            (click)="addExtraUnit()"
+            [disabled]="availableExtraUnitTypes().length === 0"
+          >
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            {{ 'PRODUCTS.ADD_UNIT' | translate }}
+          </ion-button>
+        </div>
+
+        @for (unit of productUnits(); track $index; let i = $index) {
+          <div class="unit-row">
+            <ion-item lines="none" class="field-item">
+              <ion-select
+                [value]="unit.unitTypeId"
+                interface="popover"
+                (ionChange)="updateExtraUnit(i, { unitTypeId: $any($event.detail.value) })"
+              >
+                @for (ut of unitTypes(); track ut.id) {
+                  @if (ut.id === unit.unitTypeId || ut.id !== form.controls.baseUnitTypeId.value) {
+                    <ion-select-option [value]="ut.id">{{ ut.code }} — {{ ut.name }}</ion-select-option>
+                  }
+                }
+              </ion-select>
+            </ion-item>
+            <ion-item lines="none" class="field-item factor-item">
+              <ion-input
+                type="number"
+                [value]="unit.stockFactor"
+                (ionInput)="updateExtraUnit(i, { stockFactor: +($any($event.detail).value || 0) })"
+                label="{{ 'PRODUCTS.STOCK_FACTOR' | translate }}"
+                labelPlacement="stacked"
+              ></ion-input>
+            </ion-item>
+            <ion-button fill="clear" color="danger" (click)="removeExtraUnit(i)">
+              <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
         }
       </div>
     </section>

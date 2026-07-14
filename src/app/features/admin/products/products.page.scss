@@ -6,6 +6,13 @@
   overflow: hidden;
 }
 
+.title-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
 .filter-chips {
   display: flex;
   flex-wrap: wrap;

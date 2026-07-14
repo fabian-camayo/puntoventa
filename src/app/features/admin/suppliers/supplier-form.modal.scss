@@ -1,0 +1,115 @@
+.modal-header ion-toolbar {
+  --background: var(--pv-bg-primary);
+  --border-width: 0 0 1px 0;
+  --border-color: var(--pv-border);
+  --min-height: 56px;
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--pv-bg-app);
+}
+
+.close-btn {
+  --color: var(--pv-text-secondary);
+}
+
+.save-btn {
+  --background: var(--pv-accent);
+  --color: #fff;
+  --border-radius: var(--pv-radius-md);
+  font-weight: 600;
+}
+
+.modal-content {
+  --background: var(--pv-bg-app);
+  flex: 1;
+}
+
+.form-layout {
+  padding: 16px 20px 32px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.form-section {
+  background: var(--pv-bg-primary);
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-lg);
+  padding: 16px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-weight: 700;
+  color: var(--pv-text-primary);
+
+  ion-icon {
+    color: var(--pv-accent);
+  }
+}
+
+.fields-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.field-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--pv-text-secondary);
+  }
+
+  &.span-2 {
+    grid-column: span 2;
+  }
+
+  &.span-3 {
+    grid-column: span 3;
+  }
+}
+
+.field-item {
+  --background: var(--pv-bg-secondary);
+  --border-radius: var(--pv-radius-md);
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-md);
+}
+
+.field-hint {
+  color: var(--pv-text-secondary);
+  font-size: 0.75rem;
+}
+
+.toggle-row {
+  margin-top: 16px;
+}
+
+.toggle-item {
+  --background: transparent;
+  --padding-start: 0;
+}
+
+@media (max-width: 700px) {
+  .fields-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field-box.span-2,
+  .field-box.span-3 {
+    grid-column: span 1;
+  }
+}

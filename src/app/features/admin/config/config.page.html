@@ -139,6 +139,20 @@
                 </ion-toggle>
               </ion-item>
             </div>
+            <div class="fields-grid" style="margin-top: 12px">
+              <div class="field-box span-2">
+                <label>{{ 'CONFIG.DEFAULT_CUSTOMER' | translate }}</label>
+                <ion-item lines="none" class="field-item">
+                  <ion-select formControlName="defaultCustomerId" interface="popover" placeholder="—">
+                    <ion-select-option value="">—</ion-select-option>
+                    @for (customer of customers(); track customer.id) {
+                      <ion-select-option [value]="customer.id">{{ customer.name }}</ion-select-option>
+                    }
+                  </ion-select>
+                </ion-item>
+                <small class="field-hint">{{ 'CONFIG.DEFAULT_CUSTOMER_HINT' | translate }}</small>
+              </div>
+            </div>
           </section>
 
           <section class="form-section pv-card">

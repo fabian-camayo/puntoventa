@@ -6,12 +6,35 @@ import {
   IsNumber,
   IsUUID,
   IsEnum,
+  IsArray,
+  ValidateNested,
   Min,
   Max,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ProductType } from '@prisma/client';
 import { Type } from 'class-transformer';
+
+export class ProductUnitInputDto {
+  @ApiProperty()
+  @IsUUID()
+  unitTypeId!: string;
+
+  @ApiProperty({ description: 'Unidades de inventario por 1 de esta unidad' })
+  @IsNumber()
+  @Min(0.0001)
+  @Type(() => Number)
+  stockFactor!: number;
+
+  @ApiProperty()
+  @IsBoolean()
+  isBase!: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
 
 export class CreateProductDto {
   @ApiProperty()
@@ -96,4 +119,11 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   imageUrl?: string;
+
+  @ApiPropertyOptional({ type: [ProductUnitInputDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductUnitInputDto)
+  units?: ProductUnitInputDto[];
 }

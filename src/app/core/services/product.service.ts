@@ -6,6 +6,7 @@ import {
   ProductDto,
   ProductSearchResult,
   PaginatedResult,
+  ProductUnitInput,
 } from '@puntoventa/shared';
 import { ConfigService } from './config.service';
 
@@ -30,6 +31,7 @@ export interface CreateProductPayload {
   categoryId?: string;
   minStock?: number;
   trackInventory?: boolean;
+  units?: ProductUnitInput[];
 }
 
 export interface UpdateProductPayload {
@@ -44,6 +46,7 @@ export interface UpdateProductPayload {
   minStock?: number;
   trackInventory?: boolean;
   isActive?: boolean;
+  units?: ProductUnitInput[];
 }
 
 @Injectable({ providedIn: 'root' })

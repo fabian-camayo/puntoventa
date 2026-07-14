@@ -23,6 +23,12 @@ import {
   albumsOutline,
   desktopOutline,
   cardOutline,
+  layersOutline,
+  businessOutline,
+  bagHandleOutline,
+  resizeOutline,
+  cloudUploadOutline,
+  documentOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@core/services/auth.service';
 import { ThemeService } from '@core/services/theme.service';
@@ -45,6 +51,12 @@ addIcons({
   albumsOutline,
   desktopOutline,
   cardOutline,
+  layersOutline,
+  businessOutline,
+  bagHandleOutline,
+  resizeOutline,
+  cloudUploadOutline,
+  documentOutline,
 });
 
 export interface NavItem {
@@ -69,10 +81,28 @@ const NAV_ITEMS: NavItem[] = [
     permission: 'sales.view',
   },
   {
+    labelKey: 'ADMIN.PURCHASES',
+    icon: 'bag-handle-outline',
+    route: '/admin/purchases',
+    permission: 'purchases.view',
+  },
+  {
     labelKey: 'ADMIN.PRODUCTS',
     icon: 'cube-outline',
     route: '/admin/products',
     permission: 'products.view',
+  },
+  {
+    labelKey: 'ADMIN.PRODUCT_IMPORT',
+    icon: 'cloud-upload-outline',
+    route: '/admin/product-import',
+    permission: 'products.import',
+  },
+  {
+    labelKey: 'ADMIN.PRODUCT_IMPORT_TYPES',
+    icon: 'document-outline',
+    route: '/admin/product-import-types',
+    permission: 'product_import_types.view',
   },
   {
     labelKey: 'ADMIN.CATEGORIES',
@@ -85,6 +115,30 @@ const NAV_ITEMS: NavItem[] = [
     icon: 'card-outline',
     route: '/admin/payment-types',
     permission: 'payment_types.view',
+  },
+  {
+    labelKey: 'ADMIN.UNIT_TYPES',
+    icon: 'resize-outline',
+    route: '/admin/unit-types',
+    permission: 'unit_types.view',
+  },
+  {
+    labelKey: 'ADMIN.SUPPLIERS',
+    icon: 'business-outline',
+    route: '/admin/suppliers',
+    permission: 'suppliers.view',
+  },
+  {
+    labelKey: 'ADMIN.CUSTOMERS',
+    icon: 'people-outline',
+    route: '/admin/customers',
+    permission: 'customers.view',
+  },
+  {
+    labelKey: 'ADMIN.INVENTORY',
+    icon: 'layers-outline',
+    route: '/admin/inventory',
+    permission: 'inventory.view',
   },
   {
     labelKey: 'ADMIN.REGISTER_SESSIONS',

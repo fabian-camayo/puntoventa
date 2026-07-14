@@ -12,8 +12,10 @@ export interface ProductDto {
   categoryName?: string;
   stock?: number;
   minStock?: number;
+  trackInventory?: boolean;
   isActive: boolean;
   imageUrl?: string;
+  units?: import('./unit-type.interface').ProductUnitDto[];
 }
 
 export interface ProductSearchResult {
@@ -25,4 +27,5 @@ export interface ProductSearchResult {
   stock: number;
   unit: string;
   taxRate?: number;
+  units?: import('./unit-type.interface').ProductUnitDto[];
 }

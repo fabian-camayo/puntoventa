@@ -1,0 +1,121 @@
+<ion-content class="page-content">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+    <div class="page-title-bar">
+      <h1>
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        {{ 'ADMIN.PRODUCT_IMPORT_TYPES' | translate }}
+      </h1>
+      @if (canCreate) {
+        <ion-button (click)="openCreate()">
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          {{ 'PRODUCT_IMPORT_TYPES.NEW' | translate }}
+        </ion-button>
+      }
+    </div>
+
+    <div class="pv-toolbar-card">
+      <ion-searchbar
+        [value]="searchQuery()"
+        [placeholder]="'PRODUCT_IMPORT_TYPES.SEARCH_PLACEHOLDER' | translate"
+        [debounce]="0"
+        (ionInput)="onSearchInput($event)"
+      ></ion-searchbar>
+      <div class="filter-chips">
+        <ion-chip [color]="!showInactive() ? 'primary' : 'medium'" (click)="setActiveFilter(true)">
+          <ion-label>{{ 'PRODUCT_IMPORT_TYPES.ACTIVE_ONLY' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip [color]="showInactive() ? 'primary' : 'medium'" (click)="setActiveFilter(false)">
+          <ion-label>{{ 'PRODUCT_IMPORT_TYPES.ALL' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip outline="true">
+          <ion-label>{{ total() }} {{ 'PRODUCT_IMPORT_TYPES.RECORDS' | translate }}</ion-label>
+        </ion-chip>
+      </div>
+    </div>
+
+    <div class="pv-card list-card">
+      @if (loading()) {
+        <div class="loading-state">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>{{ 'COMMON.LOADING' | translate }}</p>
+        </div>
+      } @else if (importTypes().length === 0) {
+        <div class="empty-state">
+          <ion-icon name="cloud-upload-outline"></ion-icon>
+          <h2>{{ 'PRODUCT_IMPORT_TYPES.EMPTY_TITLE' | translate }}</h2>
+          <p>{{ 'PRODUCT_IMPORT_TYPES.EMPTY_HINT' | translate }}</p>
+          @if (canCreate) {
+            <ion-button (click)="openCreate()">
+              <ion-icon name="add-outline" slot="start"></ion-icon>
+              {{ 'PRODUCT_IMPORT_TYPES.NEW' | translate }}
+            </ion-button>
+          }
+        </div>
+      } @else {
+        <div class="table-header">
+          <span class="col-code">{{ 'PRODUCT_IMPORT_TYPES.CODE' | translate }}</span>
+          <span class="col-name">{{ 'PRODUCT_IMPORT_TYPES.NAME' | translate }}</span>
+          <span class="col-mapped">{{ 'PRODUCT_IMPORT_TYPES.MAPPED_FIELDS' | translate }}</span>
+          <span class="col-status">{{ 'PRODUCT_IMPORT_TYPES.STATUS' | translate }}</span>
+          <span class="col-actions"></span>
+        </div>
+
+        <ion-list class="import-types-list" lines="full">
+          @for (item of importTypes(); track item.id) {
+            <ion-item
+              class="import-type-row"
+              [class.inactive]="!item.isActive"
+              button
+              [detail]="false"
+              (click)="openEdit(item)"
+            >
+              <div class="import-type-grid">
+                <span class="col-code mono">{{ item.code }}</span>
+                <span class="col-name">
+                  <strong>{{ item.name }}</strong>
+                  @if (item.description) {
+                    <small>{{ item.description }}</small>
+                  }
+                </span>
+                <span class="col-mapped">{{ mappedCount(item) }}</span>
+                <span class="col-status">
+                  <ion-badge [color]="item.isActive ? 'success' : 'medium'">
+                    {{ (item.isActive ? 'PRODUCT_IMPORT_TYPES.ACTIVE' : 'PRODUCT_IMPORT_TYPES.INACTIVE') | translate }}
+                  </ion-badge>
+                </span>
+                <div class="col-actions" (click)="$event.stopPropagation()">
+                  @if (canUpdate) {
+                    <ion-button fill="clear" size="small" (click)="openEdit(item)">
+                      <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  }
+                  @if (canDelete && item.isActive) {
+                    <ion-button fill="clear" color="danger" size="small" (click)="confirmDelete(item)">
+                      <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  }
+                </div>
+              </div>
+            </ion-item>
+          }
+        </ion-list>
+
+        <div class="pagination">
+          <ion-button fill="outline" [disabled]="page() <= 1" (click)="prevPage()">
+            <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+            {{ 'COMMON.BACK' | translate }}
+          </ion-button>
+          <span class="page-info">{{ page() }} / {{ totalPages() }}</span>
+          <ion-button fill="outline" [disabled]="page() >= totalPages()" (click)="nextPage()">
+            {{ 'COMMON.NEXT' | translate }}
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      }
+    </div>
+  </div>
+</ion-content>

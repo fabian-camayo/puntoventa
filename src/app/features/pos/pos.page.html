@@ -71,6 +71,17 @@
       }
 
       <section class="pos-card cart-card">
+        <div class="sale-customer-bar">
+          <button
+            type="button"
+            class="customer-btn"
+            [disabled]="!canOperateSale()"
+            (click)="openCustomerPicker()"
+          >
+            <ion-icon name="person-outline"></ion-icon>
+            <span>{{ activeSale()?.customerName || ('POS.CHANGE_CUSTOMER' | translate) }}</span>
+          </button>
+        </div>
         <div class="cart-search">
           <ion-searchbar
             [value]="searchQuery()"
@@ -115,19 +126,43 @@
         </div>
 
         <ion-list class="cart-items">
-          @for (item of activeSale()?.items ?? []; track item.productId) {
+          @for (item of activeSale()?.items ?? []; track trackSaleItem(item)) {
             <ion-item class="cart-item">
               <ion-label>
                 <h2>{{ item.productName }}</h2>
                 <p>
                   {{ item.unitPrice | appCurrency:'1.0-0' }} c/u
                   ·
+                  @if (item.unitTypeCode || item.unitTypeName) {
+                    {{ item.unitTypeCode || item.unitTypeName }}
+                    @if ((item.stockFactor ?? 1) !== 1) {
+                      (×{{ item.stockFactor }})
+                    }
+                    ·
+                  }
                   @if ((item.taxRate ?? 0) > 0) {
                     IVA {{ item.taxRate }}%
                   } @else {
                     {{ 'PRODUCTS.TAX_EXEMPT' | translate }}
                   }
                 </p>
+                @if (canOperateSale() && hasMultipleUnits(item)) {
+                  <ion-select
+                    class="unit-select"
+                    interface="popover"
+                    [value]="item.unitTypeId"
+                    (ionChange)="changeItemUnit(item, $any($event.detail.value))"
+                  >
+                    @for (unit of unitsForProduct(item.productId); track unit.unitTypeId) {
+                      <ion-select-option [value]="unit.unitTypeId">
+                        {{ unit.unitTypeCode || unit.unitTypeName }}
+                        @if (unit.stockFactor !== 1) {
+                          ({{ unit.stockFactor }} und)
+                        }
+                      </ion-select-option>
+                    }
+                  </ion-select>
+                }
               </ion-label>
 
               <div class="qty-controls" slot="end">

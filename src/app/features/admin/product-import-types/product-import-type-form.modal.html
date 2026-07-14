@@ -1,0 +1,135 @@
+<ion-header class="modal-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" class="close-btn" (click)="dismiss()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      {{ (isEdit ? 'PRODUCT_IMPORT_TYPES.EDIT_TITLE' : 'PRODUCT_IMPORT_TYPES.NEW_TITLE') | translate }}
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button class="save-btn" (click)="save()" [disabled]="saving()">
+        @if (saving()) {
+          <ion-spinner name="crescent"></ion-spinner>
+        } @else {
+          <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+          {{ 'COMMON.SAVE' | translate }}
+        }
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="modal-content">
+  <form [formGroup]="form" class="form-layout">
+    <section class="form-section">
+      <div class="section-title">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        <span>{{ 'PRODUCT_IMPORT_TYPES.SECTION_MAIN' | translate }}</span>
+      </div>
+
+      <div class="fields-grid">
+        <div class="field-box">
+          <label>{{ 'PRODUCT_IMPORT_TYPES.CODE' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-input formControlName="code" [readonly]="isEdit" placeholder="PROVEEDOR_A"></ion-input>
+          </ion-item>
+        </div>
+        <div class="field-box span-2">
+          <label>{{ 'PRODUCT_IMPORT_TYPES.NAME' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-input formControlName="name"></ion-input>
+          </ion-item>
+        </div>
+        <div class="field-box">
+          <label>{{ 'PRODUCT_IMPORT_TYPES.HEADER_ROW' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-input type="number" formControlName="headerRow" min="1"></ion-input>
+          </ion-item>
+          <small class="field-hint">{{ 'PRODUCT_IMPORT_TYPES.HEADER_ROW_HINT' | translate }}</small>
+        </div>
+        <div class="field-box span-3">
+          <label>{{ 'PRODUCT_IMPORT_TYPES.DESCRIPTION' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-textarea formControlName="description" [autoGrow]="true" rows="2"></ion-textarea>
+          </ion-item>
+        </div>
+      </div>
+
+      @if (isEdit) {
+        <div class="toggle-row">
+          <ion-item lines="none" class="toggle-item">
+            <ion-toggle formControlName="isActive" labelPlacement="start">
+              {{ 'PRODUCT_IMPORT_TYPES.ACTIVE' | translate }}
+            </ion-toggle>
+          </ion-item>
+        </div>
+      }
+    </section>
+
+    <section class="form-section">
+      <div class="section-title">
+        <ion-icon name="document-outline"></ion-icon>
+        <span>{{ 'PRODUCT_IMPORT_TYPES.SECTION_SAMPLE' | translate }}</span>
+      </div>
+      <p class="section-hint">{{ 'PRODUCT_IMPORT_TYPES.SAMPLE_HINT' | translate }}</p>
+
+      <div class="upload-row">
+        <label class="file-btn">
+          <input type="file" accept=".xlsx,.xls" (change)="onSampleFileSelected($event)" hidden />
+          @if (readingExcel()) {
+            <ion-spinner name="crescent"></ion-spinner>
+          } @else {
+            <ion-icon name="cloud-upload-outline"></ion-icon>
+            {{ 'PRODUCT_IMPORT_TYPES.LOAD_SAMPLE' | translate }}
+          }
+        </label>
+        @if (sampleFileName()) {
+          <span class="file-name">{{ sampleFileName() }}</span>
+        }
+        @if (sampleHeaders().length) {
+          <span class="headers-count">{{ sampleHeaders().length }} columnas</span>
+        }
+      </div>
+    </section>
+
+    <section class="form-section">
+      <div class="section-title">
+        <span>{{ 'PRODUCT_IMPORT_TYPES.SECTION_MAPPING' | translate }}</span>
+      </div>
+      <p class="section-hint">{{ 'PRODUCT_IMPORT_TYPES.MAPPING_HINT' | translate }}</p>
+
+      @if (!sampleHeaders().length) {
+        <p class="empty-mapping">{{ 'PRODUCT_IMPORT_TYPES.NEED_HEADERS' | translate }}</p>
+      } @else {
+        <div class="mapping-list">
+          @for (field of fields; track field.key) {
+            <div class="mapping-row">
+              <div class="field-label">
+                <strong>{{ field.label }}</strong>
+                @if (field.required) {
+                  <span class="req">*</span>
+                }
+                <small>{{ field.key }}</small>
+              </div>
+              <ion-item lines="none" class="field-item">
+                <ion-select
+                  [value]="mappingValue(field.key)"
+                  interface="popover"
+                  placeholder="— sin mapear —"
+                  (ionChange)="setMapping(field.key, $any($event.detail.value))"
+                >
+                  <ion-select-option value="">— sin mapear —</ion-select-option>
+                  @for (header of sampleHeaders(); track header) {
+                    <ion-select-option [value]="header">{{ header }}</ion-select-option>
+                  }
+                </ion-select>
+              </ion-item>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  </form>
+</ion-content>

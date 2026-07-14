@@ -34,8 +34,14 @@ export class CustomersController {
     @Query('page') page?: number,
     @Query('limit') limit?: number,
     @Query('search') search?: string,
+    @Query('includeInactive') includeInactive?: string,
   ) {
-    return this.customersService.findAll(branchId, { page, limit, search });
+    return this.customersService.findAll(branchId, {
+      page,
+      limit,
+      search,
+      includeInactive: includeInactive === 'true',
+    });
   }
 
   @Get(':id')

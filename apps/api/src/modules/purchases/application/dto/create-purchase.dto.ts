@@ -17,6 +17,11 @@ export class CreatePurchaseItemDto {
   @IsNotEmpty()
   productId!: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  unitTypeId?: string;
+
   @ApiProperty()
   @IsNumber()
   @Min(0.001)

@@ -22,6 +22,10 @@ export class ProductRepository {
         category: true,
         barcodes: true,
         inventoryItems: true,
+        productUnits: {
+          include: { unitType: true },
+          orderBy: [{ isBase: 'desc' }, { createdAt: 'asc' }],
+        },
       },
     });
   }
@@ -49,6 +53,11 @@ export class ProductRepository {
         include: {
           category: true,
           inventoryItems: { where: { branchId } },
+          productUnits: {
+            where: { isActive: true },
+            include: { unitType: true },
+            orderBy: [{ isBase: 'desc' }, { createdAt: 'asc' }],
+          },
         },
       }),
       this.prisma.product.count({ where }),
@@ -74,6 +83,11 @@ export class ProductRepository {
       include: {
         category: true,
         inventoryItems: { where: { branchId } },
+        productUnits: {
+          where: { isActive: true },
+          include: { unitType: true },
+          orderBy: [{ isBase: 'desc' }, { createdAt: 'asc' }],
+        },
       },
     });
   }

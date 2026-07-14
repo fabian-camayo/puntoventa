@@ -46,6 +46,8 @@ export class AuthService {
       'users.view',
       'roles.view',
       'products.view',
+      'products.import',
+      'product_import_types.view',
       'config.view',
       'reports.view',
       'sales.view',

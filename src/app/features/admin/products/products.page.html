@@ -9,12 +9,20 @@
         <ion-icon name="cube-outline"></ion-icon>
         {{ 'ADMIN.PRODUCTS' | translate }}
       </h1>
-      @if (canCreate) {
-        <ion-button (click)="openCreate()">
-          <ion-icon name="add-outline" slot="start"></ion-icon>
-          {{ 'PRODUCTS.NEW' | translate }}
-        </ion-button>
-      }
+      <div class="title-actions">
+        @if (canImport) {
+          <ion-button fill="outline" (click)="openImport()">
+            <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+            {{ 'PRODUCTS.IMPORT' | translate }}
+          </ion-button>
+        }
+        @if (canCreate) {
+          <ion-button (click)="openCreate()">
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            {{ 'PRODUCTS.NEW' | translate }}
+          </ion-button>
+        }
+      </div>
     </div>
 
     <div class="pv-toolbar-card">

@@ -28,12 +28,30 @@ export class SalesService {
 
     const tabId = dto.tabId ?? uuidv4();
 
+    let customerId = dto.customerId;
+    if (!customerId) {
+      const config = await this.prisma.businessConfig.findFirst({
+        where: { branchId: dto.branchId },
+        select: { defaultCustomerId: true },
+      });
+      customerId = config?.defaultCustomerId ?? undefined;
+    }
+
+    if (customerId) {
+      const customer = await this.prisma.customer.findFirst({
+        where: { id: customerId, branchId: dto.branchId, isActive: true },
+      });
+      if (!customer) {
+        throw new BadRequestException('Cliente no válido');
+      }
+    }
+
     const sale = await this.prisma.sale.create({
       data: {
         branchId: dto.branchId,
         registerId: dto.registerId,
         userId: user.sub,
-        customerId: dto.customerId,
+        customerId,
         tabId,
         tabOrder: dto.tabOrder ?? 0,
         status: SaleStatus.ACTIVE,
@@ -110,11 +128,14 @@ export class SalesService {
 
     const result = await this.prisma.executeInTransaction(async (tx) => {
       if (dto.items) {
+        const resolvedItems = await this.resolveSaleItemUnits(tx, dto.items);
         await tx.saleItem.deleteMany({ where: { saleId: id } });
         await tx.saleItem.createMany({
-          data: dto.items.map((item) => ({
+          data: resolvedItems.map((item) => ({
             saleId: id,
             productId: item.productId,
+            unitTypeId: item.unitTypeId,
+            stockFactor: item.stockFactor,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
             costPrice: item.costPrice ?? 0,
@@ -141,7 +162,10 @@ export class SalesService {
           notes: dto.notes,
           version: { increment: 1 },
         },
-        include: { items: { include: { product: true } }, customer: true },
+        include: {
+          items: { include: { product: true, unitType: true } },
+          customer: true,
+        },
       });
     });
 
@@ -206,14 +230,15 @@ export class SalesService {
       for (const item of existing.items) {
         const product = await tx.product.findUnique({ where: { id: item.productId } });
         if (product?.trackInventory) {
+          const stockQty = new Prisma.Decimal(item.quantity).mul(item.stockFactor);
           const updated = await tx.inventoryItem.updateMany({
             where: {
               branchId: existing.branchId,
               productId: item.productId,
-              quantity: { gte: item.quantity },
+              quantity: { gte: stockQty },
             },
             data: {
-              quantity: { decrement: item.quantity },
+              quantity: { decrement: stockQty },
               version: { increment: 1 },
             },
           });
@@ -236,10 +261,10 @@ export class SalesService {
               create: {
                 branchId: existing.branchId,
                 productId: item.productId,
-                quantity: -Number(item.quantity),
+                quantity: stockQty.negated(),
               },
               update: {
-                quantity: { decrement: item.quantity },
+                quantity: { decrement: stockQty },
               },
             });
           }
@@ -306,7 +331,7 @@ export class SalesService {
           version: { increment: 1 },
         },
         include: {
-          items: { include: { product: true } },
+          items: { include: { product: true, unitType: true } },
           payments: { include: { paymentType: true } },
           customer: true,
         },
@@ -370,6 +395,8 @@ export class SalesService {
     items: Array<{
       id: string;
       productId: string;
+      unitTypeId?: string | null;
+      stockFactor?: Prisma.Decimal;
       quantity: Prisma.Decimal;
       unitPrice: Prisma.Decimal;
       costPrice: Prisma.Decimal;
@@ -381,6 +408,7 @@ export class SalesService {
       total: Prisma.Decimal;
       notes: string | null;
       product?: { name: string; sku: string };
+      unitType?: { id: string; code: string; name: string } | null;
     }>;
     payments?: Array<{
       amount: Prisma.Decimal;
@@ -408,6 +436,10 @@ export class SalesService {
         productId: i.productId,
         productName: i.product?.name,
         sku: i.product?.sku,
+        unitTypeId: i.unitTypeId ?? i.unitType?.id ?? undefined,
+        unitTypeCode: i.unitType?.code,
+        unitTypeName: i.unitType?.name,
+        stockFactor: i.stockFactor != null ? Number(i.stockFactor) : 1,
         quantity: Number(i.quantity),
         unitPrice: Number(i.unitPrice),
         costPrice: Number(i.costPrice),
@@ -438,6 +470,59 @@ export class SalesService {
       version: sale.version,
       completedAt: sale.completedAt?.toISOString(),
     };
+  }
+
+  private async resolveSaleItemUnits(
+    tx: Prisma.TransactionClient,
+    items: Array<{
+      productId: string;
+      unitTypeId?: string;
+      quantity: number;
+      unitPrice: number;
+      costPrice?: number;
+      discountAmount?: number;
+      discountPercent?: number;
+      taxRate?: number;
+      taxAmount?: number;
+      subtotal: number;
+      total: number;
+      notes?: string;
+    }>,
+  ) {
+    const productIds = [...new Set(items.map((i) => i.productId))];
+    const productUnits = await tx.productUnit.findMany({
+      where: { productId: { in: productIds }, isActive: true },
+      include: { unitType: true },
+    });
+    const byProduct = new Map<string, typeof productUnits>();
+    for (const pu of productUnits) {
+      const list = byProduct.get(pu.productId) ?? [];
+      list.push(pu);
+      byProduct.set(pu.productId, list);
+    }
+
+    return items.map((item) => {
+      const units = byProduct.get(item.productId) ?? [];
+      let matched = item.unitTypeId
+        ? units.find((u) => u.unitTypeId === item.unitTypeId)
+        : units.find((u) => u.isBase);
+
+      if (item.unitTypeId && !matched) {
+        throw new BadRequestException(
+          `La unidad seleccionada no está configurada para el producto`,
+        );
+      }
+
+      if (!matched && units.length) {
+        matched = units.find((u) => u.isBase) ?? units[0];
+      }
+
+      return {
+        ...item,
+        unitTypeId: matched?.unitTypeId ?? null,
+        stockFactor: matched ? Number(matched.stockFactor) : 1,
+      };
+    });
   }
 
   private async assertRegisterIsOpen(registerId: string): Promise<void> {

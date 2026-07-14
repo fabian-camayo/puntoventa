@@ -1,0 +1,99 @@
+.modal-header ion-toolbar {
+  --background: var(--pv-bg-primary);
+  --border-width: 0 0 1px 0;
+  --border-color: var(--pv-border);
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--pv-bg-app);
+}
+
+.close-btn {
+  --color: var(--pv-text-secondary);
+}
+
+.save-btn {
+  --background: var(--pv-accent);
+  --color: #fff;
+  --border-radius: var(--pv-radius-md);
+  font-weight: 600;
+}
+
+.modal-content {
+  --background: var(--pv-bg-app);
+}
+
+.form-layout {
+  padding: 16px 20px 32px;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-section {
+  background: var(--pv-bg-primary);
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field-item,
+.toggle-item {
+  --background: var(--pv-bg-secondary);
+  --border-radius: var(--pv-radius-md);
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-md);
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  color: var(--pv-text-secondary);
+}
+
+.upload-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.file-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--pv-radius-md);
+  border: 1px dashed var(--pv-border);
+  background: var(--pv-bg-secondary);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.file-name {
+  color: var(--pv-text-secondary);
+  font-size: 0.85rem;
+}
+
+.result-box {
+  .errors {
+    max-height: 220px;
+    overflow: auto;
+    font-size: 0.85rem;
+    color: var(--ion-color-danger);
+  }
+}
+
+.loading-state,
+.empty-state {
+  padding: 32px;
+  text-align: center;
+  color: var(--pv-text-secondary);
+}

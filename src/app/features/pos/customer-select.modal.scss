@@ -1,0 +1,39 @@
+.modal-header ion-toolbar {
+  --background: var(--pv-bg-primary);
+  --border-width: 0 0 1px 0;
+  --border-color: var(--pv-border);
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.modal-content {
+  --background: var(--pv-bg-app);
+}
+
+.picker-layout {
+  padding: 8px 0 16px;
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 180px;
+  color: var(--pv-text-secondary);
+
+  ion-icon {
+    font-size: 2.5rem;
+    opacity: 0.5;
+  }
+}
+
+ion-item.selected {
+  --background: color-mix(in srgb, var(--pv-accent) 10%, transparent);
+}

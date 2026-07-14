@@ -103,6 +103,7 @@ export class SaleService {
   private toUpdateItemPayload(item: SaleItemDto) {
     return {
       productId: item.productId,
+      unitTypeId: item.unitTypeId,
       quantity: item.quantity,
       unitPrice: item.unitPrice,
       costPrice: item.costPrice,

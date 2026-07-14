@@ -29,6 +29,7 @@ import {
   chevronBackOutline,
   chevronForwardOutline,
   cubeOutline,
+  cloudUploadOutline,
 } from 'ionicons/icons';
 import { ProductDto } from '@puntoventa/shared';
 import { ProductService } from '@core/services/product.service';
@@ -37,6 +38,7 @@ import { ConfigService } from '@core/services/config.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppCurrencyPipe } from '@shared/pipes/app-currency.pipe';
 import { ProductFormModal } from './product-form.modal';
+import { ProductImportModal } from './product-import.modal';
 
 addIcons({
   addOutline,
@@ -45,6 +47,7 @@ addIcons({
   chevronBackOutline,
   chevronForwardOutline,
   cubeOutline,
+  cloudUploadOutline,
 });
 
 @Component({
@@ -84,6 +87,7 @@ export class ProductsPage implements OnInit, OnDestroy {
   readonly canUpdate = this.auth.hasPermission('products.update');
   readonly canDelete = this.auth.hasPermission('products.delete');
   readonly canViewCosts = this.auth.hasPermission('products.view_costs');
+  readonly canImport = this.auth.hasPermission('products.import');
 
   branchId = signal<string | null>(null);
   products = signal<ProductDto[]>([]);
@@ -153,6 +157,23 @@ export class ProductsPage implements OnInit, OnDestroy {
       await this.loadProducts();
       await this.loadCategories(this.branchId()!);
       await this.showToast('PRODUCTS.SAVED_OK', 'success');
+    }
+  }
+
+  async openImport(): Promise<void> {
+    if (!this.canImport) return;
+    const branchId = this.branchId();
+    if (!branchId) return;
+
+    const modal = await this.modalCtrl.create({
+      component: ProductImportModal,
+      componentProps: { branchId },
+      cssClass: 'pv-form-modal',
+    });
+    await modal.present();
+    const { role } = await modal.onDidDismiss();
+    if (role === 'imported') {
+      await this.loadProducts();
     }
   }
 

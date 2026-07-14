@@ -143,6 +143,39 @@
   border-bottom: 1px solid var(--pv-border);
 }
 
+.sale-customer-bar {
+  flex-shrink: 0;
+  padding: 8px 10px 0;
+  border-bottom: 1px solid var(--pv-border);
+}
+
+.customer-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-md);
+  background: var(--pv-bg-secondary);
+  color: var(--pv-text-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+
+  ion-icon {
+    color: var(--pv-accent);
+    font-size: 1.15rem;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: default;
+  }
+}
+
 .product-search {
   padding: 8px 10px;
   --background: var(--pv-bg-secondary);

@@ -1,0 +1,122 @@
+<ion-content class="page-content">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+    <div class="page-title-bar">
+      <h1>
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        {{ 'ADMIN.PRODUCT_IMPORT' | translate }}
+      </h1>
+      @if (canConfigure) {
+        <ion-button fill="outline" (click)="goToImportTypes()">
+          <ion-icon name="settings-outline" slot="start"></ion-icon>
+          {{ 'ADMIN.PRODUCT_IMPORT_TYPES' | translate }}
+        </ion-button>
+      }
+    </div>
+
+    <div class="pv-card import-card">
+      @if (loadingTypes()) {
+        <div class="loading-state">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>{{ 'COMMON.LOADING' | translate }}</p>
+        </div>
+      } @else if (importTypes().length === 0) {
+        <div class="empty-state">
+          <ion-icon name="document-outline"></ion-icon>
+          <h2>{{ 'PRODUCT_IMPORT.EMPTY_TITLE' | translate }}</h2>
+          <p>{{ 'PRODUCT_IMPORT.EMPTY_HINT' | translate }}</p>
+          @if (canConfigure) {
+            <ion-button (click)="goToImportTypes()">
+              <ion-icon name="settings-outline" slot="start"></ion-icon>
+              {{ 'PRODUCT_IMPORT.CONFIGURE_TYPES' | translate }}
+            </ion-button>
+          }
+        </div>
+      } @else {
+        <section class="form-section">
+          <label>{{ 'PRODUCTS.IMPORT_TYPE' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-select
+              interface="popover"
+              [value]="selectedTypeId()"
+              (ionChange)="selectedTypeId.set($any($event.detail.value))"
+            >
+              @for (type of importTypes(); track type.id) {
+                <ion-select-option [value]="type.id">
+                  {{ type.name }} ({{ type.code }})
+                </ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+          <small class="field-hint">{{ 'PRODUCTS.IMPORT_TYPE_HINT' | translate }}</small>
+
+          <div class="upload-box">
+            <label class="file-btn">
+              <input type="file" accept=".xlsx,.xls" (change)="onFileSelected($event)" hidden />
+              <ion-icon name="cloud-upload-outline"></ion-icon>
+              {{ 'PRODUCTS.IMPORT_SELECT_FILE' | translate }}
+            </label>
+            @if (selectedFile(); as file) {
+              <span class="file-name">{{ file.name }}</span>
+            }
+          </div>
+
+          <ion-item lines="none" class="toggle-item">
+            <ion-toggle
+              [checked]="updateExisting()"
+              (ionChange)="updateExisting.set($any($event.detail.checked))"
+              labelPlacement="start"
+            >
+              {{ 'PRODUCTS.IMPORT_UPDATE_EXISTING' | translate }}
+            </ion-toggle>
+          </ion-item>
+
+          @if (canImport) {
+            <ion-button
+              expand="block"
+              class="import-btn"
+              (click)="import()"
+              [disabled]="importing() || !selectedFile()"
+            >
+              @if (importing()) {
+                <ion-spinner name="crescent"></ion-spinner>
+              } @else {
+                <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+                {{ 'PRODUCTS.IMPORT_RUN' | translate }}
+              }
+            </ion-button>
+          }
+        </section>
+
+        @if (result(); as res) {
+          <section class="result-box">
+            <h3>{{ 'PRODUCTS.IMPORT_RESULT' | translate }}</h3>
+            <p>
+              Filas: {{ res.totalRows }} · Creados: {{ res.created }} ·
+              Actualizados: {{ res.updated }} · Omitidos: {{ res.skipped }}
+            </p>
+            @if (res.errors.length) {
+              <div class="errors">
+                <strong>{{ res.errors.length }} errores</strong>
+                <ul>
+                  @for (err of res.errors.slice(0, 30); track err.row) {
+                    <li>
+                      Fila {{ err.row }}
+                      @if (err.sku) {
+                        ({{ err.sku }})
+                      }
+                      : {{ err.message }}
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+          </section>
+        }
+      }
+    </div>
+  </div>
+</ion-content>

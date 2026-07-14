@@ -1,0 +1,81 @@
+<ion-content class="page-content">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+    <div class="page-title-bar">
+      <h1>
+        <ion-icon name="layers-outline"></ion-icon>
+        {{ 'ADMIN.INVENTORY' | translate }}
+      </h1>
+    </div>
+
+    <div class="pv-toolbar-card">
+      <ion-searchbar
+        [value]="searchQuery()"
+        [placeholder]="'INVENTORY.SEARCH_PLACEHOLDER' | translate"
+        [debounce]="0"
+        (ionInput)="onSearchInput($event)"
+      ></ion-searchbar>
+      <div class="filter-chips">
+        <ion-chip outline="true">
+          <ion-label>{{ total() }} {{ 'INVENTORY.RECORDS' | translate }}</ion-label>
+        </ion-chip>
+      </div>
+    </div>
+
+    <div class="pv-card list-card">
+      @if (loading()) {
+        <div class="loading-state">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>{{ 'COMMON.LOADING' | translate }}</p>
+        </div>
+      } @else if (items().length === 0) {
+        <div class="empty-state">
+          <ion-icon name="layers-outline"></ion-icon>
+          <h2>{{ 'INVENTORY.EMPTY_TITLE' | translate }}</h2>
+          <p>{{ 'INVENTORY.EMPTY_HINT' | translate }}</p>
+        </div>
+      } @else {
+        <div class="table-header">
+          <span class="col-sku">{{ 'INVENTORY.SKU' | translate }}</span>
+          <span class="col-name">{{ 'INVENTORY.PRODUCT_NAME' | translate }}</span>
+          <span class="col-qty">{{ 'INVENTORY.QUANTITY' | translate }}</span>
+          <span class="col-reserved">{{ 'INVENTORY.RESERVED' | translate }}</span>
+        </div>
+
+        <ion-list class="inventory-list" lines="full">
+          @for (item of items(); track item.id) {
+            <ion-item class="stock-row" [detail]="false">
+              <div class="stock-grid">
+                <span class="col-sku mono">{{ item.sku || '—' }}</span>
+                <span class="col-name"><strong>{{ item.name || '—' }}</strong></span>
+                <span class="col-qty">{{ item.quantity }}</span>
+                <span class="col-reserved">
+                  @if (item.reserved != null) {
+                    {{ item.reserved }}
+                  } @else {
+                    —
+                  }
+                </span>
+              </div>
+            </ion-item>
+          }
+        </ion-list>
+
+        <div class="pagination">
+          <ion-button fill="outline" [disabled]="page() <= 1" (click)="prevPage()">
+            <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+            {{ 'COMMON.BACK' | translate }}
+          </ion-button>
+          <span class="page-info">{{ page() }} / {{ totalPages() }}</span>
+          <ion-button fill="outline" [disabled]="page() >= totalPages()" (click)="nextPage()">
+            {{ 'COMMON.NEXT' | translate }}
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      }
+    </div>
+  </div>
+</ion-content>

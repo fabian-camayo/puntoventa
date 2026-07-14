@@ -20,19 +20,23 @@ export class PurchaseRepository {
       where: { id },
       include: {
         supplier: true,
-        items: { include: { product: true } },
+        items: { include: { product: true, unitType: true } },
         user: { select: { id: true, username: true, firstName: true, lastName: true } },
       },
     });
   }
 
-  findByBranch(branchId: string, params?: PaginationQuery) {
+  findByBranch(
+    branchId: string,
+    params?: PaginationQuery & { status?: import('@prisma/client').PurchaseStatus },
+  ) {
     const page = params?.page ?? 1;
     const limit = params?.limit ?? 20;
     const skip = (page - 1) * limit;
 
     const where: Prisma.PurchaseWhereInput = {
       branchId,
+      ...(params?.status ? { status: params.status } : {}),
       ...(params?.search ? this.buildSearchWhere(params.search) : {}),
     };
 
@@ -42,7 +46,7 @@ export class PurchaseRepository {
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { supplier: true, items: true },
+        include: { supplier: true, items: { include: { product: true, unitType: true } } },
       }),
       this.prisma.purchase.count({ where }),
     ]).then(([items, total]) => ({

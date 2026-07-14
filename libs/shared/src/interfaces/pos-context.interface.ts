@@ -8,4 +8,5 @@ export interface PosContextDto {
   businessName?: string;
   ticketHeader?: string;
   ticketFooter?: string;
+  defaultCustomerId?: string;
 }

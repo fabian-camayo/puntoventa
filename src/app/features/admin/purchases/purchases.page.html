@@ -1,0 +1,139 @@
+<ion-content class="page-content">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+    <div class="page-title-bar">
+      <h1>
+        <ion-icon name="cart-outline"></ion-icon>
+        {{ 'ADMIN.PURCHASES' | translate }}
+      </h1>
+      @if (canCreate) {
+        <ion-button (click)="openCreate()">
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          {{ 'PURCHASES.NEW' | translate }}
+        </ion-button>
+      }
+    </div>
+
+    <div class="pv-toolbar-card">
+      <ion-searchbar
+        [value]="searchQuery()"
+        [placeholder]="'PURCHASES.SEARCH_PLACEHOLDER' | translate"
+        [debounce]="0"
+        (ionInput)="onSearchInput($event)"
+      ></ion-searchbar>
+      <div class="filter-chips">
+        <ion-chip
+          [color]="statusFilter() === 'ALL' ? 'primary' : 'medium'"
+          (click)="setStatusFilter('ALL')"
+        >
+          <ion-label>{{ 'PURCHASES.FILTER_ALL' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip
+          [color]="statusFilter() === 'DRAFT' ? 'primary' : 'medium'"
+          (click)="setStatusFilter('DRAFT')"
+        >
+          <ion-label>{{ 'PURCHASES.FILTER_DRAFT' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip
+          [color]="statusFilter() === 'RECEIVED' ? 'primary' : 'medium'"
+          (click)="setStatusFilter('RECEIVED')"
+        >
+          <ion-label>{{ 'PURCHASES.FILTER_RECEIVED' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip
+          [color]="statusFilter() === 'CANCELLED' ? 'primary' : 'medium'"
+          (click)="setStatusFilter('CANCELLED')"
+        >
+          <ion-label>{{ 'PURCHASES.FILTER_CANCELLED' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip outline="true">
+          <ion-label>{{ total() }} {{ 'PURCHASES.RECORDS' | translate }}</ion-label>
+        </ion-chip>
+      </div>
+    </div>
+
+    <div class="pv-card list-card">
+      @if (loading()) {
+        <div class="loading-state">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>{{ 'COMMON.LOADING' | translate }}</p>
+        </div>
+      } @else if (purchases().length === 0) {
+        <div class="empty-state">
+          <ion-icon name="cart-outline"></ion-icon>
+          <h2>{{ 'PURCHASES.EMPTY_TITLE' | translate }}</h2>
+          <p>{{ 'PURCHASES.EMPTY_HINT' | translate }}</p>
+        </div>
+      } @else {
+        <div class="table-header">
+          <span class="col-doc">{{ 'PURCHASES.DOCUMENT' | translate }}</span>
+          <span class="col-supplier">{{ 'PURCHASES.SUPPLIER' | translate }}</span>
+          <span class="col-status">{{ 'PURCHASES.STATUS' | translate }}</span>
+          <span class="col-total">{{ 'PURCHASES.TOTAL' | translate }}</span>
+          <span class="col-date">{{ 'PURCHASES.DATE' | translate }}</span>
+          <span class="col-actions"></span>
+        </div>
+
+        <ion-list class="purchases-list" lines="full">
+          @for (purchase of purchases(); track purchase.id) {
+            <ion-item class="purchase-row" [detail]="false">
+              <div class="purchase-grid">
+                <span class="col-doc">
+                  <strong>{{ purchase.documentNumber }}</strong>
+                </span>
+                <span class="col-supplier">{{ purchase.supplierName ?? '—' }}</span>
+                <span class="col-status">
+                  <ion-badge [color]="statusColor(purchase.status)">
+                    {{ 'PURCHASES.STATUS_' + purchase.status | translate }}
+                  </ion-badge>
+                </span>
+                <span class="col-total">{{ purchase.total | appCurrency:'1.0-0' }}</span>
+                <span class="col-date">{{ formatDate(purchase.receivedAt ?? purchase.createdAt) }}</span>
+                <div class="col-actions">
+                  @if (canUpdate && purchase.status === 'DRAFT') {
+                    <ion-button fill="clear" size="small" (click)="openEdit(purchase)">
+                      <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                    <ion-button
+                      fill="clear"
+                      color="success"
+                      size="small"
+                      (click)="confirmReceive(purchase)"
+                    >
+                      <ion-icon name="download-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  }
+                  @if (canDelete && purchase.status === 'DRAFT') {
+                    <ion-button
+                      fill="clear"
+                      color="danger"
+                      size="small"
+                      (click)="confirmCancel(purchase)"
+                    >
+                      <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  }
+                </div>
+              </div>
+            </ion-item>
+          }
+        </ion-list>
+
+        <div class="pagination">
+          <ion-button fill="outline" [disabled]="page() <= 1" (click)="prevPage()">
+            <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+            {{ 'COMMON.BACK' | translate }}
+          </ion-button>
+          <span class="page-info">{{ page() }} / {{ totalPages() }}</span>
+          <ion-button fill="outline" [disabled]="page() >= totalPages()" (click)="nextPage()">
+            {{ 'COMMON.NEXT' | translate }}
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      }
+    </div>
+  </div>
+</ion-content>

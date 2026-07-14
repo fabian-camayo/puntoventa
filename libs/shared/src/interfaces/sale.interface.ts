@@ -17,6 +17,11 @@ export interface SaleItemDto {
   productId: string;
   productName?: string;
   sku?: string;
+  unitTypeId?: string;
+  unitTypeCode?: string;
+  unitTypeName?: string;
+  /** Factor aplicado al stock (unidades de inventario por 1 de esta línea). */
+  stockFactor?: number;
   quantity: number;
   unitPrice: number;
   costPrice?: number;

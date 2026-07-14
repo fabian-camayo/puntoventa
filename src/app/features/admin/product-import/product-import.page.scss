@@ -1,0 +1,98 @@
+.import-card {
+  padding: 20px;
+  max-width: 720px;
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 36vh;
+  text-align: center;
+  color: var(--pv-text-secondary);
+  gap: 8px;
+
+  ion-icon {
+    font-size: 3.5rem;
+    opacity: 0.5;
+  }
+
+  h2 {
+    margin: 0;
+    color: var(--pv-text-primary);
+  }
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  > label {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+}
+
+.field-item,
+.toggle-item {
+  --background: var(--pv-bg-secondary);
+  --border-radius: var(--pv-radius-md);
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-md);
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  color: var(--pv-text-secondary);
+}
+
+.upload-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.file-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: var(--pv-radius-md);
+  border: 1px dashed var(--pv-border);
+  background: var(--pv-bg-secondary);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.file-name {
+  color: var(--pv-text-secondary);
+  font-size: 0.9rem;
+}
+
+.import-btn {
+  margin-top: 8px;
+  --background: var(--pv-accent);
+  font-weight: 600;
+}
+
+.result-box {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--pv-border);
+
+  h3 {
+    margin: 0 0 8px;
+  }
+
+  .errors {
+    margin-top: 12px;
+    max-height: 280px;
+    overflow: auto;
+    font-size: 0.85rem;
+    color: var(--ion-color-danger);
+  }
+}

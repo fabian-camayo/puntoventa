@@ -1,0 +1,245 @@
+.modal-header ion-toolbar {
+  --background: var(--pv-bg-primary);
+  --border-width: 0 0 1px 0;
+  --border-color: var(--pv-border);
+  --min-height: 56px;
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--pv-bg-app);
+}
+
+.close-btn {
+  --color: var(--pv-text-secondary);
+}
+
+.save-btn {
+  --background: var(--pv-accent);
+  --color: #fff;
+  --border-radius: var(--pv-radius-md);
+  font-weight: 600;
+}
+
+.receive-btn {
+  --border-radius: var(--pv-radius-md);
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+.modal-content {
+  --background: var(--pv-bg-app);
+}
+
+.form-layout {
+  padding: 16px 20px 32px;
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-section {
+  background: var(--pv-bg-primary);
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-lg);
+  box-shadow: var(--pv-shadow-sm);
+  padding: 16px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--pv-text-primary);
+
+  ion-icon {
+    color: var(--pv-accent);
+    font-size: 1.2rem;
+  }
+}
+
+.fields-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.field-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--pv-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  &.span-2 {
+    grid-column: span 2;
+  }
+
+  &.span-3 {
+    grid-column: 1 / -1;
+  }
+}
+
+.field-item {
+  --background: var(--pv-bg-secondary);
+  --border-radius: var(--pv-radius-md);
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-md);
+
+  &.compact {
+    --min-height: 40px;
+    --padding-start: 8px;
+    --inner-padding-end: 8px;
+  }
+}
+
+.product-search {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.search-loading {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+}
+
+.search-results {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 240px;
+  overflow: auto;
+  background: var(--pv-bg-primary);
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-md);
+  box-shadow: var(--pv-shadow-md, 0 8px 24px rgba(0, 0, 0, 0.12));
+}
+
+.lines-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--pv-text-secondary);
+  background: var(--pv-bg-secondary);
+  border-radius: var(--pv-radius-md);
+}
+
+.lines-header,
+.line-row {
+  display: grid;
+  grid-template-columns: 1.4fr 120px 80px 100px 70px 100px 44px;
+  gap: 8px;
+  align-items: center;
+}
+
+.lines-header {
+  padding: 8px 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--pv-text-secondary);
+  border-bottom: 1px solid var(--pv-border);
+}
+
+.line-row {
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--pv-border);
+
+  .col-product {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+
+    strong {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    small {
+      color: var(--pv-text-secondary);
+      font-size: 0.8rem;
+    }
+  }
+
+  .col-line-total {
+    font-weight: 600;
+    text-align: right;
+  }
+}
+
+.totals-bar {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--pv-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.total-row {
+  display: flex;
+  gap: 24px;
+  min-width: 240px;
+  justify-content: space-between;
+  color: var(--pv-text-secondary);
+
+  &.grand {
+    margin-top: 4px;
+    font-size: 1.1rem;
+    color: var(--pv-text-primary);
+  }
+}
+
+@media (max-width: 768px) {
+  .fields-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field-box.span-2,
+  .field-box.span-3 {
+    grid-column: auto;
+  }
+
+  .lines-header {
+    display: none;
+  }
+
+  .line-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .col-product {
+    grid-column: 1 / -1;
+  }
+
+  .col-line-total,
+  .col-remove {
+    justify-self: end;
+  }
+
+  ion-buttons[slot='end'] {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}

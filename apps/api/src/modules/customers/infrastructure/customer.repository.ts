@@ -19,14 +19,17 @@ export class CustomerRepository {
     return this.prisma.customer.update({ where: { id }, data });
   }
 
-  searchByBranch(branchId: string, params?: PaginationQuery) {
+  searchByBranch(
+    branchId: string,
+    params?: PaginationQuery & { includeInactive?: boolean },
+  ) {
     const page = params?.page ?? 1;
     const limit = params?.limit ?? 20;
     const skip = (page - 1) * limit;
 
     const where: Prisma.CustomerWhereInput = {
       branchId,
-      isActive: true,
+      ...(params?.includeInactive ? {} : { isActive: true }),
       ...(params?.search ? this.buildSearchWhere(params.search) : {}),
     };
 

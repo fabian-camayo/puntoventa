@@ -5,12 +5,15 @@ import {
   IsNumber,
   IsUUID,
   IsEnum,
+  IsArray,
+  ValidateNested,
   Min,
   Max,
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { ProductType } from '@prisma/client';
 import { Type } from 'class-transformer';
+import { ProductUnitInputDto } from './create-product.dto';
 
 export class UpdateProductDto {
   @ApiPropertyOptional()
@@ -91,4 +94,11 @@ export class UpdateProductDto {
   @IsOptional()
   @IsString()
   imageUrl?: string;
+
+  @ApiPropertyOptional({ type: [ProductUnitInputDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductUnitInputDto)
+  units?: ProductUnitInputDto[];
 }

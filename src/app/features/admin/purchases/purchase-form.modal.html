@@ -1,0 +1,215 @@
+<ion-header class="modal-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" class="close-btn" (click)="dismiss()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      {{ (isEdit ? 'PURCHASES.EDIT_TITLE' : 'PURCHASES.NEW_TITLE') | translate }}
+    </ion-title>
+    <ion-buttons slot="end">
+      @if (canSaveAndReceive) {
+        <ion-button
+          class="receive-btn"
+          fill="outline"
+          (click)="save(true)"
+          [disabled]="saving()"
+        >
+          <ion-icon name="download-outline" slot="start"></ion-icon>
+          {{ 'PURCHASES.SAVE_AND_RECEIVE' | translate }}
+        </ion-button>
+      }
+      <ion-button class="save-btn" (click)="save(false)" [disabled]="saving()">
+        @if (saving()) {
+          <ion-spinner name="crescent"></ion-spinner>
+        } @else {
+          <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+          {{ 'COMMON.SAVE' | translate }}
+        }
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="modal-content">
+  <form [formGroup]="form" class="form-layout">
+    <section class="form-section">
+      <div class="section-title">
+        <ion-icon name="cart-outline"></ion-icon>
+        <span>{{ 'PURCHASES.SECTION_MAIN' | translate }}</span>
+      </div>
+
+      <div class="fields-grid">
+        <div class="field-box span-2">
+          <label>{{ 'PURCHASES.SUPPLIER' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-select
+              formControlName="supplierId"
+              interface="popover"
+              [placeholder]="'PURCHASES.SELECT_SUPPLIER' | translate"
+            >
+              @for (supplier of suppliers; track supplier.id) {
+                <ion-select-option [value]="supplier.id">
+                  {{ supplier.code }} — {{ supplier.name }}
+                </ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+        </div>
+
+        <div class="field-box">
+          <label>{{ 'PURCHASES.DOCUMENT' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-input formControlName="documentNumber"></ion-input>
+          </ion-item>
+        </div>
+
+        <div class="field-box span-3">
+          <label>{{ 'PURCHASES.NOTES' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-textarea formControlName="notes" [autoGrow]="true" rows="2"></ion-textarea>
+          </ion-item>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <div class="section-title">
+        <ion-icon name="cube-outline"></ion-icon>
+        <span>{{ 'PURCHASES.SECTION_ITEMS' | translate }}</span>
+      </div>
+
+      <div class="product-search">
+        <ion-searchbar
+          [value]="searchQuery()"
+          [placeholder]="'PURCHASES.PRODUCT_SEARCH' | translate"
+          [debounce]="0"
+          (ionInput)="onProductSearch($event)"
+        ></ion-searchbar>
+
+        @if (searching()) {
+          <div class="search-loading">
+            <ion-spinner name="crescent"></ion-spinner>
+          </div>
+        }
+
+        @if (searchResults().length > 0) {
+          <ion-list class="search-results" lines="full">
+            @for (product of searchResults(); track product.id) {
+              <ion-item button detail="false" (click)="addProduct(product)">
+                <ion-icon name="add-outline" slot="start" color="primary"></ion-icon>
+                <ion-label>
+                  <h3>{{ product.name }}</h3>
+                  <p>{{ product.sku }}</p>
+                </ion-label>
+              </ion-item>
+            }
+          </ion-list>
+        }
+      </div>
+
+      @if (lines().length === 0) {
+        <div class="lines-empty">
+          <p>{{ 'PURCHASES.ITEMS_EMPTY' | translate }}</p>
+        </div>
+      } @else {
+        <div class="lines-header">
+          <span class="col-product">{{ 'PURCHASES.PRODUCT' | translate }}</span>
+          <span class="col-unit">{{ 'PURCHASES.UNIT' | translate }}</span>
+          <span class="col-qty">{{ 'PURCHASES.QTY' | translate }}</span>
+          <span class="col-cost">{{ 'PURCHASES.UNIT_COST' | translate }}</span>
+          <span class="col-tax">{{ 'PURCHASES.TAX_RATE' | translate }}</span>
+          <span class="col-line-total">{{ 'PURCHASES.LINE_TOTAL' | translate }}</span>
+          <span class="col-remove"></span>
+        </div>
+
+        @for (line of lines(); track line.key) {
+          <div class="line-row">
+            <div class="col-product">
+              <strong>{{ line.productName }}</strong>
+              <small>{{ line.sku }}</small>
+            </div>
+            <div class="col-unit">
+              @if (line.availableUnits.length > 1) {
+                <ion-item lines="none" class="field-item compact">
+                  <ion-select
+                    interface="popover"
+                    [value]="line.unitTypeId"
+                    (ionChange)="changeLineUnit(line.key, $any($event.detail.value))"
+                  >
+                    @for (unit of line.availableUnits; track unit.unitTypeId) {
+                      <ion-select-option [value]="unit.unitTypeId">
+                        {{ unit.unitTypeCode || unit.unitTypeName }}
+                        @if (unit.stockFactor !== 1) {
+                          (×{{ unit.stockFactor }})
+                        }
+                      </ion-select-option>
+                    }
+                  </ion-select>
+                </ion-item>
+              } @else {
+                <span>{{ line.unitTypeCode || '—' }}</span>
+              }
+            </div>
+            <div class="col-qty">
+              <ion-item lines="none" class="field-item compact">
+                <ion-input
+                  type="number"
+                  [value]="line.quantity"
+                  (ionInput)="onLineNumberChange(line.key, 'quantity', $event)"
+                ></ion-input>
+              </ion-item>
+            </div>
+            <div class="col-cost">
+              <ion-item lines="none" class="field-item compact">
+                <ion-input
+                  type="number"
+                  [value]="line.unitCost"
+                  (ionInput)="onLineNumberChange(line.key, 'unitCost', $event)"
+                ></ion-input>
+              </ion-item>
+            </div>
+            <div class="col-tax">
+              <ion-item lines="none" class="field-item compact">
+                <ion-input
+                  type="number"
+                  [value]="line.taxRate"
+                  (ionInput)="onLineNumberChange(line.key, 'taxRate', $event)"
+                ></ion-input>
+              </ion-item>
+            </div>
+            <div class="col-line-total">
+              {{ lineTotal(line) | appCurrency:'1.0-0' }}
+            </div>
+            <div class="col-remove">
+              <ion-button
+                fill="clear"
+                color="danger"
+                size="small"
+                (click)="removeLine(line.key)"
+              >
+                <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+        }
+      }
+
+      <div class="totals-bar">
+        <div class="total-row">
+          <span>{{ 'PURCHASES.SUBTOTAL' | translate }}</span>
+          <strong>{{ subtotal | appCurrency:'1.0-0' }}</strong>
+        </div>
+        <div class="total-row">
+          <span>{{ 'PURCHASES.TAX_AMOUNT' | translate }}</span>
+          <strong>{{ taxAmount | appCurrency:'1.0-0' }}</strong>
+        </div>
+        <div class="total-row grand">
+          <span>{{ 'PURCHASES.TOTAL' | translate }}</span>
+          <strong>{{ total | appCurrency:'1.0-0' }}</strong>
+        </div>
+      </div>
+    </section>
+  </form>
+</ion-content>

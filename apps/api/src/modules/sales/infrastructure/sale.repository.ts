@@ -10,7 +10,7 @@ export class SaleRepository {
     return this.prisma.sale.findUnique({
       where: { id },
       include: {
-        items: { include: { product: true } },
+        items: { include: { product: true, unitType: true } },
         payments: { include: { paymentType: true } },
         customer: true,
       },

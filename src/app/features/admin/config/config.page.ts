@@ -29,6 +29,7 @@ import {
   colorPaletteOutline,
   saveOutline,
   checkmarkOutline,
+  peopleOutline,
 } from 'ionicons/icons';
 import { firstValueFrom, forkJoin } from 'rxjs';
 import { AppConfigDto, PosContextDto } from '@puntoventa/shared';
@@ -36,6 +37,7 @@ import {
   ConfigService,
   UpdateBusinessConfigPayload,
 } from '@core/services/config.service';
+import { CustomerDto, CustomerService } from '@core/services/customer.service';
 import { AuthService } from '@core/services/auth.service';
 import { ThemeService, ThemeMode } from '@core/services/theme.service';
 
@@ -48,6 +50,7 @@ addIcons({
   colorPaletteOutline,
   saveOutline,
   checkmarkOutline,
+  peopleOutline,
 });
 
 @Component({
@@ -77,6 +80,7 @@ addIcons({
 export class ConfigPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly configService = inject(ConfigService);
+  private readonly customerService = inject(CustomerService);
   private readonly auth = inject(AuthService);
   private readonly themeService = inject(ThemeService);
   private readonly toast = inject(ToastController);
@@ -88,6 +92,7 @@ export class ConfigPage implements OnInit {
   branchId = signal<string | null>(null);
   posContext = signal<PosContextDto | null>(null);
   appConfig = signal<AppConfigDto | null>(null);
+  customers = signal<CustomerDto[]>([]);
   activeTab = signal<'general' | 'billing' | 'app'>('general');
 
   form = this.fb.nonNullable.group({
@@ -102,6 +107,7 @@ export class ConfigPage implements OnInit {
     ticketHeader: [''],
     ticketFooter: [''],
     allowNegativeStock: [false],
+    defaultCustomerId: [''],
     language: ['es'],
     theme: ['system' as ThemeMode],
   });
@@ -148,6 +154,7 @@ export class ConfigPage implements OnInit {
         ticketHeader: raw.ticketHeader || undefined,
         ticketFooter: raw.ticketFooter || undefined,
         allowNegativeStock: raw.allowNegativeStock,
+        defaultCustomerId: raw.defaultCustomerId || undefined,
       };
 
       await firstValueFrom(
@@ -205,9 +212,11 @@ export class ConfigPage implements OnInit {
 
       this.branchId.set(branchId);
 
-      const business = await firstValueFrom(
-        this.configService.getBusinessConfig(branchId),
-      );
+      const [business, customers] = await Promise.all([
+        firstValueFrom(this.configService.getBusinessConfig(branchId)),
+        firstValueFrom(this.customerService.listActive(branchId)).catch(() => [] as CustomerDto[]),
+      ]);
+      this.customers.set(customers);
 
       this.form.patchValue({
         businessName: business.businessName,
@@ -221,6 +230,7 @@ export class ConfigPage implements OnInit {
         ticketHeader: business.ticketHeader ?? '',
         ticketFooter: business.ticketFooter ?? '',
         allowNegativeStock: business.allowNegativeStock,
+        defaultCustomerId: business.defaultCustomerId ?? '',
         language: appConfig.language ?? 'es',
         theme: (appConfig.theme as ThemeMode) ?? 'system',
       });

@@ -34,8 +34,9 @@ export class PurchasesController {
     @Query('page') page?: number,
     @Query('limit') limit?: number,
     @Query('search') search?: string,
+    @Query('status') status?: string,
   ) {
-    return this.purchasesService.findAll(branchId, { page, limit, search });
+    return this.purchasesService.findAll(branchId, { page, limit, search, status });
   }
 
   @Get(':id')
@@ -50,6 +51,13 @@ export class PurchasesController {
   @ApiOperation({ summary: 'Crear compra' })
   create(@Body() dto: CreatePurchaseDto, @CurrentUser() user: JwtPayload) {
     return this.purchasesService.create(dto, user);
+  }
+
+  @Post(':id/receive')
+  @RequirePermissions('purchases.update', 'purchases.create')
+  @ApiOperation({ summary: 'Recibir compra e ingresar stock al inventario' })
+  receive(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.purchasesService.receive(id, user);
   }
 
   @Put(':id')

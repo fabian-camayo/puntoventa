@@ -19,7 +19,15 @@ export class CustomersService {
     private readonly auditService: AuditService,
   ) {}
 
-  async findAll(branchId: string, params?: { page?: number; limit?: number; search?: string }) {
+  async findAll(
+    branchId: string,
+    params?: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      includeInactive?: boolean;
+    },
+  ) {
     const result = await this.customerRepository.searchByBranch(branchId, params);
     return {
       ...result,
