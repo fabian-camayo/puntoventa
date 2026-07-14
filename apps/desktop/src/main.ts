@@ -7,20 +7,23 @@ import {
 } from 'electron';
 import * as path from 'path';
 import { BackendManager } from './backend/backend-manager';
-import { ConfigStore } from './config/config-store';
+import { ConfigStore, AppConfig } from './config/config-store';
 import { ServerDiscovery } from './network/server-discovery';
 import { APP_MODES, AppMode } from '@puntoventa/shared';
 
+// Ruta estable en producción: %APPDATA%\PuntoVenta (así el instalador NSIS puede escribir el mismo .env)
+if (app.isPackaged) {
+  app.setPath('userData', path.join(app.getPath('appData'), 'PuntoVenta'));
+}
+
 let mainWindow: BrowserWindow | null = null;
 const backendManager = new BackendManager();
-const configStore = new ConfigStore();
+let configStore: ConfigStore;
 const serverDiscovery = new ServerDiscovery();
 
 const isDev = !app.isPackaged;
 
 async function createWindow(): Promise<void> {
-  const config = configStore.get();
-
   mainWindow = new BrowserWindow({
     width: 1920,
     height: 1080,
@@ -58,15 +61,29 @@ async function initializeBackend(): Promise<void> {
   const config = configStore.get();
   const mode = config.mode as AppMode;
 
-  if (mode === APP_MODES.SERVER || mode === APP_MODES.STANDALONE) {
-    await backendManager.start();
+  if (mode !== APP_MODES.SERVER && mode !== APP_MODES.STANDALONE) {
+    return;
+  }
+
+  if (!configStore.canStartLocalBackend()) {
+    console.log(
+      '[BackendManager] Esperando configuración de MySQL/JWT antes de iniciar la API',
+    );
+    return;
+  }
+
+  try {
+    await backendManager.start(configStore.getRuntimeEnv());
     if (mode === APP_MODES.SERVER) {
       serverDiscovery.startAdvertising(config.apiPort);
     }
+  } catch (err) {
+    console.error('[BackendManager] No se pudo iniciar la API:', err);
   }
 }
 
 app.whenReady().then(async () => {
+  configStore = new ConfigStore();
   await initializeBackend();
   await createWindow();
 
@@ -92,11 +109,37 @@ app.on('before-quit', async () => {
 
 // ─── IPC Handlers ───────────────────────────────────────────────────────────
 
-ipcMain.handle('app:getConfig', () => configStore.get());
+ipcMain.handle('app:getConfig', () => configStore.getPublic());
 
-ipcMain.handle('app:saveConfig', (_event, config: Record<string, unknown>) => {
+ipcMain.handle('app:getEnvPath', () => configStore.getEnvPath());
+
+ipcMain.handle('app:saveConfig', async (_event, config: Partial<AppConfig>) => {
   configStore.save(config);
-  return configStore.get();
+
+  const mode = configStore.get().mode as AppMode;
+  if (
+    (mode === APP_MODES.SERVER || mode === APP_MODES.STANDALONE) &&
+    configStore.canStartLocalBackend()
+  ) {
+    try {
+      if (backendManager.isRunning()) {
+        await backendManager.restart(configStore.getRuntimeEnv());
+      } else {
+        await backendManager.start(configStore.getRuntimeEnv());
+      }
+      if (mode === APP_MODES.SERVER) {
+        serverDiscovery.startAdvertising(configStore.get().apiPort);
+      }
+    } catch (err) {
+      console.error('[BackendManager] Error al (re)iniciar API tras guardar config:', err);
+      return {
+        ...configStore.getPublic(),
+        backendError: err instanceof Error ? err.message : String(err),
+      };
+    }
+  }
+
+  return configStore.getPublic();
 });
 
 ipcMain.handle('app:getMode', () => configStore.get().mode);
@@ -104,18 +147,28 @@ ipcMain.handle('app:getMode', () => configStore.get().mode);
 ipcMain.handle('app:setMode', async (_event, mode: AppMode) => {
   configStore.set('mode', mode);
   if (mode === APP_MODES.SERVER || mode === APP_MODES.STANDALONE) {
-    await backendManager.start();
+    if (configStore.canStartLocalBackend()) {
+      try {
+        if (backendManager.isRunning()) {
+          await backendManager.restart(configStore.getRuntimeEnv());
+        } else {
+          await backendManager.start(configStore.getRuntimeEnv());
+        }
+      } catch (err) {
+        console.error('[BackendManager] Error al iniciar API:', err);
+      }
+    }
   } else {
     await backendManager.stop();
   }
-  return configStore.get();
+  return configStore.getPublic();
 });
 
 ipcMain.handle('app:getApiUrl', () => configStore.getApiUrl());
 
 ipcMain.handle('app:isBackendRunning', () => backendManager.isRunning());
 
-ipcMain.handle('app:getTheme', () => nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
+ipcMain.handle('app:getTheme', () => (nativeTheme.shouldUseDarkColors ? 'dark' : 'light'));
 
 ipcMain.handle('discovery:findServers', () => serverDiscovery.findServers());
 

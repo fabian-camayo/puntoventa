@@ -86,6 +86,45 @@
     @if (step() === 2 && isServerMode()) {
       <ion-card>
         <ion-card-header>
+          <ion-card-title>{{ 'SETUP.DATABASE_CONFIG' | translate }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p class="setup-hint">{{ 'SETUP.DATABASE_HINT' | translate }}</p>
+          <ion-item>
+            <ion-label position="stacked">{{ 'SETUP.DB_HOST' | translate }}</ion-label>
+            <ion-input formControlName="dbHost" placeholder="localhost"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">{{ 'SETUP.DB_PORT' | translate }}</ion-label>
+            <ion-input formControlName="dbPort" type="number"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">{{ 'SETUP.DB_USER' | translate }}</ion-label>
+            <ion-input formControlName="dbUser"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">{{ 'SETUP.DB_PASSWORD' | translate }}</ion-label>
+            <ion-input formControlName="dbPassword" type="password"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">{{ 'SETUP.DB_NAME' | translate }}</ion-label>
+            <ion-input formControlName="dbName"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">{{ 'SETUP.API_PORT' | translate }}</ion-label>
+            <ion-input formControlName="apiPort" type="number"></ion-input>
+          </ion-item>
+          <div class="step-buttons">
+            <ion-button fill="outline" (click)="prevStep()">{{ 'COMMON.BACK' | translate }}</ion-button>
+            <ion-button (click)="nextStep()" [disabled]="!canContinueDatabase()">{{ 'COMMON.NEXT' | translate }}</ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    @if (step() === 3 && isServerMode()) {
+      <ion-card>
+        <ion-card-header>
           <ion-card-title>{{ 'SETUP.SERVER_CONFIG' | translate }}</ion-card-title>
         </ion-card-header>
         <ion-card-content>
@@ -104,6 +143,7 @@
           <div class="step-buttons">
             <ion-button fill="outline" (click)="prevStep()">{{ 'COMMON.BACK' | translate }}</ion-button>
             <ion-button (click)="onComplete()" [disabled]="loading()">
+              @if (loading()) { <ion-spinner></ion-spinner> }
               {{ 'SETUP.COMPLETE' | translate }}
             </ion-button>
           </div>

@@ -1,5 +1,4 @@
 import { SaleStatus } from '../enums/sale-status.enum';
-import { PaymentMethod } from '../enums/payment-method.enum';
 export interface SaleTab {
     id: string;
     tabId: string;
@@ -16,6 +15,11 @@ export interface SaleItemDto {
     productId: string;
     productName?: string;
     sku?: string;
+    unitTypeId?: string;
+    unitTypeCode?: string;
+    unitTypeName?: string;
+    /** Factor aplicado al stock (unidades de inventario por 1 de esta línea). */
+    stockFactor?: number;
     quantity: number;
     unitPrice: number;
     costPrice?: number;
@@ -28,7 +32,10 @@ export interface SaleItemDto {
     notes?: string;
 }
 export interface SalePaymentDto {
-    method: PaymentMethod;
+    paymentTypeId: string;
+    paymentTypeName?: string;
+    paymentTypeCode?: string;
+    affectsCash?: boolean;
     amount: number;
     reference?: string;
 }

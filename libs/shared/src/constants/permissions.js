@@ -2,6 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DEFAULT_PERMISSIONS = exports.PERMISSION_ACTIONS = exports.PERMISSION_MODULES = void 0;
 exports.buildPermissionCode = buildPermissionCode;
+/**
+ * Códigos de permisos dinámicos almacenados en BD.
+ * Formato: {modulo}.{accion}
+ * Estos códigos se usan para seed inicial; los permisos reales viven en la tabla permissions.
+ */
 exports.PERMISSION_MODULES = {
     PRODUCTS: 'products',
     CATEGORIES: 'categories',
@@ -36,6 +41,7 @@ exports.PERMISSION_ACTIONS = {
 function buildPermissionCode(module, action) {
     return `${module}.${action}`;
 }
+/** Definición de permisos para seed inicial */
 exports.DEFAULT_PERMISSIONS = [
     { module: 'products', action: 'view', name: 'Ver productos', description: 'Permite ver el catálogo de productos' },
     { module: 'products', action: 'create', name: 'Crear productos', description: 'Permite crear nuevos productos' },
@@ -47,6 +53,15 @@ exports.DEFAULT_PERMISSIONS = [
     { module: 'categories', action: 'create', name: 'Crear categorías', description: 'Permite crear categorías' },
     { module: 'categories', action: 'update', name: 'Modificar categorías', description: 'Permite editar categorías' },
     { module: 'categories', action: 'delete', name: 'Eliminar categorías', description: 'Permite eliminar categorías' },
+    { module: 'unit_types', action: 'view', name: 'Ver tipos de unidad', description: 'Permite ver tipos de unidad de producto' },
+    { module: 'unit_types', action: 'create', name: 'Crear tipos de unidad', description: 'Permite crear tipos de unidad' },
+    { module: 'unit_types', action: 'update', name: 'Modificar tipos de unidad', description: 'Permite editar tipos de unidad' },
+    { module: 'unit_types', action: 'delete', name: 'Eliminar tipos de unidad', description: 'Permite desactivar tipos de unidad' },
+    { module: 'product_import_types', action: 'view', name: 'Ver tipos de importe', description: 'Permite ver plantillas de importación de productos' },
+    { module: 'product_import_types', action: 'create', name: 'Crear tipos de importe', description: 'Permite crear plantillas de importación Excel' },
+    { module: 'product_import_types', action: 'update', name: 'Modificar tipos de importe', description: 'Permite editar plantillas de importación' },
+    { module: 'product_import_types', action: 'delete', name: 'Eliminar tipos de importe', description: 'Permite desactivar plantillas de importación' },
+    { module: 'products', action: 'import', name: 'Importar productos', description: 'Permite importar productos desde Excel' },
     { module: 'customers', action: 'view', name: 'Ver clientes', description: 'Permite ver clientes' },
     { module: 'customers', action: 'create', name: 'Crear clientes', description: 'Permite crear clientes' },
     { module: 'customers', action: 'update', name: 'Modificar clientes', description: 'Permite editar clientes' },

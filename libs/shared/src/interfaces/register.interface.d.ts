@@ -49,6 +49,24 @@ export interface CloseRegisterRequest {
     closingAmount: number;
     notes?: string;
 }
+export type CashMovementTypeDto = 'INCOME' | 'EXPENSE' | 'WITHDRAWAL' | 'DEPOSIT' | 'SALE' | 'REFUND';
+export interface CashMovementDto {
+    id: string;
+    registerSessionId: string;
+    userId: string;
+    type: CashMovementTypeDto;
+    amount: number;
+    description?: string;
+    reference?: string;
+    createdAt: string;
+    userName?: string;
+}
+export interface CreateCashMovementRequest {
+    type: 'WITHDRAWAL' | 'DEPOSIT';
+    amount: number;
+    description?: string;
+    reference?: string;
+}
 export interface TerminalDto {
     id: string;
     branchId: string;
@@ -67,3 +85,4 @@ export interface TerminalDto {
     barcodeReaderStatus?: DeviceConnectionStatus;
     hasOpenRegisterSession?: boolean;
 }
+//# sourceMappingURL=register.interface.d.ts.map

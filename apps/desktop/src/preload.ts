@@ -4,6 +4,7 @@ import { AppMode } from '@puntoventa/shared';
 export interface ElectronAPI {
   getConfig: () => Promise<Record<string, unknown>>;
   saveConfig: (config: Record<string, unknown>) => Promise<Record<string, unknown>>;
+  getEnvPath: () => Promise<string>;
   getMode: () => Promise<AppMode>;
   setMode: (mode: AppMode) => Promise<Record<string, unknown>>;
   getApiUrl: () => Promise<string>;
@@ -19,6 +20,7 @@ export interface ElectronAPI {
 const electronAPI: ElectronAPI = {
   getConfig: () => ipcRenderer.invoke('app:getConfig'),
   saveConfig: (config) => ipcRenderer.invoke('app:saveConfig', config),
+  getEnvPath: () => ipcRenderer.invoke('app:getEnvPath'),
   getMode: () => ipcRenderer.invoke('app:getMode'),
   setMode: (mode) => ipcRenderer.invoke('app:setMode', mode),
   getApiUrl: () => ipcRenderer.invoke('app:getApiUrl'),

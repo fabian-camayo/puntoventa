@@ -5,6 +5,7 @@ import { AppConfigDto, AppMode } from '@puntoventa/shared';
 export interface ElectronAPI {
   getConfig: () => Promise<AppConfigDto>;
   saveConfig: (config: Partial<AppConfigDto>) => Promise<AppConfigDto>;
+  getEnvPath: () => Promise<string>;
   getMode: () => Promise<AppMode>;
   setMode: (mode: AppMode) => Promise<AppConfigDto>;
   getApiUrl: () => Promise<string>;

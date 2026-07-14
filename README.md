@@ -85,12 +85,14 @@ npm run dev:full
 ## Empaquetado Windows
 
 ```bash
-npm run build:web
-npm run build:api
 npm run dist:win
 ```
 
-El instalador se genera en `dist/installer/`.
+Eso compila shared, API, web y genera el instalador NSIS en `dist/installer/`.
+
+Durante la instalación se pide la conexión MySQL y se escribe `installer.env` (también se copia a `%APPDATA%\PuntoVenta\.env`). El acceso directo del escritorio se crea automáticamente. La API empacada usa Electron como runtime Node (`ELECTRON_RUN_AS_NODE`).
+
+Requisitos: MySQL en el PC destino. Genere `dist:win` preferentemente en **Windows** (módulos nativos: bcrypt / Prisma). Opcional: `apps/desktop/resources/icon.ico`.
 
 ## Módulos del Sistema
 

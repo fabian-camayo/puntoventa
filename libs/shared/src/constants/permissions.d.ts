@@ -1,3 +1,8 @@
+/**
+ * Códigos de permisos dinámicos almacenados en BD.
+ * Formato: {modulo}.{accion}
+ * Estos códigos se usan para seed inicial; los permisos reales viven en la tabla permissions.
+ */
 export declare const PERMISSION_MODULES: {
     readonly PRODUCTS: "products";
     readonly CATEGORIES: "categories";
@@ -32,6 +37,7 @@ export declare const PERMISSION_ACTIONS: {
 export type PermissionModule = (typeof PERMISSION_MODULES)[keyof typeof PERMISSION_MODULES];
 export type PermissionAction = (typeof PERMISSION_ACTIONS)[keyof typeof PERMISSION_ACTIONS];
 export declare function buildPermissionCode(module: string, action: string): string;
+/** Definición de permisos para seed inicial */
 export declare const DEFAULT_PERMISSIONS: ReadonlyArray<{
     module: string;
     action: string;

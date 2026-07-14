@@ -4,12 +4,26 @@ export interface AppConfigDto {
   mode: AppMode;
   serverHost?: string;
   serverPort?: number;
-  apiUrl: string;
+  apiPort?: number;
+  apiUrl?: string;
   isConfigured: boolean;
   branchId?: string;
   registerId?: string;
   language: string;
   theme: 'light' | 'dark' | 'system';
+  /** MySQL */
+  dbHost?: string;
+  dbPort?: number;
+  dbUser?: string;
+  /** En getConfig puede venir enmascarado (********). */
+  dbPassword?: string;
+  dbName?: string;
+  hasDatabasePassword?: boolean;
+  jwtSecret?: string;
+  jwtExpiresIn?: string;
+  jwtRefreshExpiresIn?: string;
+  databaseUrl?: string;
+  backendError?: string;
 }
 
 export interface ServerDiscoveryResult {
@@ -22,6 +36,7 @@ export interface SetupWizardRequest {
   mode: AppMode;
   serverHost?: string;
   serverPort?: number;
+  apiPort?: number;
   username?: string;
   password?: string;
   businessName?: string;
@@ -29,6 +44,12 @@ export interface SetupWizardRequest {
   adminPassword?: string;
   adminFirstName?: string;
   adminLastName?: string;
+  dbHost?: string;
+  dbPort?: number;
+  dbUser?: string;
+  dbPassword?: string;
+  dbName?: string;
+  jwtSecret?: string;
 }
 
 export interface ConnectionTestResult {

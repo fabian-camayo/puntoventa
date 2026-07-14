@@ -8,5 +8,6 @@ export interface PosContextDto {
     businessName?: string;
     ticketHeader?: string;
     ticketFooter?: string;
+    defaultCustomerId?: string;
 }
 //# sourceMappingURL=pos-context.interface.d.ts.map

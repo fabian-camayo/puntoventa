@@ -73,6 +73,7 @@ testem.log
 # Electron
 /dist/installer
 apps/desktop/dist
+apps/desktop/.packaging
 
 # Prisma
 prisma/*.db

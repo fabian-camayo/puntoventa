@@ -24,7 +24,7 @@
     "prestart:api": "npm run build:shared",
     "start:electron": "npm run start -w @puntoventa/desktop",
     "build:electron": "npm run build -w @puntoventa/desktop",
-    "dist:win": "npm run dist:win -w @puntoventa/desktop",
+    "dist:win": "npm run build:shared && npm run build:api && npm run build:web && npm run dist:win -w @puntoventa/desktop",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",

@@ -2,7 +2,9 @@
 // Migraciones versionadas con Prisma Migrate (nunca modificar migraciones anteriores)
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // Linux (dev/CI) + Windows (instalador Electron)
+  binaryTargets = ["native", "windows"]
 }
 
 datasource db {

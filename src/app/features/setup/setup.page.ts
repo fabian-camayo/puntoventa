@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import {
   IonContent,
   IonHeader,
@@ -51,7 +51,7 @@ import { ConfigService } from '../../core/services/config.service';
     TranslateModule,
   ],
 })
-export class SetupPage {
+export class SetupPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly config = inject(ConfigService);
   private readonly router = inject(Router);
@@ -67,6 +67,12 @@ export class SetupPage {
     mode: [APP_MODES.STANDALONE as AppMode, Validators.required],
     serverHost: [''],
     serverPort: [3000],
+    apiPort: [3000],
+    dbHost: ['localhost', Validators.required],
+    dbPort: [3306, Validators.required],
+    dbUser: ['root', Validators.required],
+    dbPassword: [''],
+    dbName: ['puntoventa', Validators.required],
     username: [''],
     password: [''],
     businessName: ['Mi Negocio', Validators.required],
@@ -75,6 +81,31 @@ export class SetupPage {
     adminFirstName: ['Administrador', Validators.required],
     adminLastName: ['Sistema', Validators.required],
   });
+
+  ngOnInit(): void {
+    void this.prefillFromExistingConfig();
+  }
+
+  private async prefillFromExistingConfig(): Promise<void> {
+    try {
+      if (window.electronAPI) {
+        const cfg = await window.electronAPI.getConfig();
+        this.form.patchValue({
+          mode: (cfg.mode as AppMode) || APP_MODES.STANDALONE,
+          serverHost: cfg.serverHost || '',
+          serverPort: cfg.serverPort ?? 3000,
+          apiPort: cfg.apiPort ?? 3000,
+          dbHost: cfg.dbHost || 'localhost',
+          dbPort: cfg.dbPort ?? 3306,
+          dbUser: cfg.dbUser || 'root',
+          dbPassword: cfg.hasDatabasePassword ? '********' : '',
+          dbName: cfg.dbName || 'puntoventa',
+        });
+      }
+    } catch {
+      // ignore
+    }
+  }
 
   async onDiscoverServers(): Promise<void> {
     if (window.electronAPI) {
@@ -111,17 +142,37 @@ export class SetupPage {
     try {
       if (window.electronAPI) {
         await window.electronAPI.setMode(values.mode);
-        await window.electronAPI.saveConfig({
+
+        const payload: Record<string, unknown> = {
           mode: values.mode,
           serverHost: values.serverHost,
-          serverPort: values.serverPort,
+          serverPort: Number(values.serverPort),
+          apiPort: Number(values.apiPort),
           isConfigured: true,
           language: 'es',
           theme: 'system',
-        });
+        };
+
+        if (this.isServerMode()) {
+          payload['dbHost'] = values.dbHost;
+          payload['dbPort'] = Number(values.dbPort);
+          payload['dbUser'] = values.dbUser;
+          payload['dbPassword'] = values.dbPassword;
+          payload['dbName'] = values.dbName;
+        }
+
+        const saved = await window.electronAPI.saveConfig(payload);
+        if (saved && (saved as { backendError?: string }).backendError) {
+          const t = await this.toast.create({
+            message: `Configuración guardada, pero la API no inició: ${(saved as { backendError: string }).backendError}`,
+            color: 'warning',
+            duration: 5000,
+          });
+          await t.present();
+        }
       }
 
-      this.router.navigate(['/login']);
+      await this.router.navigate(['/login']);
     } catch {
       const t = await this.toast.create({
         message: 'Error en la configuración',
@@ -149,5 +200,10 @@ export class SetupPage {
   isServerMode(): boolean {
     const mode = this.form.get('mode')?.value;
     return mode === APP_MODES.SERVER || mode === APP_MODES.STANDALONE;
+  }
+
+  canContinueDatabase(): boolean {
+    const v = this.form.getRawValue();
+    return !!(v.dbHost && v.dbUser && v.dbName && v.dbPort);
   }
 }

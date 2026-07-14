@@ -12,8 +12,10 @@ export interface ProductDto {
     categoryName?: string;
     stock?: number;
     minStock?: number;
+    trackInventory?: boolean;
     isActive: boolean;
     imageUrl?: string;
+    units?: import('./unit-type.interface').ProductUnitDto[];
 }
 export interface ProductSearchResult {
     id: string;
@@ -24,5 +26,6 @@ export interface ProductSearchResult {
     stock: number;
     unit: string;
     taxRate?: number;
+    units?: import('./unit-type.interface').ProductUnitDto[];
 }
 //# sourceMappingURL=product.interface.d.ts.map
