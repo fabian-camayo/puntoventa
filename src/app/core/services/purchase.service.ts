@@ -7,7 +7,6 @@ import { ConfigService } from './config.service';
 
 export type PurchaseStatus = 'DRAFT' | 'RECEIVED' | 'CANCELLED';
 export type PurchasePaymentTerm = 'CASH' | 'CREDIT';
-export type PurchaseFundSource = 'REGISTER' | 'BANK_ACCOUNT';
 
 export interface PurchaseItemDto {
   id?: string;
@@ -34,9 +33,10 @@ export interface PurchaseDto {
   documentNumber: string;
   status: PurchaseStatus;
   paymentTerm: PurchasePaymentTerm;
-  fundSource?: PurchaseFundSource;
-  bankAccountId?: string;
-  bankAccountName?: string;
+  paymentTypeId?: string;
+  paymentTypeCode?: string;
+  paymentTypeName?: string;
+  paymentTypeAffectsCash?: boolean;
   registerId?: string;
   registerName?: string;
   reduceCash: boolean;
@@ -56,8 +56,7 @@ export interface CreatePurchasePayload {
   documentNumber: string;
   purchaseDate: string;
   paymentTerm: PurchasePaymentTerm;
-  fundSource?: PurchaseFundSource;
-  bankAccountId?: string;
+  paymentTypeId?: string;
   registerId?: string;
   reduceCash?: boolean;
   notes?: string;
@@ -74,7 +73,7 @@ export interface UpdatePurchasePayload {
   notes?: string;
   purchaseDate?: string;
   paymentTerm?: PurchasePaymentTerm;
-  fundSource?: PurchaseFundSource | null;
+  paymentTypeId?: string | null;
   bankAccountId?: string | null;
   registerId?: string | null;
   reduceCash?: boolean;

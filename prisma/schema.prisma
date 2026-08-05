@@ -582,11 +582,6 @@ enum PurchasePaymentTerm {
   CREDIT
 }
 
-enum PurchaseFundSource {
-  REGISTER
-  BANK_ACCOUNT
-}
-
 model BankAccount {
   id            String   @id @default(uuid()) @db.Char(36)
   branchId      String   @map("branch_id") @db.Char(36)
@@ -613,7 +608,7 @@ model Purchase {
   documentNumber String               @map("document_number") @db.VarChar(50)
   status         PurchaseStatus       @default(DRAFT)
   paymentTerm    PurchasePaymentTerm  @default(CASH) @map("payment_term")
-  fundSource     PurchaseFundSource?  @map("fund_source")
+  paymentTypeId  String?              @map("payment_type_id") @db.Char(36)
   bankAccountId  String?              @map("bank_account_id") @db.Char(36)
   registerId     String?              @map("register_id") @db.Char(36)
   reduceCash     Boolean              @default(true) @map("reduce_cash")
@@ -629,6 +624,7 @@ model Purchase {
   branch      Branch       @relation(fields: [branchId], references: [id])
   supplier    Supplier     @relation(fields: [supplierId], references: [id])
   user        User         @relation(fields: [userId], references: [id])
+  paymentType PaymentType? @relation(fields: [paymentTypeId], references: [id])
   bankAccount BankAccount? @relation(fields: [bankAccountId], references: [id])
   register    Register?    @relation(fields: [registerId], references: [id])
   items       PurchaseItem[]
@@ -678,7 +674,8 @@ model PaymentType {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  payments SalePayment[]
+  payments  SalePayment[]
+  purchases Purchase[]
 
   @@map("payment_types")
 }

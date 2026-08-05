@@ -1,0 +1,188 @@
+<ion-content class="page-content">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+    <app-admin-back></app-admin-back>
+    <div class="page-title-bar">
+      <h1>
+        <ion-icon name="bar-chart-outline"></ion-icon>
+        {{ 'ADMIN.REPORTS' | translate }}
+      </h1>
+      <ion-button fill="outline" (click)="applyFilters()" [disabled]="loading()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        {{ 'REPORTS.REFRESH' | translate }}
+      </ion-button>
+    </div>
+
+    <div class="pv-toolbar-card filters-card">
+      <div class="filters-row">
+        <div class="filter-field">
+          <label>{{ 'REPORTS.FROM' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-input type="date" [value]="fromDate()" (ionChange)="onFromChange($event)"></ion-input>
+          </ion-item>
+        </div>
+        <div class="filter-field">
+          <label>{{ 'REPORTS.TO' | translate }}</label>
+          <ion-item lines="none" class="field-item">
+            <ion-input type="date" [value]="toDate()" (ionChange)="onToChange($event)"></ion-input>
+          </ion-item>
+        </div>
+        <div class="filter-actions">
+          <ion-button size="small" fill="outline" (click)="setPreset(7)">
+            {{ 'REPORTS.PRESET_7' | translate }}
+          </ion-button>
+          <ion-button size="small" fill="outline" (click)="setPreset(30)">
+            {{ 'REPORTS.PRESET_30' | translate }}
+          </ion-button>
+          <ion-button size="small" (click)="applyFilters()" [disabled]="loading()">
+            {{ 'REPORTS.APPLY' | translate }}
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>{{ 'COMMON.LOADING' | translate }}</p>
+      </div>
+    } @else if (!summary()) {
+      <div class="pv-card empty-state">
+        <ion-icon name="bar-chart-outline"></ion-icon>
+        <h2>{{ 'REPORTS.EMPTY_TITLE' | translate }}</h2>
+        <p>{{ 'REPORTS.EMPTY_HINT' | translate }}</p>
+      </div>
+    } @else {
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon">
+            <ion-icon name="cart-outline"></ion-icon>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">{{ 'REPORTS.SALES_COUNT' | translate }}</span>
+            <strong class="kpi-value">{{ summary()!.salesCount }}</strong>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon accent">
+            <ion-icon name="cash-outline"></ion-icon>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">{{ 'REPORTS.REVENUE' | translate }}</span>
+            <strong class="kpi-value">{{ summary()!.totalRevenue | appCurrency:'1.0-0' }}</strong>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon warn">
+            <ion-icon name="pricetag-outline"></ion-icon>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">{{ 'REPORTS.COST' | translate }}</span>
+            <strong class="kpi-value">{{ summary()!.totalCost | appCurrency:'1.0-0' }}</strong>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon success">
+            <ion-icon name="trending-up-outline"></ion-icon>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">{{ 'REPORTS.PROFIT' | translate }}</span>
+            <strong class="kpi-value">{{ summary()!.totalProfit | appCurrency:'1.0-0' }}</strong>
+            <small class="kpi-meta">
+              {{ 'REPORTS.MARGIN' | translate }}: {{ summary()!.marginPercent }}%
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <section class="pv-card list-card">
+          <div class="section-head">
+            <h2>{{ 'REPORTS.DAILY_TITLE' | translate }}</h2>
+            <span>{{ daily().length }} {{ 'REPORTS.DAYS' | translate }}</span>
+          </div>
+
+          @if (daily().length === 0) {
+            <div class="inline-empty">{{ 'REPORTS.NO_DAILY' | translate }}</div>
+          } @else {
+            <div class="table-header daily-header">
+              <span>{{ 'REPORTS.DATE' | translate }}</span>
+              <span>{{ 'REPORTS.SALES_COUNT' | translate }}</span>
+              <span>{{ 'REPORTS.REVENUE' | translate }}</span>
+              <span>{{ 'REPORTS.COST' | translate }}</span>
+              <span>{{ 'REPORTS.PROFIT' | translate }}</span>
+            </div>
+            <div class="table-body">
+              @for (row of daily(); track row.date) {
+                <div class="table-row daily-row">
+                  <span>{{ formatDate(row.date) }}</span>
+                  <span>{{ row.salesCount }}</span>
+                  <span>{{ row.revenue | appCurrency:'1.0-0' }}</span>
+                  <span>{{ row.cost | appCurrency:'1.0-0' }}</span>
+                  <span [class.profit-positive]="row.profit >= 0" [class.profit-negative]="row.profit < 0">
+                    {{ row.profit | appCurrency:'1.0-0' }}
+                  </span>
+                </div>
+              }
+            </div>
+          }
+        </section>
+
+        <section class="pv-card list-card">
+          <div class="section-head">
+            <h2>{{ 'REPORTS.TOP_PRODUCTS_TITLE' | translate }}</h2>
+            <span>{{ 'REPORTS.BY_PROFIT' | translate }}</span>
+          </div>
+
+          @if (topProducts().length === 0) {
+            <div class="inline-empty">{{ 'REPORTS.NO_PRODUCTS' | translate }}</div>
+          } @else {
+            <div class="table-header products-header">
+              <span>#</span>
+              <span>{{ 'REPORTS.PRODUCT' | translate }}</span>
+              <span>{{ 'REPORTS.QTY' | translate }}</span>
+              <span>{{ 'REPORTS.REVENUE' | translate }}</span>
+              <span>{{ 'REPORTS.PROFIT' | translate }}</span>
+            </div>
+            <div class="table-body">
+              @for (row of topProducts(); track row.productId) {
+                <div class="table-row products-row">
+                  <span class="rank">{{ row.rank }}</span>
+                  <span class="product-cell">
+                    <strong>{{ row.name }}</strong>
+                    <small>{{ row.sku }}</small>
+                  </span>
+                  <span>{{ row.quantitySold }}</span>
+                  <span>{{ row.revenue | appCurrency:'1.0-0' }}</span>
+                  <span [class.profit-positive]="row.profit >= 0" [class.profit-negative]="row.profit < 0">
+                    {{ row.profit | appCurrency:'1.0-0' }}
+                  </span>
+                </div>
+              }
+            </div>
+          }
+        </section>
+      </div>
+
+      <div class="pv-card extras-card">
+        <div class="extras-grid">
+          <div>
+            <span>{{ 'REPORTS.SUBTOTAL' | translate }}</span>
+            <strong>{{ summary()!.totalSubtotal | appCurrency:'1.0-0' }}</strong>
+          </div>
+          <div>
+            <span>{{ 'REPORTS.TAX' | translate }}</span>
+            <strong>{{ summary()!.totalTax | appCurrency:'1.0-0' }}</strong>
+          </div>
+          <div>
+            <span>{{ 'REPORTS.DISCOUNT' | translate }}</span>
+            <strong>{{ summary()!.totalDiscount | appCurrency:'1.0-0' }}</strong>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</ion-content>

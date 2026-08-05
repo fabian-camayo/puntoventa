@@ -42,7 +42,6 @@ const MODULE_ORDER = [
   'inventory',
   'registers',
   'payment_types',
-  'bank_accounts',
   'reports',
   'users',
   'roles',

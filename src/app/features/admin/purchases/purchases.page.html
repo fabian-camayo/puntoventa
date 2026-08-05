@@ -91,6 +91,9 @@
                   <ion-badge [color]="purchase.paymentTerm === 'CREDIT' ? 'warning' : 'primary'">
                     {{ 'PURCHASES.TERM_' + purchase.paymentTerm | translate }}
                   </ion-badge>
+                  @if (purchase.paymentTerm === 'CASH' && purchase.paymentTypeName) {
+                    <small class="payment-type-name">{{ purchase.paymentTypeName }}</small>
+                  }
                 </span>
                 <span class="col-status">
                   <ion-badge [color]="statusColor(purchase.status)">

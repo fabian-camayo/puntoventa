@@ -20,6 +20,7 @@ export class PurchaseRepository {
       where: { id },
       include: {
         supplier: true,
+        paymentType: true,
         bankAccount: true,
         register: true,
         items: { include: { product: true, unitType: true } },
@@ -50,6 +51,7 @@ export class PurchaseRepository {
         orderBy: { createdAt: 'desc' },
         include: {
           supplier: true,
+          paymentType: true,
           bankAccount: true,
           register: true,
           items: { include: { product: true, unitType: true } },

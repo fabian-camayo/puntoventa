@@ -7,7 +7,6 @@ import {
 import {
   PurchaseStatus,
   PurchasePaymentTerm,
-  PurchaseFundSource,
   CashMovementType,
   RegisterSessionStatus,
   Prisma,
@@ -21,11 +20,20 @@ import { JwtPayload } from '@puntoventa/shared';
 
 type PaymentFields = {
   paymentTerm: PurchasePaymentTerm;
-  fundSource: PurchaseFundSource | null;
+  paymentTypeId: string | null;
   bankAccountId: string | null;
   registerId: string | null;
   reduceCash: boolean;
+  affectsCash: boolean;
 };
+
+const purchaseInclude = {
+  supplier: true,
+  paymentType: true,
+  bankAccount: true,
+  register: true,
+  items: { include: { product: true, unitType: true } },
+} as const;
 
 @Injectable()
 export class PurchasesService {
@@ -115,7 +123,7 @@ export class PurchasesService {
 
     const payment = await this.resolvePaymentFields(dto.branchId, {
       paymentTerm: dto.paymentTerm ?? PurchasePaymentTerm.CASH,
-      fundSource: dto.fundSource ?? null,
+      paymentTypeId: dto.paymentTypeId ?? null,
       bankAccountId: dto.bankAccountId ?? null,
       registerId: dto.registerId ?? null,
       reduceCash: dto.reduceCash ?? true,
@@ -133,7 +141,7 @@ export class PurchasesService {
           documentNumber: dto.documentNumber,
           status: PurchaseStatus.DRAFT,
           paymentTerm: payment.paymentTerm,
-          fundSource: payment.fundSource,
+          paymentTypeId: payment.paymentTypeId,
           bankAccountId: payment.bankAccountId,
           registerId: payment.registerId,
           reduceCash: payment.reduceCash,
@@ -160,12 +168,7 @@ export class PurchasesService {
             }),
           },
         },
-        include: {
-          supplier: true,
-          bankAccount: true,
-          register: true,
-          items: { include: { product: true, unitType: true } },
-        },
+        include: purchaseInclude,
       });
     });
 
@@ -190,8 +193,8 @@ export class PurchasesService {
 
     const payment = await this.resolvePaymentFields(existing.branchId, {
       paymentTerm: dto.paymentTerm ?? existing.paymentTerm,
-      fundSource:
-        dto.fundSource !== undefined ? dto.fundSource : existing.fundSource,
+      paymentTypeId:
+        dto.paymentTypeId !== undefined ? dto.paymentTypeId : existing.paymentTypeId,
       bankAccountId:
         dto.bankAccountId !== undefined ? dto.bankAccountId : existing.bankAccountId,
       registerId: dto.registerId !== undefined ? dto.registerId : existing.registerId,
@@ -242,7 +245,7 @@ export class PurchasesService {
               ? this.parsePurchaseDate(dto.purchaseDate)
               : undefined,
           paymentTerm: payment.paymentTerm,
-          fundSource: payment.fundSource,
+          paymentTypeId: payment.paymentTypeId,
           bankAccountId: payment.bankAccountId,
           registerId: payment.registerId,
           reduceCash: payment.reduceCash,
@@ -250,12 +253,7 @@ export class PurchasesService {
           taxAmount: totals.taxAmount,
           total: totals.total,
         },
-        include: {
-          supplier: true,
-          bankAccount: true,
-          register: true,
-          items: { include: { product: true, unitType: true } },
-        },
+        include: purchaseInclude,
       });
     });
 
@@ -282,7 +280,7 @@ export class PurchasesService {
 
     await this.resolvePaymentFields(existing.branchId, {
       paymentTerm: existing.paymentTerm,
-      fundSource: existing.fundSource,
+      paymentTypeId: existing.paymentTypeId,
       bankAccountId: existing.bankAccountId,
       registerId: existing.registerId,
       reduceCash: existing.reduceCash,
@@ -328,9 +326,10 @@ export class PurchasesService {
         });
       }
 
+      const affectsCash = existing.paymentType?.affectsCash === true;
       if (
         existing.paymentTerm === PurchasePaymentTerm.CASH &&
-        existing.fundSource === PurchaseFundSource.REGISTER &&
+        affectsCash &&
         existing.reduceCash &&
         existing.registerId
       ) {
@@ -364,12 +363,7 @@ export class PurchasesService {
           status: PurchaseStatus.RECEIVED,
           receivedAt: new Date(),
         },
-        include: {
-          supplier: true,
-          bankAccount: true,
-          register: true,
-          items: { include: { product: true, unitType: true } },
-        },
+        include: purchaseInclude,
       });
     });
 
@@ -412,7 +406,7 @@ export class PurchasesService {
     branchId: string,
     input: {
       paymentTerm: PurchasePaymentTerm;
-      fundSource: PurchaseFundSource | null;
+      paymentTypeId: string | null;
       bankAccountId: string | null;
       registerId: string | null;
       reduceCash: boolean;
@@ -421,18 +415,26 @@ export class PurchasesService {
     if (input.paymentTerm === PurchasePaymentTerm.CREDIT) {
       return {
         paymentTerm: PurchasePaymentTerm.CREDIT,
-        fundSource: null,
+        paymentTypeId: null,
         bankAccountId: null,
         registerId: null,
         reduceCash: false,
+        affectsCash: false,
       };
     }
 
-    if (!input.fundSource) {
-      throw new BadRequestException('Debe indicar el origen de los fondos (caja o banco)');
+    if (!input.paymentTypeId) {
+      throw new BadRequestException('Debe indicar el tipo de pago');
     }
 
-    if (input.fundSource === PurchaseFundSource.REGISTER) {
+    const paymentType = await this.prisma.paymentType.findUnique({
+      where: { id: input.paymentTypeId },
+    });
+    if (!paymentType) {
+      throw new BadRequestException('El tipo de pago no es válido');
+    }
+
+    if (paymentType.affectsCash) {
       if (!input.registerId) {
         throw new BadRequestException('Debe seleccionar la caja para el pago de contado');
       }
@@ -444,29 +446,21 @@ export class PurchasesService {
       }
       return {
         paymentTerm: PurchasePaymentTerm.CASH,
-        fundSource: PurchaseFundSource.REGISTER,
+        paymentTypeId: paymentType.id,
         bankAccountId: null,
         registerId: input.registerId,
         reduceCash: input.reduceCash,
+        affectsCash: true,
       };
-    }
-
-    if (!input.bankAccountId) {
-      throw new BadRequestException('Debe seleccionar la cuenta bancaria');
-    }
-    const bankAccount = await this.prisma.bankAccount.findFirst({
-      where: { id: input.bankAccountId, branchId, isActive: true },
-    });
-    if (!bankAccount) {
-      throw new BadRequestException('La cuenta bancaria no es válida o está inactiva');
     }
 
     return {
       paymentTerm: PurchasePaymentTerm.CASH,
-      fundSource: PurchaseFundSource.BANK_ACCOUNT,
-      bankAccountId: input.bankAccountId,
+      paymentTypeId: paymentType.id,
+      bankAccountId: null,
       registerId: null,
       reduceCash: false,
+      affectsCash: false,
     };
   }
 
@@ -577,7 +571,7 @@ export class PurchasesService {
     documentNumber: string;
     status: PurchaseStatus;
     paymentTerm?: PurchasePaymentTerm;
-    fundSource?: PurchaseFundSource | null;
+    paymentTypeId?: string | null;
     bankAccountId?: string | null;
     registerId?: string | null;
     reduceCash?: boolean;
@@ -589,6 +583,12 @@ export class PurchasesService {
     receivedAt?: Date | null;
     createdAt: Date;
     supplier?: { id: string; name: string; code: string };
+    paymentType?: {
+      id: string;
+      code: string;
+      name: string;
+      affectsCash: boolean;
+    } | null;
     bankAccount?: { id: string; code: string; name: string } | null;
     register?: { id: string; code: string; name: string } | null;
     items?: Array<{
@@ -614,7 +614,10 @@ export class PurchasesService {
       documentNumber: purchase.documentNumber,
       status: purchase.status,
       paymentTerm: purchase.paymentTerm ?? PurchasePaymentTerm.CASH,
-      fundSource: purchase.fundSource ?? undefined,
+      paymentTypeId: purchase.paymentTypeId ?? purchase.paymentType?.id ?? undefined,
+      paymentTypeCode: purchase.paymentType?.code,
+      paymentTypeName: purchase.paymentType?.name,
+      paymentTypeAffectsCash: purchase.paymentType?.affectsCash,
       bankAccountId: purchase.bankAccountId ?? undefined,
       bankAccountName: purchase.bankAccount
         ? `${purchase.bankAccount.code} — ${purchase.bankAccount.name}`

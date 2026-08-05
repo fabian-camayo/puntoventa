@@ -105,18 +105,23 @@
 
         @if (isCash) {
           <div class="field-box">
-            <label>{{ 'PURCHASES.FUND_SOURCE' | translate }}<span class="req">*</span></label>
-            <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.fundSource)">
-              <ion-select formControlName="fundSource" interface="popover">
-                <ion-select-option value="REGISTER">{{ 'PURCHASES.FUND_REGISTER' | translate }}</ion-select-option>
-                <ion-select-option value="BANK_ACCOUNT">{{ 'PURCHASES.FUND_BANK' | translate }}</ion-select-option>
+            <label>{{ 'PURCHASES.PAYMENT_TYPE' | translate }}<span class="req">*</span></label>
+            <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.paymentTypeId)">
+              <ion-select
+                formControlName="paymentTypeId"
+                interface="popover"
+                [placeholder]="'PURCHASES.SELECT_PAYMENT_TYPE' | translate"
+              >
+                @for (type of paymentTypes(); track type.id) {
+                  <ion-select-option [value]="type.id">{{ type.name }}</ion-select-option>
+                }
               </ion-select>
             </ion-item>
-            <app-field-error [control]="form.controls.fundSource" />
+            <app-field-error [control]="form.controls.paymentTypeId" />
           </div>
         }
 
-        @if (isRegisterFund) {
+        @if (isCashAffectsRegister) {
           <div class="field-box">
             <label>{{ 'PURCHASES.REGISTER' | translate }}<span class="req">*</span></label>
             <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.registerId)">
@@ -135,32 +140,9 @@
             <app-field-error [control]="form.controls.registerId" />
           </div>
         }
-
-        @if (isBankFund) {
-          <div class="field-box span-2">
-            <label>{{ 'PURCHASES.BANK_ACCOUNT' | translate }}<span class="req">*</span></label>
-            <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.bankAccountId)">
-              <ion-select
-                formControlName="bankAccountId"
-                interface="popover"
-                [placeholder]="'PURCHASES.SELECT_BANK_ACCOUNT' | translate"
-              >
-                @for (account of bankAccounts(); track account.id) {
-                  <ion-select-option [value]="account.id">
-                    {{ account.code }} — {{ account.name }}
-                    @if (account.bankName) {
-                      ({{ account.bankName }})
-                    }
-                  </ion-select-option>
-                }
-              </ion-select>
-            </ion-item>
-            <app-field-error [control]="form.controls.bankAccountId" />
-          </div>
-        }
       </div>
 
-      @if (isRegisterFund) {
+      @if (isCashAffectsRegister) {
         <div class="toggle-row">
           <ion-item lines="none" class="toggle-item">
             <ion-toggle formControlName="reduceCash" labelPlacement="start">

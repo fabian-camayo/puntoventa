@@ -818,16 +818,23 @@ export class SalesService {
     }>,
   ) {
     const productIds = [...new Set(items.map((i) => i.productId))];
-    const productUnits = await tx.productUnit.findMany({
-      where: { productId: { in: productIds }, isActive: true },
-      include: { unitType: true },
-    });
+    const [productUnits, products] = await Promise.all([
+      tx.productUnit.findMany({
+        where: { productId: { in: productIds }, isActive: true },
+        include: { unitType: true },
+      }),
+      tx.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, costPrice: true },
+      }),
+    ]);
     const byProduct = new Map<string, typeof productUnits>();
     for (const pu of productUnits) {
       const list = byProduct.get(pu.productId) ?? [];
       list.push(pu);
       byProduct.set(pu.productId, list);
     }
+    const costByProduct = new Map(products.map((p) => [p.id, Number(p.costPrice)]));
 
     return items.map((item) => {
       const units = byProduct.get(item.productId) ?? [];
@@ -845,10 +852,18 @@ export class SalesService {
         matched = units.find((u) => u.isBase) ?? units[0];
       }
 
+      const stockFactor = matched ? Number(matched.stockFactor) : 1;
+      const baseCost = costByProduct.get(item.productId) ?? 0;
+      const costPrice =
+        item.costPrice != null && item.costPrice > 0
+          ? item.costPrice
+          : Math.round(baseCost * stockFactor * 10000) / 10000;
+
       return {
         ...item,
         unitTypeId: matched?.unitTypeId ?? null,
-        stockFactor: matched ? Number(matched.stockFactor) : 1,
+        stockFactor,
+        costPrice,
       };
     });
   }

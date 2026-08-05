@@ -232,7 +232,7 @@ export class PurchasesPage implements OnInit, OnDestroy {
     if (!this.canUpdate || purchase.status !== 'DRAFT') return;
 
     let message =
-      purchase.reduceCash && purchase.fundSource === 'REGISTER'
+      purchase.reduceCash && purchase.paymentTypeAffectsCash
         ? `¿Recibir "${purchase.documentNumber}"? Se actualizará el inventario y se descontará el efectivo de la caja.`
         : `¿Recibir "${purchase.documentNumber}"? Se actualizará el inventario.`;
 

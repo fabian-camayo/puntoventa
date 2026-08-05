@@ -23,6 +23,17 @@ export class ReportsController {
     return this.reportsService.getSalesSummary(branchId, from, to);
   }
 
+  @Get('sales-profit')
+  @RequirePermissions('reports.view')
+  @ApiOperation({ summary: 'Reporte de ventas y ganancias' })
+  getSalesProfit(
+    @Query('branchId') branchId: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return this.reportsService.getSalesProfit(branchId, from, to);
+  }
+
   @Get('inventory-valuation')
   @RequirePermissions('reports.view')
   @ApiOperation({ summary: 'Valoración de inventario' })

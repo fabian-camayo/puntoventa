@@ -30,6 +30,7 @@ import {
   cloudUploadOutline,
   documentOutline,
   walletOutline,
+  barChartOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@core/services/auth.service';
 import { ConfigService } from '@core/services/config.service';
@@ -61,6 +62,7 @@ addIcons({
   cloudUploadOutline,
   documentOutline,
   walletOutline,
+  barChartOutline,
 });
 
 export interface NavItem {
@@ -83,6 +85,12 @@ const NAV_ITEMS: NavItem[] = [
     icon: 'receipt-outline',
     route: '/admin/sales',
     permission: 'sales.view',
+  },
+  {
+    labelKey: 'ADMIN.REPORTS',
+    icon: 'bar-chart-outline',
+    route: '/admin/reports',
+    permission: 'reports.view',
   },
   {
     labelKey: 'ADMIN.PURCHASES',
@@ -119,12 +127,6 @@ const NAV_ITEMS: NavItem[] = [
     icon: 'card-outline',
     route: '/admin/payment-types',
     permission: 'payment_types.view',
-  },
-  {
-    labelKey: 'ADMIN.BANK_ACCOUNTS',
-    icon: 'wallet-outline',
-    route: '/admin/bank-accounts',
-    permission: 'bank_accounts.view',
   },
   {
     labelKey: 'ADMIN.UNIT_TYPES',

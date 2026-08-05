@@ -14,7 +14,7 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { PurchaseFundSource, PurchasePaymentTerm } from '@prisma/client';
+import { PurchasePaymentTerm } from '@prisma/client';
 
 export class CreatePurchaseItemDto {
   @ApiProperty()
@@ -72,26 +72,18 @@ export class CreatePurchaseDto {
   @IsEnum(PurchasePaymentTerm)
   paymentTerm?: PurchasePaymentTerm;
 
-  @ApiPropertyOptional({ enum: PurchaseFundSource })
+  @ApiPropertyOptional()
   @ValidateIf((o: CreatePurchaseDto) => (o.paymentTerm ?? PurchasePaymentTerm.CASH) === PurchasePaymentTerm.CASH)
-  @IsEnum(PurchaseFundSource)
-  fundSource?: PurchaseFundSource;
+  @IsUUID()
+  paymentTypeId?: string;
 
   @ApiPropertyOptional()
-  @ValidateIf(
-    (o: CreatePurchaseDto) =>
-      (o.paymentTerm ?? PurchasePaymentTerm.CASH) === PurchasePaymentTerm.CASH &&
-      o.fundSource === PurchaseFundSource.BANK_ACCOUNT,
-  )
+  @IsOptional()
   @IsUUID()
   bankAccountId?: string;
 
   @ApiPropertyOptional()
-  @ValidateIf(
-    (o: CreatePurchaseDto) =>
-      (o.paymentTerm ?? PurchasePaymentTerm.CASH) === PurchasePaymentTerm.CASH &&
-      o.fundSource === PurchaseFundSource.REGISTER,
-  )
+  @IsOptional()
   @IsUUID()
   registerId?: string;
 

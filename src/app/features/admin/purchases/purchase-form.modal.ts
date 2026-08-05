@@ -42,11 +42,10 @@ import {
   firstValueFrom,
   takeUntil,
 } from 'rxjs';
-import { BankAccountDto, ProductDto, ProductSearchResult, RegisterDto } from '@puntoventa/shared';
+import { PaymentTypeDto, ProductDto, ProductSearchResult, RegisterDto } from '@puntoventa/shared';
 import {
   CreatePurchasePayload,
   PurchaseDto,
-  PurchaseFundSource,
   PurchaseItemDto,
   PurchasePaymentTerm,
   PurchaseService,
@@ -55,8 +54,8 @@ import {
 import { SupplierDto } from '@core/services/supplier.service';
 import { ProductService } from '@core/services/product.service';
 import { CategoryService } from '@core/services/category.service';
-import { BankAccountService } from '@core/services/bank-account.service';
 import { RegisterService } from '@core/services/register.service';
+import { PaymentTypeService } from '@core/services/payment-type.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppCurrencyPipe } from '@shared/pipes/app-currency.pipe';
 import { FieldErrorComponent } from '@shared/components/field-error/field-error.component';
@@ -130,8 +129,8 @@ export class PurchaseFormModal implements OnInit, OnDestroy {
   private readonly purchaseService = inject(PurchaseService);
   private readonly productService = inject(ProductService);
   private readonly categoryService = inject(CategoryService);
-  private readonly bankAccountService = inject(BankAccountService);
   private readonly registerService = inject(RegisterService);
+  private readonly paymentTypeService = inject(PaymentTypeService);
   private readonly auth = inject(AuthService);
   private readonly modalCtrl = inject(ModalController);
   private readonly toast = inject(ToastController);
@@ -150,7 +149,7 @@ export class PurchaseFormModal implements OnInit, OnDestroy {
   searchResults = signal<ProductSearchResult[]>([]);
   searching = signal(false);
   registers = signal<RegisterDto[]>([]);
-  bankAccounts = signal<BankAccountDto[]>([]);
+  paymentTypes = signal<PaymentTypeDto[]>([]);
   readonly isInvalid = isControlInvalid;
 
   readonly canCreate = this.auth.hasPermission('purchases.create');
@@ -165,9 +164,8 @@ export class PurchaseFormModal implements OnInit, OnDestroy {
     documentNumber: ['', [Validators.required, Validators.maxLength(50)]],
     purchaseDate: [this.todayIsoDate(), Validators.required],
     paymentTerm: ['CASH' as PurchasePaymentTerm, Validators.required],
-    fundSource: ['REGISTER' as PurchaseFundSource | ''],
+    paymentTypeId: [''],
     registerId: [''],
-    bankAccountId: [''],
     reduceCash: [true],
     notes: [''],
   });
@@ -184,9 +182,8 @@ export class PurchaseFormModal implements OnInit, OnDestroy {
         documentNumber: this.purchase.documentNumber,
         purchaseDate: this.purchase.purchaseDate?.slice(0, 10) || this.todayIsoDate(),
         paymentTerm: this.purchase.paymentTerm ?? 'CASH',
-        fundSource: this.purchase.fundSource ?? 'REGISTER',
+        paymentTypeId: this.purchase.paymentTypeId ?? '',
         registerId: this.purchase.registerId ?? '',
-        bankAccountId: this.purchase.bankAccountId ?? '',
         reduceCash: this.purchase.reduceCash ?? true,
         notes: this.purchase.notes ?? '',
       });
@@ -224,12 +221,13 @@ export class PurchaseFormModal implements OnInit, OnDestroy {
     return this.form.controls.paymentTerm.value === 'CASH';
   }
 
-  get isRegisterFund(): boolean {
-    return this.isCash && this.form.controls.fundSource.value === 'REGISTER';
+  get selectedPaymentType(): PaymentTypeDto | undefined {
+    const id = this.form.controls.paymentTypeId.value;
+    return this.paymentTypes().find((t) => t.id === id);
   }
 
-  get isBankFund(): boolean {
-    return this.isCash && this.form.controls.fundSource.value === 'BANK_ACCOUNT';
+  get isCashAffectsRegister(): boolean {
+    return this.isCash && this.selectedPaymentType?.affectsCash === true;
   }
 
   lineSubtotal(line: EditableLine): number {
@@ -461,8 +459,9 @@ export class PurchaseFormModal implements OnInit, OnDestroy {
     this.saving.set(true);
     const raw = this.form.getRawValue();
     const paymentTerm = raw.paymentTerm;
-    const fundSource =
-      paymentTerm === 'CASH' ? (raw.fundSource as PurchaseFundSource) : undefined;
+    const paymentType = this.selectedPaymentType;
+    const paymentTypeId = paymentTerm === 'CASH' ? raw.paymentTypeId || undefined : undefined;
+    const affectsCash = paymentType?.affectsCash === true;
 
     try {
       let saved: PurchaseDto;
@@ -472,19 +471,11 @@ export class PurchaseFormModal implements OnInit, OnDestroy {
           notes: raw.notes || undefined,
           purchaseDate: raw.purchaseDate,
           paymentTerm,
-          fundSource: paymentTerm === 'CASH' ? fundSource : null,
+          paymentTypeId: paymentTerm === 'CASH' ? paymentTypeId ?? null : null,
           registerId:
-            paymentTerm === 'CASH' && fundSource === 'REGISTER'
-              ? raw.registerId || null
-              : null,
-          bankAccountId:
-            paymentTerm === 'CASH' && fundSource === 'BANK_ACCOUNT'
-              ? raw.bankAccountId || null
-              : null,
-          reduceCash:
-            paymentTerm === 'CASH' && fundSource === 'REGISTER'
-              ? raw.reduceCash
-              : false,
+            paymentTerm === 'CASH' && affectsCash ? raw.registerId || null : null,
+          bankAccountId: null,
+          reduceCash: paymentTerm === 'CASH' && affectsCash ? raw.reduceCash : false,
           items: this.lines().map((line) => ({
             productId: line.productId,
             unitTypeId: line.unitTypeId,
@@ -503,19 +494,10 @@ export class PurchaseFormModal implements OnInit, OnDestroy {
           documentNumber: raw.documentNumber,
           purchaseDate: raw.purchaseDate,
           paymentTerm,
-          fundSource,
+          paymentTypeId,
           registerId:
-            paymentTerm === 'CASH' && fundSource === 'REGISTER'
-              ? raw.registerId || undefined
-              : undefined,
-          bankAccountId:
-            paymentTerm === 'CASH' && fundSource === 'BANK_ACCOUNT'
-              ? raw.bankAccountId || undefined
-              : undefined,
-          reduceCash:
-            paymentTerm === 'CASH' && fundSource === 'REGISTER'
-              ? raw.reduceCash
-              : false,
+            paymentTerm === 'CASH' && affectsCash ? raw.registerId || undefined : undefined,
+          reduceCash: paymentTerm === 'CASH' && affectsCash ? raw.reduceCash : false,
           notes: raw.notes || undefined,
           items: this.lines().map((line) => ({
             productId: line.productId,
@@ -552,7 +534,7 @@ export class PurchaseFormModal implements OnInit, OnDestroy {
     const raw = this.form.getRawValue();
     const reducesCash =
       raw.paymentTerm === 'CASH' &&
-      raw.fundSource === 'REGISTER' &&
+      this.selectedPaymentType?.affectsCash === true &&
       raw.reduceCash;
 
     let message = reducesCash
@@ -631,54 +613,69 @@ export class PurchaseFormModal implements OnInit, OnDestroy {
     this.form.controls.paymentTerm.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => this.applyPaymentValidators());
-    this.form.controls.fundSource.valueChanges
+    this.form.controls.paymentTypeId.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => this.applyPaymentValidators());
   }
 
   private applyPaymentValidators(): void {
-    const { paymentTerm, fundSource, registerId, bankAccountId } = this.form.controls;
+    const { paymentTerm, paymentTypeId, registerId } = this.form.controls;
 
     if (paymentTerm.value === 'CREDIT') {
-      fundSource.clearValidators();
+      paymentTypeId.clearValidators();
       registerId.clearValidators();
-      bankAccountId.clearValidators();
-      fundSource.setValue('', { emitEvent: false });
+      paymentTypeId.setValue('', { emitEvent: false });
       registerId.setValue('', { emitEvent: false });
-      bankAccountId.setValue('', { emitEvent: false });
     } else {
-      fundSource.setValidators([Validators.required]);
-      if (!fundSource.value) {
-        fundSource.setValue('REGISTER', { emitEvent: false });
+      paymentTypeId.setValidators([Validators.required]);
+      if (!paymentTypeId.value && this.paymentTypes().length) {
+        const preferred =
+          this.paymentTypes().find((t) => t.affectsCash) ?? this.paymentTypes()[0];
+        if (preferred) {
+          paymentTypeId.setValue(preferred.id, { emitEvent: false });
+        }
       }
-      if (fundSource.value === 'REGISTER') {
+
+      const selected = this.paymentTypes().find((t) => t.id === paymentTypeId.value);
+      if (selected?.affectsCash) {
         registerId.setValidators([Validators.required]);
-        bankAccountId.clearValidators();
-        bankAccountId.setValue('', { emitEvent: false });
       } else {
-        bankAccountId.setValidators([Validators.required]);
         registerId.clearValidators();
         registerId.setValue('', { emitEvent: false });
       }
     }
 
-    fundSource.updateValueAndValidity({ emitEvent: false });
+    paymentTypeId.updateValueAndValidity({ emitEvent: false });
     registerId.updateValueAndValidity({ emitEvent: false });
-    bankAccountId.updateValueAndValidity({ emitEvent: false });
   }
 
   private async loadPaymentOptions(): Promise<void> {
     if (!this.branchId) return;
     try {
-      const [registers, accounts] = await Promise.all([
+      const [registers, typesRaw] = await Promise.all([
         firstValueFrom(this.registerService.listRegisters(this.branchId, { limit: 100 })),
-        firstValueFrom(this.bankAccountService.listActive(this.branchId)),
+        firstValueFrom(this.paymentTypeService.listActive()),
       ]);
       this.registers.set(registers.items.filter((r) => r.isActive));
-      this.bankAccounts.set(accounts);
+      const types = [...typesRaw];
+      if (
+        this.purchase?.paymentTypeId &&
+        !types.some((t) => t.id === this.purchase!.paymentTypeId)
+      ) {
+        types.unshift({
+          id: this.purchase.paymentTypeId,
+          code: this.purchase.paymentTypeCode ?? '',
+          name: this.purchase.paymentTypeName ?? this.purchase.paymentTypeId,
+          affectsCash: this.purchase.paymentTypeAffectsCash ?? false,
+          isActive: true,
+          sortOrder: 0,
+        });
+      }
+      this.paymentTypes.set(types);
+      this.applyPaymentValidators();
     } catch {
       this.registers.set([]);
-      this.bankAccounts.set([]);
+      this.paymentTypes.set([]);
     }
   }
 

@@ -18,7 +18,6 @@ export const ADMIN_ROUTES: Routes = [
         'purchases.view',
         'categories.view',
         'payment_types.view',
-        'bank_accounts.view',
         'unit_types.view',
         'product_import_types.view',
         'products.import',
@@ -73,10 +72,8 @@ export const ADMIN_ROUTES: Routes = [
   },
   {
     path: 'bank-accounts',
-    loadComponent: () =>
-      import('./bank-accounts/bank-accounts.page').then((m) => m.BankAccountsPage),
-    canActivate: [permissionGuard],
-    data: { permission: 'bank_accounts.view' },
+    redirectTo: 'payment-types',
+    pathMatch: 'full',
   },
   {
     path: 'unit-types',
@@ -121,6 +118,13 @@ export const ADMIN_ROUTES: Routes = [
       import('./sales/sales.page').then((m) => m.SalesPage),
     canActivate: [permissionGuard],
     data: { permission: 'sales.view' },
+  },
+  {
+    path: 'reports',
+    loadComponent: () =>
+      import('./reports/reports.page').then((m) => m.ReportsPage),
+    canActivate: [permissionGuard],
+    data: { permission: 'reports.view' },
   },
   {
     path: 'purchases',
