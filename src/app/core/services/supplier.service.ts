@@ -13,6 +13,7 @@ export interface SupplierDto {
   taxId?: string;
   email?: string;
   phone?: string;
+  city?: string;
   address?: string;
   isActive: boolean;
 }
@@ -24,6 +25,7 @@ export interface CreateSupplierPayload {
   taxId?: string;
   email?: string;
   phone?: string;
+  city?: string;
   address?: string;
   isActive?: boolean;
 }
@@ -33,6 +35,7 @@ export interface UpdateSupplierPayload {
   taxId?: string;
   email?: string;
   phone?: string;
+  city?: string;
   address?: string;
   isActive?: boolean;
 }

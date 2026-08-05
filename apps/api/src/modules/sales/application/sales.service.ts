@@ -13,6 +13,7 @@ import { AuditService } from '../../audit/application/audit.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { CheckoutDto } from './dto/checkout.dto';
+import { AdminUpdateSaleDto } from './dto/admin-update-sale.dto';
 import { JwtPayload } from '@puntoventa/shared';
 
 @Injectable()
@@ -214,8 +215,6 @@ export class SalesService {
       throw new ConflictException('Conflicto de versión. Recargue la venta.');
     }
 
-    const documentNumber = await this.generateDocumentNumber(existing.branchId);
-
     const result = await this.prisma.executeInTransaction(async (tx) => {
       const openSession = await tx.registerSession.findFirst({
         where: {
@@ -227,97 +226,16 @@ export class SalesService {
         throw new BadRequestException('Debe abrir la caja antes de cobrar una venta');
       }
 
-      for (const item of existing.items) {
-        const product = await tx.product.findUnique({ where: { id: item.productId } });
-        if (product?.trackInventory) {
-          const stockQty = new Prisma.Decimal(item.quantity).mul(item.stockFactor);
-          const updated = await tx.inventoryItem.updateMany({
-            where: {
-              branchId: existing.branchId,
-              productId: item.productId,
-              quantity: { gte: stockQty },
-            },
-            data: {
-              quantity: { decrement: stockQty },
-              version: { increment: 1 },
-            },
-          });
-          if (updated.count === 0) {
-            const config = await tx.businessConfig.findFirst({
-              where: { branchId: existing.branchId },
-            });
-            if (!config?.allowNegativeStock) {
-              throw new BadRequestException(
-                `Stock insuficiente para ${product.name}`,
-              );
-            }
-            await tx.inventoryItem.upsert({
-              where: {
-                branchId_productId: {
-                  branchId: existing.branchId,
-                  productId: item.productId,
-                },
-              },
-              create: {
-                branchId: existing.branchId,
-                productId: item.productId,
-                quantity: stockQty.negated(),
-              },
-              update: {
-                quantity: { decrement: stockQty },
-              },
-            });
-          }
-        }
-      }
+      const documentNumber = await this.allocateDocumentNumber(tx, existing.branchId);
 
-      await tx.salePayment.deleteMany({ where: { saleId: id } });
+      await this.deductInventory(tx, existing.branchId, existing.items);
 
-      const paymentTypeIds = [...new Set(dto.payments.map((p) => p.paymentTypeId))];
-      const paymentTypes = await tx.paymentType.findMany({
-        where: { id: { in: paymentTypeIds }, isActive: true },
-      });
-      if (paymentTypes.length !== paymentTypeIds.length) {
-        throw new BadRequestException('Uno o más tipos de pago no son válidos');
-      }
-      const paymentTypeMap = new Map(paymentTypes.map((pt) => [pt.id, pt]));
-
-      const saleTotal = Number(existing.total);
-      let nonCashPaid = 0;
-      let cashTendered = 0;
-
-      for (const payment of dto.payments) {
-        if (payment.amount <= 0) {
-          throw new BadRequestException('El monto de cada pago debe ser mayor a cero');
-        }
-        const type = paymentTypeMap.get(payment.paymentTypeId)!;
-        if (type.affectsCash) {
-          cashTendered += payment.amount;
-        } else {
-          nonCashPaid += payment.amount;
-        }
-      }
-
-      const cashRequired = Math.max(0, Math.round((saleTotal - nonCashPaid) * 100) / 100);
-      const totalPaid = Math.round((nonCashPaid + cashTendered) * 100) / 100;
-      if (totalPaid + 0.001 < saleTotal) {
-        throw new BadRequestException('El pago es insuficiente para cubrir el total de la venta');
-      }
-      if (cashTendered + 0.001 < cashRequired) {
-        throw new BadRequestException('El efectivo recibido es insuficiente');
-      }
-
-      const changeAmount = Math.max(0, Math.round((cashTendered - cashRequired) * 100) / 100);
-      const cashIntoRegister = Math.round((cashTendered - changeAmount) * 100) / 100;
-
-      await tx.salePayment.createMany({
-        data: dto.payments.map((p) => ({
-          saleId: id,
-          paymentTypeId: p.paymentTypeId,
-          amount: p.amount,
-          reference: p.reference,
-        })),
-      });
+      const paymentSettlement = await this.applyPayments(
+        tx,
+        id,
+        Number(existing.total),
+        dto.payments,
+      );
 
       const sale = await tx.sale.update({
         where: { id },
@@ -325,8 +243,8 @@ export class SalesService {
           status: SaleStatus.COMPLETED,
           documentNumber,
           registerSessionId: openSession.id,
-          amountPaid: totalPaid,
-          changeAmount,
+          amountPaid: paymentSettlement.totalPaid,
+          changeAmount: paymentSettlement.changeAmount,
           completedAt: new Date(),
           version: { increment: 1 },
         },
@@ -337,13 +255,13 @@ export class SalesService {
         },
       });
 
-      if (cashIntoRegister > 0) {
+      if (paymentSettlement.cashIntoRegister > 0) {
         await tx.cashMovement.create({
           data: {
             registerSessionId: openSession.id,
             userId: user.sub,
             type: CashMovementType.SALE,
-            amount: cashIntoRegister,
+            amount: paymentSettlement.cashIntoRegister,
             description: `Venta ${documentNumber}`,
             reference: documentNumber,
           },
@@ -359,19 +277,227 @@ export class SalesService {
       module: 'sales',
       entityType: 'Sale',
       entityId: id,
-      newValues: { documentNumber, total: Number(result.total) },
+      newValues: { documentNumber: result.documentNumber, total: Number(result.total) },
     });
 
     return this.mapSaleToDto(result);
   }
 
-  private async generateDocumentNumber(branchId: string): Promise<string> {
-    const count = await this.prisma.sale.count({
-      where: { branchId, status: SaleStatus.COMPLETED },
+  /** Anula una venta completada: restaura stock y revierte el efectivo en caja. */
+  async voidSale(id: string, user: JwtPayload) {
+    const existing = await this.saleRepository.findByIdWithDetails(id);
+    if (!existing) throw new NotFoundException('Venta no encontrada');
+    if (existing.status !== SaleStatus.COMPLETED) {
+      throw new BadRequestException('Solo se pueden anular ventas completadas');
+    }
+
+    const result = await this.prisma.executeInTransaction(async (tx) => {
+      await this.restoreInventory(tx, existing.branchId, existing.items);
+      await this.reverseSaleCashMovement(tx, existing, user.sub);
+
+      return tx.sale.update({
+        where: { id },
+        data: {
+          status: SaleStatus.VOIDED,
+          version: { increment: 1 },
+        },
+        include: {
+          items: { include: { product: true, unitType: true } },
+          payments: { include: { paymentType: true } },
+          customer: true,
+        },
+      });
     });
-    const date = new Date();
-    const prefix = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}`;
-    return `V-${prefix}-${String(count + 1).padStart(6, '0')}`;
+
+    await this.auditService.log({
+      userId: user.sub,
+      action: 'VOID',
+      module: 'sales',
+      entityType: 'Sale',
+      entityId: id,
+      oldValues: {
+        documentNumber: existing.documentNumber,
+        total: Number(existing.total),
+        status: existing.status,
+      },
+    });
+
+    return this.mapSaleToDto(result);
+  }
+
+  /**
+   * Edita una venta completada: revierte stock/caja anteriores,
+   * aplica nuevos ítems y pagos, y mantiene el número de documento.
+   */
+  async adminUpdate(id: string, dto: AdminUpdateSaleDto, user: JwtPayload) {
+    const existing = await this.saleRepository.findByIdWithDetails(id);
+    if (!existing) throw new NotFoundException('Venta no encontrada');
+    if (existing.status !== SaleStatus.COMPLETED) {
+      throw new BadRequestException('Solo se pueden editar ventas completadas');
+    }
+    if (existing.version !== dto.version) {
+      throw new ConflictException('Conflicto de versión. Recargue la venta.');
+    }
+
+    const documentNumber = existing.documentNumber;
+    if (!documentNumber) {
+      throw new BadRequestException('La venta no tiene número de documento');
+    }
+
+    const result = await this.prisma.executeInTransaction(async (tx) => {
+      await this.restoreInventory(tx, existing.branchId, existing.items);
+      await this.reverseSaleCashMovement(tx, existing, user.sub);
+
+      const resolvedItems = await this.resolveSaleItemUnits(tx, dto.items);
+      await tx.saleItem.deleteMany({ where: { saleId: id } });
+      await tx.saleItem.createMany({
+        data: resolvedItems.map((item) => ({
+          saleId: id,
+          productId: item.productId,
+          unitTypeId: item.unitTypeId,
+          stockFactor: item.stockFactor,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          costPrice: item.costPrice ?? 0,
+          discountAmount: item.discountAmount ?? 0,
+          discountPercent: item.discountPercent ?? 0,
+          taxRate: item.taxRate ?? 0,
+          taxAmount: item.taxAmount ?? 0,
+          subtotal: item.subtotal,
+          total: item.total,
+          notes: item.notes,
+        })),
+      });
+
+      await this.deductInventory(tx, existing.branchId, resolvedItems);
+
+      const saleTotal =
+        dto.total ??
+        resolvedItems.reduce((sum, item) => sum + Number(item.total), 0);
+
+      const paymentSettlement = await this.applyPayments(
+        tx,
+        id,
+        saleTotal,
+        dto.payments,
+      );
+
+      const sessionId =
+        existing.registerSessionId ??
+        (
+          await tx.registerSession.findFirst({
+            where: {
+              registerId: existing.registerId,
+              status: RegisterSessionStatus.OPEN,
+            },
+            select: { id: true },
+          })
+        )?.id;
+
+      if (paymentSettlement.cashIntoRegister > 0) {
+        if (!sessionId) {
+          throw new BadRequestException(
+            'No hay sesión de caja para registrar el efectivo de la venta editada',
+          );
+        }
+        await tx.cashMovement.create({
+          data: {
+            registerSessionId: sessionId,
+            userId: user.sub,
+            type: CashMovementType.SALE,
+            amount: paymentSettlement.cashIntoRegister,
+            description: `Venta ${documentNumber} (editada)`,
+            reference: documentNumber,
+          },
+        });
+      }
+
+      return tx.sale.update({
+        where: { id },
+        data: {
+          customerId: dto.customerId,
+          discountAmount: dto.discountAmount,
+          discountPercent: dto.discountPercent,
+          subtotal: dto.subtotal ?? saleTotal - (dto.taxAmount ?? 0),
+          taxAmount: dto.taxAmount,
+          total: saleTotal,
+          amountPaid: paymentSettlement.totalPaid,
+          changeAmount: paymentSettlement.changeAmount,
+          notes: dto.notes,
+          registerSessionId: sessionId ?? existing.registerSessionId,
+          version: { increment: 1 },
+        },
+        include: {
+          items: { include: { product: true, unitType: true } },
+          payments: { include: { paymentType: true } },
+          customer: true,
+        },
+      });
+    });
+
+    await this.auditService.log({
+      userId: user.sub,
+      action: 'UPDATE',
+      module: 'sales',
+      entityType: 'Sale',
+      entityId: id,
+      oldValues: { total: Number(existing.total) },
+      newValues: { total: Number(result.total), documentNumber },
+    });
+
+    return this.mapSaleToDto(result);
+  }
+
+  /**
+   * Elimina una venta.
+   * Si está completada, restaura stock y revierte el efectivo antes de borrarla.
+   */
+  async remove(id: string, user: JwtPayload) {
+    const existing = await this.saleRepository.findByIdWithDetails(id);
+    if (!existing) throw new NotFoundException('Venta no encontrada');
+
+    await this.prisma.executeInTransaction(async (tx) => {
+      if (existing.status === SaleStatus.COMPLETED) {
+        await this.restoreInventory(tx, existing.branchId, existing.items);
+        await this.reverseSaleCashMovement(tx, existing, user.sub);
+      }
+
+      await tx.sale.delete({ where: { id } });
+    });
+
+    await this.auditService.log({
+      userId: user.sub,
+      action: 'DELETE',
+      module: 'sales',
+      entityType: 'Sale',
+      entityId: id,
+      oldValues: {
+        documentNumber: existing.documentNumber,
+        status: existing.status,
+        total: Number(existing.total),
+      },
+    });
+
+    return { deleted: true };
+  }
+
+  private async allocateDocumentNumber(
+    tx: Prisma.TransactionClient,
+    branchId: string,
+  ): Promise<string> {
+    const config = await tx.businessConfig.findUnique({ where: { branchId } });
+    const prefix = (config?.invoicePrefix ?? 'FEV').trim().toUpperCase() || 'FEV';
+    const padding = Math.min(10, Math.max(1, config?.invoiceNumberPadding ?? 3));
+    const next = Math.max(1, config?.invoiceNextNumber ?? 1);
+
+    if (config) {
+      await tx.businessConfig.update({
+        where: { branchId },
+        data: { invoiceNextNumber: next + 1 },
+      });
+    }
+
+    return `${prefix}${String(next).padStart(padding, '0')}`;
   }
 
   private mapSaleToDto(sale: {
@@ -470,6 +596,208 @@ export class SalesService {
       version: sale.version,
       completedAt: sale.completedAt?.toISOString(),
     };
+  }
+
+  private async deductInventory(
+    tx: Prisma.TransactionClient,
+    branchId: string,
+    items: Array<{
+      productId: string;
+      quantity: Prisma.Decimal | number;
+      stockFactor?: Prisma.Decimal | number;
+      product?: { name?: string } | null;
+    }>,
+  ): Promise<void> {
+    for (const item of items) {
+      const product = await tx.product.findUnique({ where: { id: item.productId } });
+      if (!product?.trackInventory) continue;
+
+      const stockQty = new Prisma.Decimal(item.quantity).mul(item.stockFactor ?? 1);
+      const updated = await tx.inventoryItem.updateMany({
+        where: {
+          branchId,
+          productId: item.productId,
+          quantity: { gte: stockQty },
+        },
+        data: {
+          quantity: { decrement: stockQty },
+          version: { increment: 1 },
+        },
+      });
+
+      if (updated.count === 0) {
+        const config = await tx.businessConfig.findFirst({
+          where: { branchId },
+        });
+        if (!config?.allowNegativeStock) {
+          throw new BadRequestException(
+            `Stock insuficiente para ${product.name}`,
+          );
+        }
+        await tx.inventoryItem.upsert({
+          where: {
+            branchId_productId: {
+              branchId,
+              productId: item.productId,
+            },
+          },
+          create: {
+            branchId,
+            productId: item.productId,
+            quantity: stockQty.negated(),
+          },
+          update: {
+            quantity: { decrement: stockQty },
+          },
+        });
+      }
+    }
+  }
+
+  private async restoreInventory(
+    tx: Prisma.TransactionClient,
+    branchId: string,
+    items: Array<{
+      productId: string;
+      quantity: Prisma.Decimal | number;
+      stockFactor?: Prisma.Decimal | number;
+    }>,
+  ): Promise<void> {
+    for (const item of items) {
+      const product = await tx.product.findUnique({ where: { id: item.productId } });
+      if (!product?.trackInventory) continue;
+
+      const stockQty = new Prisma.Decimal(item.quantity).mul(item.stockFactor ?? 1);
+      await tx.inventoryItem.upsert({
+        where: {
+          branchId_productId: {
+            branchId,
+            productId: item.productId,
+          },
+        },
+        create: {
+          branchId,
+          productId: item.productId,
+          quantity: stockQty,
+        },
+        update: {
+          quantity: { increment: stockQty },
+          version: { increment: 1 },
+        },
+      });
+    }
+  }
+
+  private async applyPayments(
+    tx: Prisma.TransactionClient,
+    saleId: string,
+    saleTotal: number,
+    payments: Array<{ paymentTypeId: string; amount: number; reference?: string }>,
+  ): Promise<{ totalPaid: number; changeAmount: number; cashIntoRegister: number }> {
+    await tx.salePayment.deleteMany({ where: { saleId } });
+
+    const paymentTypeIds = [...new Set(payments.map((p) => p.paymentTypeId))];
+    const paymentTypes = await tx.paymentType.findMany({
+      where: { id: { in: paymentTypeIds }, isActive: true },
+    });
+    if (paymentTypes.length !== paymentTypeIds.length) {
+      throw new BadRequestException('Uno o más tipos de pago no son válidos');
+    }
+    const paymentTypeMap = new Map(paymentTypes.map((pt) => [pt.id, pt]));
+
+    let nonCashPaid = 0;
+    let cashTendered = 0;
+
+    for (const payment of payments) {
+      if (payment.amount <= 0) {
+        throw new BadRequestException('El monto de cada pago debe ser mayor a cero');
+      }
+      const type = paymentTypeMap.get(payment.paymentTypeId)!;
+      if (type.affectsCash) {
+        cashTendered += payment.amount;
+      } else {
+        nonCashPaid += payment.amount;
+      }
+    }
+
+    const cashRequired = Math.max(0, Math.round((saleTotal - nonCashPaid) * 100) / 100);
+    const totalPaid = Math.round((nonCashPaid + cashTendered) * 100) / 100;
+    if (totalPaid + 0.001 < saleTotal) {
+      throw new BadRequestException('El pago es insuficiente para cubrir el total de la venta');
+    }
+    if (cashTendered + 0.001 < cashRequired) {
+      throw new BadRequestException('El efectivo recibido es insuficiente');
+    }
+
+    const changeAmount = Math.max(0, Math.round((cashTendered - cashRequired) * 100) / 100);
+    const cashIntoRegister = Math.round((cashTendered - changeAmount) * 100) / 100;
+
+    await tx.salePayment.createMany({
+      data: payments.map((p) => ({
+        saleId,
+        paymentTypeId: p.paymentTypeId,
+        amount: p.amount,
+        reference: p.reference,
+      })),
+    });
+
+    return { totalPaid, changeAmount, cashIntoRegister };
+  }
+
+  private async reverseSaleCashMovement(
+    tx: Prisma.TransactionClient,
+    sale: {
+      documentNumber?: string | null;
+      registerSessionId?: string | null;
+      registerId: string;
+    },
+    userId: string,
+  ): Promise<void> {
+    if (!sale.documentNumber) return;
+
+    let sessionId = sale.registerSessionId;
+    if (!sessionId) {
+      const openSession = await tx.registerSession.findFirst({
+        where: {
+          registerId: sale.registerId,
+          status: RegisterSessionStatus.OPEN,
+        },
+        select: { id: true },
+      });
+      sessionId = openSession?.id ?? null;
+    }
+    if (!sessionId) return;
+
+    const saleMovements = await tx.cashMovement.findMany({
+      where: {
+        registerSessionId: sessionId,
+        type: CashMovementType.SALE,
+        reference: sale.documentNumber,
+      },
+    });
+    const soldCash = saleMovements.reduce((sum, m) => sum + Number(m.amount), 0);
+
+    const refundMovements = await tx.cashMovement.findMany({
+      where: {
+        registerSessionId: sessionId,
+        type: CashMovementType.REFUND,
+        reference: sale.documentNumber,
+      },
+    });
+    const refunded = refundMovements.reduce((sum, m) => sum + Number(m.amount), 0);
+    const toRefund = Math.round((soldCash - refunded) * 100) / 100;
+    if (toRefund <= 0) return;
+
+    await tx.cashMovement.create({
+      data: {
+        registerSessionId: sessionId,
+        userId,
+        type: CashMovementType.REFUND,
+        amount: toRefund,
+        description: `Anulación venta ${sale.documentNumber}`,
+        reference: sale.documentNumber,
+      },
+    });
   }
 
   private async resolveSaleItemUnits(

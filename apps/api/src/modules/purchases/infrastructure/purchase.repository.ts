@@ -20,6 +20,8 @@ export class PurchaseRepository {
       where: { id },
       include: {
         supplier: true,
+        bankAccount: true,
+        register: true,
         items: { include: { product: true, unitType: true } },
         user: { select: { id: true, username: true, firstName: true, lastName: true } },
       },
@@ -46,7 +48,12 @@ export class PurchaseRepository {
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { supplier: true, items: { include: { product: true, unitType: true } } },
+        include: {
+          supplier: true,
+          bankAccount: true,
+          register: true,
+          items: { include: { product: true, unitType: true } },
+        },
       }),
       this.prisma.purchase.count({ where }),
     ]).then(([items, total]) => ({

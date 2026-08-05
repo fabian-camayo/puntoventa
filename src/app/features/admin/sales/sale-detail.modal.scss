@@ -35,6 +35,17 @@
   background: var(--pv-bg-secondary);
 }
 
+.payments-block {
+  padding: 12px 16px;
+  border-top: 1px solid var(--pv-border);
+}
+
+.payments-block h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  color: var(--pv-text-secondary);
+}
+
 .total-row {
   display: flex;
   justify-content: space-between;

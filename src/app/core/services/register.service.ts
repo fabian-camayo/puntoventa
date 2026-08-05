@@ -8,6 +8,7 @@ import {
   CashMovementDto,
   OpenRegisterRequest,
   PaginatedResult,
+  PosSessionSummaryDto,
   RegisterDto,
   RegisterSessionDto,
   TerminalDto,
@@ -167,6 +168,14 @@ export class RegisterService {
     return this.http
       .get<{ data: RegisterSessionDto }>(
         `${this.config.apiBaseUrl}/registers/sessions/${sessionId}`,
+      )
+      .pipe(map((r) => r.data));
+  }
+
+  getPosSummary(sessionId: string): Observable<PosSessionSummaryDto> {
+    return this.http
+      .get<{ data: PosSessionSummaryDto }>(
+        `${this.config.apiBaseUrl}/registers/sessions/${sessionId}/pos-summary`,
       )
       .pipe(map((r) => r.data));
   }

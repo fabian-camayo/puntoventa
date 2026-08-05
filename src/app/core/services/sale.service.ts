@@ -99,6 +99,48 @@ export class SaleService {
       .pipe(map((r) => r.data));
   }
 
+  voidSale(id: string): Observable<SaleDto> {
+    return this.http
+      .post<{ data: SaleDto }>(`${this.baseUrl}/${id}/void`, {})
+      .pipe(map((r) => r.data));
+  }
+
+  adminUpdateSale(
+    id: string,
+    sale: Partial<SaleDto> & {
+      version: number;
+      items: SaleItemDto[];
+      payments: NonNullable<SaleDto['payments']>;
+    },
+  ): Observable<SaleDto> {
+    const body = {
+      customerId: sale.customerId,
+      subtotal: sale.subtotal,
+      discountAmount: sale.discountAmount,
+      discountPercent: sale.discountPercent,
+      taxAmount: sale.taxAmount,
+      total: sale.total,
+      notes: sale.notes,
+      version: sale.version,
+      items: sale.items.map((item) => this.toUpdateItemPayload(item)),
+      payments: sale.payments.map((p) => ({
+        paymentTypeId: p.paymentTypeId,
+        amount: p.amount,
+        reference: p.reference,
+      })),
+    };
+
+    return this.http
+      .put<{ data: SaleDto }>(`${this.baseUrl}/${id}/admin`, body)
+      .pipe(map((r) => r.data));
+  }
+
+  deleteSale(id: string): Observable<{ deleted: boolean }> {
+    return this.http
+      .delete<{ data: { deleted: boolean } }>(`${this.baseUrl}/${id}`)
+      .pipe(map((r) => r.data));
+  }
+
   /** El API rechaza campos extra (productName, sku, id) por forbidNonWhitelisted. */
   private toUpdateItemPayload(item: SaleItemDto) {
     return {

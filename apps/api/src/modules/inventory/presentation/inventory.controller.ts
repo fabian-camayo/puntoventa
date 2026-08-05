@@ -6,8 +6,10 @@ import {
   Body,
   Query,
   UseGuards,
+  StreamableFile,
+  Header,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiProduces } from '@nestjs/swagger';
 import { InventoryService } from '../application/inventory.service';
 import { CreateAdjustmentDto } from '../application/dto/create-adjustment.dto';
 import { JwtAuthGuard } from '../../../presentation/guards/jwt-auth.guard';
@@ -22,6 +24,30 @@ import { JwtPayload } from '@puntoventa/shared';
 @ApiBearerAuth()
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
+
+  @Get('stock/export')
+  @RequirePermissions('inventory.view', 'reports.export')
+  @ApiOperation({ summary: 'Exportar inventario a Excel' })
+  @ApiProduces(
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  @Header(
+    'Content-Type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  async exportStock(
+    @Query('branchId') branchId: string,
+    @Query('search') search?: string,
+  ): Promise<StreamableFile> {
+    const { buffer, filename } = await this.inventoryService.exportStockExcel(
+      branchId,
+      search,
+    );
+    return new StreamableFile(buffer, {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      disposition: `attachment; filename="${filename}"`,
+    });
+  }
 
   @Get('stock')
   @RequirePermissions('inventory.view')

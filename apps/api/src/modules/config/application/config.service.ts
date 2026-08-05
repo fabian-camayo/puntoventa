@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { ConfigService as NestConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import {
   AppConfigDto,
   ConnectionTestResult,
@@ -73,15 +73,30 @@ export class ConfigService {
       currency: config.currency,
       currencySymbol: config.currencySymbol,
       taxRate: Number(config.taxRate),
+      logoUrl: config.logoUrl ?? undefined,
       ticketHeader: config.ticketHeader ?? undefined,
       ticketFooter: config.ticketFooter ?? undefined,
+      invoicePrefix: config.invoicePrefix ?? 'FEV',
+      invoiceNumberPadding: config.invoiceNumberPadding ?? 3,
+      invoiceNextNumber: config.invoiceNextNumber ?? 1,
       allowNegativeStock: config.allowNegativeStock,
       defaultCustomerId: config.defaultCustomerId ?? undefined,
     };
   }
 
   async updateBusinessConfig(branchId: string, dto: UpdateBusinessConfigDto, actor: JwtPayload) {
-    const config = await this.businessConfigRepository.upsert(branchId, dto);
+    const invoicePrefix = dto.invoicePrefix?.trim().toUpperCase() || undefined;
+    if (invoicePrefix !== undefined && !/^[A-Z0-9_-]{1,20}$/.test(invoicePrefix)) {
+      throw new BadRequestException(
+        'El prefijo de factura solo admite letras, números, guion y guion bajo (máx. 20)',
+      );
+    }
+
+    const config = await this.businessConfigRepository.upsert(branchId, {
+      ...dto,
+      invoicePrefix,
+      logoUrl: dto.logoUrl === undefined ? undefined : dto.logoUrl || null,
+    });
 
     await this.auditService.log({
       userId: actor.sub,
@@ -159,6 +174,11 @@ export class ConfigService {
       registerCode: register.code,
       registerBoundToTerminal,
       businessName: businessConfig?.businessName ?? branch.name,
+      taxId: businessConfig?.taxId ?? undefined,
+      address: businessConfig?.address ?? undefined,
+      phone: businessConfig?.phone ?? undefined,
+      email: businessConfig?.email ?? undefined,
+      logoUrl: businessConfig?.logoUrl ?? undefined,
       ticketHeader: businessConfig?.ticketHeader ?? undefined,
       ticketFooter: businessConfig?.ticketFooter ?? undefined,
       defaultCustomerId: businessConfig?.defaultCustomerId ?? undefined,
@@ -255,6 +275,24 @@ export class ConfigService {
     };
   }
 
+  async logBackupRestore(
+    actor: JwtPayload,
+    filename: string | undefined,
+    statements: number,
+  ): Promise<void> {
+    await this.auditService.log({
+      userId: actor.sub,
+      action: 'CONFIG_CHANGE',
+      module: 'config',
+      entityType: 'DatabaseBackup',
+      newValues: {
+        action: 'restore',
+        filename: filename ?? null,
+        statements,
+      } as Prisma.InputJsonValue,
+    });
+  }
+
   async runSetupWizard(dto: SetupWizardDto): Promise<ConnectionTestResult> {
     const configured = await this.appSettingRepository.findByKey('app.configured');
     if (configured?.value === 'true') {
@@ -284,7 +322,8 @@ export class ConfigService {
         });
       }
 
-      if (dto.mode === APP_MODES.STANDALONE && dto.businessName && dto.adminUsername && dto.adminPassword) {
+      if (dto.mode === APP_MODES.STANDALONE || dto.mode === APP_MODES.SERVER) {
+        if (dto.businessName && dto.adminUsername && dto.adminPassword) {
         const company = await tx.company.create({
           data: {
             code: 'MAIN',
@@ -333,8 +372,8 @@ export class ConfigService {
           create: { key: 'app.branch_id', value: branch.id, category: 'app' },
           update: { value: branch.id },
         });
+        }
       }
-
       await tx.appSetting.upsert({
         where: { key: 'app.configured' },
         create: { key: 'app.configured', value: 'true', category: 'app' },

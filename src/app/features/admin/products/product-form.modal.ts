@@ -17,6 +17,7 @@ import {
   IonSpinner,
   ModalController,
   ToastController,
+  AlertController,
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
@@ -42,6 +43,8 @@ import { UnitTypeService } from '@core/services/unit-type.service';
 import { CategoryDto } from '@core/services/category.service';
 import { AuthService } from '@core/services/auth.service';
 import { ConfigService } from '@core/services/config.service';
+import { FieldErrorComponent } from '@shared/components/field-error/field-error.component';
+import { isControlInvalid, notifyInvalidForm } from '@shared/utils/form-validation';
 
 addIcons({
   closeOutline,
@@ -82,6 +85,7 @@ interface EditableProductUnit {
     IonIcon,
     IonSpinner,
     TranslateModule,
+    FieldErrorComponent,
   ],
 })
 export class ProductFormModal implements OnInit {
@@ -92,6 +96,7 @@ export class ProductFormModal implements OnInit {
   private readonly configService = inject(ConfigService);
   private readonly modalCtrl = inject(ModalController);
   private readonly toast = inject(ToastController);
+  private readonly alertCtrl = inject(AlertController);
 
   @Input() branchId = '';
   @Input() product: ProductDto | null = null;
@@ -102,6 +107,7 @@ export class ProductFormModal implements OnInit {
   isEdit = false;
   unitTypes = signal<UnitTypeDto[]>([]);
   productUnits = signal<EditableProductUnit[]>([]);
+  readonly isInvalid = isControlInvalid;
 
   readonly canViewCosts = this.auth.hasPermission('products.view_costs');
   readonly canModifyPrices = this.auth.hasPermission('products.modify_prices');
@@ -211,15 +217,12 @@ export class ProductFormModal implements OnInit {
     this.productUnits.update((list) => list.filter((_, i) => i !== index));
   }
 
-  dismiss(saved = false): void {
-    void this.modalCtrl.dismiss(null, saved ? 'saved' : 'cancel');
+  dismiss(saved = false, product: ProductDto | null = null): void {
+    void this.modalCtrl.dismiss(product, saved ? 'saved' : 'cancel');
   }
 
   async save(): Promise<void> {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (await notifyInvalidForm(this.form, this.toast)) return;
 
     const raw = this.form.getRawValue();
     const baseUnitTypeId = raw.baseUnitTypeId;
@@ -244,14 +247,30 @@ export class ProductFormModal implements OnInit {
     }
 
     const baseType = this.unitTypes().find((u) => u.id === baseUnitTypeId);
-    this.saving.set(true);
 
     const salePrice = Number(raw.salePrice);
     const costPrice = Number(raw.costPrice);
     const taxRate = raw.applyTax ? Number(raw.taxRate) : 0;
     const minStock = Number(raw.minStock);
 
+    if (this.canViewCosts && costPrice > 0 && salePrice < costPrice) {
+      const alert = await this.alertCtrl.create({
+        header: 'Precio de venta bajo el costo',
+        message: `El precio de venta (${salePrice}) es menor que el costo (${costPrice}). Si continúa, el producto se podrá vender con pérdida.`,
+        buttons: [
+          { text: 'Cancelar', role: 'cancel' },
+          { text: 'Guardar de todos modos', role: 'confirm' },
+        ],
+      });
+      await alert.present();
+      const { role } = await alert.onDidDismiss();
+      if (role !== 'confirm') return;
+    }
+
+    this.saving.set(true);
+
     try {
+      let saved: ProductDto;
       if (this.isEdit && this.product) {
         const payload: UpdateProductPayload = {
           name: raw.name,
@@ -267,7 +286,7 @@ export class ProductFormModal implements OnInit {
           isActive: raw.isActive,
           units: unitsPayload,
         };
-        await firstValueFrom(this.productService.update(this.product.id, payload));
+        saved = await firstValueFrom(this.productService.update(this.product.id, payload));
       } else {
         const payload: CreateProductPayload = {
           branchId: this.branchId,
@@ -284,10 +303,10 @@ export class ProductFormModal implements OnInit {
           trackInventory: raw.trackInventory,
           units: unitsPayload,
         };
-        await firstValueFrom(this.productService.create(payload));
+        saved = await firstValueFrom(this.productService.create(payload));
       }
 
-      this.dismiss(true);
+      this.dismiss(true, saved);
     } catch (err: unknown) {
       const message =
         (err as { error?: { message?: string } })?.error?.message ??

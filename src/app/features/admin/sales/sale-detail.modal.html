@@ -8,6 +8,24 @@
           {{ 'POS.PRINT_RECEIPT' | translate }}
         </ion-button>
       }
+      @if (canEditSale) {
+        <ion-button (click)="openEdit()" [disabled]="busy">
+          <ion-icon name="create-outline" slot="start"></ion-icon>
+          {{ 'SALES.EDIT' | translate }}
+        </ion-button>
+      }
+      @if (canVoidSale) {
+        <ion-button color="warning" (click)="confirmVoid()" [disabled]="busy">
+          <ion-icon name="ban-outline" slot="start"></ion-icon>
+          {{ 'SALES.VOID' | translate }}
+        </ion-button>
+      }
+      @if (canDeleteSale) {
+        <ion-button color="danger" (click)="confirmDelete()" [disabled]="busy">
+          <ion-icon name="trash-outline" slot="start"></ion-icon>
+          {{ 'COMMON.DELETE' | translate }}
+        </ion-button>
+      }
       <ion-button (click)="close()">
         <ion-icon name="close-outline" slot="icon-only"></ion-icon>
       </ion-button>
@@ -56,6 +74,18 @@
       </ion-item>
     }
   </ion-list>
+
+  @if (sale.payments?.length) {
+    <div class="payments-block">
+      <h3>{{ 'SALES.PAYMENTS' | translate }}</h3>
+      @for (payment of sale.payments; track $index) {
+        <div class="meta-row">
+          <span class="meta-label">{{ payment.paymentTypeName ?? 'Pago' }}</span>
+          <strong>{{ payment.amount | appCurrency:'1.0-0' }}</strong>
+        </div>
+      }
+    </div>
+  }
 
   <div class="detail-totals">
     <div class="total-row">

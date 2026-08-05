@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import {
   IonContent,
   IonItem,
@@ -13,10 +13,24 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NavController } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
-import { logInOutline, storefrontOutline, personOutline, lockClosedOutline } from 'ionicons/icons';
+import {
+  logInOutline,
+  storefrontOutline,
+  personOutline,
+  lockClosedOutline,
+  eyeOutline,
+  eyeOffOutline,
+} from 'ionicons/icons';
 import { AuthService } from '@core/services/auth.service';
 
-addIcons({ logInOutline, storefrontOutline, personOutline, lockClosedOutline });
+addIcons({
+  logInOutline,
+  storefrontOutline,
+  personOutline,
+  lockClosedOutline,
+  eyeOutline,
+  eyeOffOutline,
+});
 
 @Component({
   selector: 'app-login',
@@ -42,11 +56,16 @@ export class LoginPage implements OnInit {
 
   loading = false;
   errorMessage = '';
+  showPassword = signal(false);
 
   form = this.fb.nonNullable.group({
     username: ['', Validators.required],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
+
+  togglePasswordVisibility(): void {
+    this.showPassword.update((visible) => !visible);
+  }
 
   ngOnInit(): void {
     if (this.auth.isAuthenticated) {

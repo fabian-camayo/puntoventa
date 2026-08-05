@@ -25,3 +25,13 @@ ion-button {
   text-transform: none;
   letter-spacing: 0;
 }
+
+.field-item.invalid {
+  border-color: var(--pv-danger, #dc2626) !important;
+  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.2);
+}
+
+.field-box label .req {
+  color: var(--pv-danger, #dc2626);
+  margin-left: 2px;
+}

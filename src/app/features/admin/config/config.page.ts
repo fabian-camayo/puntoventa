@@ -17,8 +17,10 @@ import {
   IonSegmentButton,
   IonLabel,
   ToastController,
+  AlertController,
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
+import { AdminBackButton } from '@shared/components/admin-back-button/admin-back-button.component';
 import { addIcons } from 'ionicons';
 import {
   settingsOutline,
@@ -30,6 +32,12 @@ import {
   saveOutline,
   checkmarkOutline,
   peopleOutline,
+  imageOutline,
+  trashOutline,
+  downloadOutline,
+  cloudDownloadOutline,
+  cloudUploadOutline,
+  documentOutline,
 } from 'ionicons/icons';
 import { firstValueFrom, forkJoin } from 'rxjs';
 import { AppConfigDto, PosContextDto } from '@puntoventa/shared';
@@ -51,6 +59,12 @@ addIcons({
   saveOutline,
   checkmarkOutline,
   peopleOutline,
+  imageOutline,
+  trashOutline,
+  downloadOutline,
+  cloudDownloadOutline,
+  cloudUploadOutline,
+  documentOutline,
 });
 
 @Component({
@@ -75,6 +89,7 @@ addIcons({
     IonSegmentButton,
     IonLabel,
     TranslateModule,
+    AdminBackButton,
   ],
 })
 export class ConfigPage implements OnInit {
@@ -84,16 +99,21 @@ export class ConfigPage implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly themeService = inject(ThemeService);
   private readonly toast = inject(ToastController);
+  private readonly alertCtrl = inject(AlertController);
 
   readonly canUpdate = this.auth.hasPermission('config.update');
 
   loading = signal(true);
   saving = signal(false);
+  backingUp = signal(false);
+  restoring = signal(false);
+  restoreFile = signal<File | null>(null);
+  restoreFileName = signal('');
   branchId = signal<string | null>(null);
   posContext = signal<PosContextDto | null>(null);
   appConfig = signal<AppConfigDto | null>(null);
   customers = signal<CustomerDto[]>([]);
-  activeTab = signal<'general' | 'billing' | 'app'>('general');
+  activeTab = signal<'general' | 'billing' | 'app' | 'backup'>('general');
 
   form = this.fb.nonNullable.group({
     businessName: ['', [Validators.required, Validators.maxLength(120)]],
@@ -104,19 +124,38 @@ export class ConfigPage implements OnInit {
     currency: ['COP', [Validators.required, Validators.maxLength(3)]],
     currencySymbol: ['$', [Validators.required, Validators.maxLength(5)]],
     taxRate: [16, [Validators.required, Validators.min(0), Validators.max(100)]],
+    logoUrl: [''],
     ticketHeader: [''],
     ticketFooter: [''],
+    invoicePrefix: ['FEV', [Validators.required, Validators.maxLength(20)]],
+    invoiceNumberPadding: [3, [Validators.required, Validators.min(1), Validators.max(10)]],
+    invoiceNextNumber: [1, [Validators.required, Validators.min(1)]],
     allowNegativeStock: [false],
     defaultCustomerId: [''],
     language: ['es'],
     theme: ['system' as ThemeMode],
   });
 
+  readonly invoicePreview = signal('FEV001');
+
   ngOnInit(): void {
     if (!this.canUpdate) {
       this.form.disable();
     }
+    this.form.valueChanges.subscribe(() => this.updateInvoicePreview());
     void this.loadConfig();
+  }
+
+  private updateInvoicePreview(): void {
+    const prefix = (this.form.controls.invoicePrefix.value ?? 'FEV')
+      .trim()
+      .toUpperCase() || 'FEV';
+    const padding = Math.min(
+      10,
+      Math.max(1, Number(this.form.controls.invoiceNumberPadding.value) || 3),
+    );
+    const next = Math.max(1, Number(this.form.controls.invoiceNextNumber.value) || 1);
+    this.invoicePreview.set(`${prefix}${String(next).padStart(padding, '0')}`);
   }
 
   async onRefresh(event: CustomEvent): Promise<void> {
@@ -127,6 +166,130 @@ export class ConfigPage implements OnInit {
   appModeLabel(mode?: string): string {
     const key = `CONFIG.MODE_${mode ?? 'STANDALONE'}`;
     return key;
+  }
+
+  async onLogoSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      await this.showToast('CONFIG.LOGO_INVALID', 'warning');
+      input.value = '';
+      return;
+    }
+    if (file.size > 500_000) {
+      await this.showToast('CONFIG.LOGO_TOO_LARGE', 'warning');
+      input.value = '';
+      return;
+    }
+
+    try {
+      const dataUrl = await this.readFileAsDataUrl(file);
+      // Comprime para impresión/API (objetivo ~200 KB en base64)
+      const optimized = await this.optimizeLogoDataUrl(dataUrl, file.type);
+      this.form.controls.logoUrl.setValue(optimized);
+    } catch {
+      await this.showToast('CONFIG.LOGO_INVALID', 'danger');
+    } finally {
+      input.value = '';
+    }
+  }
+
+  clearLogo(): void {
+    this.form.controls.logoUrl.setValue('');
+  }
+
+  async downloadBackup(): Promise<void> {
+    if (!this.canUpdate || this.backingUp()) return;
+    this.backingUp.set(true);
+    try {
+      const blob = await firstValueFrom(this.configService.downloadDatabaseBackup());
+      if (blob.type.includes('application/json')) {
+        throw new Error('Respuesta inválida');
+      }
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+      link.href = url;
+      link.download = `puntoventa-backup-${stamp}.sql`;
+      link.click();
+      URL.revokeObjectURL(url);
+      await this.showToastMessage('Copia de seguridad descargada', 'success');
+    } catch (err: unknown) {
+      const message = (err as { error?: { message?: string } })?.error?.message;
+      await this.showToastMessage(
+        message ?? 'No se pudo generar la copia de seguridad',
+        'danger',
+      );
+    } finally {
+      this.backingUp.set(false);
+    }
+  }
+
+  onBackupFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.restoreFile.set(file);
+    this.restoreFileName.set(file?.name ?? '');
+    input.value = '';
+  }
+
+  async confirmRestore(): Promise<void> {
+    const file = this.restoreFile();
+    if (!this.canUpdate || !file || this.restoring()) return;
+
+    const alert = await this.alertCtrl.create({
+      header: 'Restaurar base de datos',
+      message:
+        'Esta acción reemplazará TODOS los datos actuales con el respaldo. No se puede deshacer. ¿Continuar?',
+      inputs: [
+        {
+          name: 'confirm',
+          type: 'text',
+          placeholder: 'Escriba RESTAURAR para confirmar',
+        },
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Restaurar', role: 'confirm', cssClass: 'alert-button-danger' },
+      ],
+    });
+    await alert.present();
+    const { role, data } = await alert.onDidDismiss<
+      { values?: { confirm?: string }; confirm?: string } | undefined
+    >();
+    if (role !== 'confirm') return;
+    const typed = (
+      data?.values?.confirm ??
+      data?.confirm ??
+      ''
+    )
+      .trim()
+      .toUpperCase();
+    if (typed !== 'RESTAURAR') {
+      await this.showToastMessage('Debe escribir RESTAURAR para confirmar', 'warning');
+      return;
+    }
+
+    this.restoring.set(true);
+    try {
+      await firstValueFrom(this.configService.restoreDatabaseBackup(file));
+      this.restoreFile.set(null);
+      this.restoreFileName.set('');
+      await this.showToastMessage(
+        'Base de datos restaurada. Recargue la aplicación.',
+        'success',
+      );
+    } catch (err: unknown) {
+      const message = (err as { error?: { message?: string } })?.error?.message;
+      await this.showToastMessage(
+        message ?? 'No se pudo restaurar el respaldo',
+        'danger',
+      );
+    } finally {
+      this.restoring.set(false);
+    }
   }
 
   async save(): Promise<void> {
@@ -151,8 +314,12 @@ export class ConfigPage implements OnInit {
         currency: raw.currency,
         currencySymbol: raw.currencySymbol,
         taxRate: Number(raw.taxRate),
+        logoUrl: raw.logoUrl || null,
         ticketHeader: raw.ticketHeader || undefined,
         ticketFooter: raw.ticketFooter || undefined,
+        invoicePrefix: raw.invoicePrefix.trim().toUpperCase(),
+        invoiceNumberPadding: Number(raw.invoiceNumberPadding),
+        invoiceNextNumber: Number(raw.invoiceNextNumber),
         allowNegativeStock: raw.allowNegativeStock,
         defaultCustomerId: raw.defaultCustomerId || undefined,
       };
@@ -179,6 +346,54 @@ export class ConfigPage implements OnInit {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  private readFileAsDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result ?? ''));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /** Reduce tamaño del logo para que quepa en API e impresión del ticket. */
+  private optimizeLogoDataUrl(dataUrl: string, mimeType: string): Promise<string> {
+    const maxBytes = 280_000;
+    if (dataUrl.length <= maxBytes && (mimeType === 'image/jpeg' || mimeType === 'image/png')) {
+      return Promise.resolve(dataUrl);
+    }
+
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxSide = 360;
+        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+
+        let quality = 0.82;
+        let out = canvas.toDataURL('image/jpeg', quality);
+        while (out.length > maxBytes && quality > 0.4) {
+          quality -= 0.1;
+          out = canvas.toDataURL('image/jpeg', quality);
+        }
+        resolve(out);
+      };
+      img.onerror = () => reject(new Error('invalid image'));
+      img.src = dataUrl;
+    });
   }
 
   private async loadConfig(): Promise<void> {
@@ -227,13 +442,18 @@ export class ConfigPage implements OnInit {
         currency: business.currency,
         currencySymbol: business.currencySymbol,
         taxRate: business.taxRate,
+        logoUrl: business.logoUrl ?? '',
         ticketHeader: business.ticketHeader ?? '',
         ticketFooter: business.ticketFooter ?? '',
+        invoicePrefix: business.invoicePrefix ?? 'FEV',
+        invoiceNumberPadding: business.invoiceNumberPadding ?? 3,
+        invoiceNextNumber: business.invoiceNextNumber ?? 1,
         allowNegativeStock: business.allowNegativeStock,
         defaultCustomerId: business.defaultCustomerId ?? '',
         language: appConfig.language ?? 'es',
         theme: (appConfig.theme as ThemeMode) ?? 'system',
       });
+      this.updateInvoicePreview();
     } catch {
       await this.showToast('CONFIG.LOAD_ERROR', 'danger');
     } finally {
@@ -248,6 +468,8 @@ export class ConfigPage implements OnInit {
     const messages: Record<string, string> = {
       'CONFIG.SAVED_OK': 'Configuración guardada correctamente',
       'CONFIG.LOAD_ERROR': 'Error al cargar la configuración',
+      'CONFIG.LOGO_TOO_LARGE': 'El logo debe pesar menos de 500 KB',
+      'CONFIG.LOGO_INVALID': 'Seleccione una imagen válida (PNG o JPG)',
     };
     await this.showToastMessage(messages[messageKey] ?? messageKey, color);
   }

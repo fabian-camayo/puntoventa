@@ -4,6 +4,7 @@
   </ion-refresher>
 
   <div class="page-container">
+    <app-admin-back></app-admin-back>
     <div class="page-title-bar">
       <h1>
         <ion-icon name="settings-outline"></ion-icon>
@@ -31,6 +32,9 @@
         </ion-segment-button>
         <ion-segment-button value="app">
           <ion-label>{{ 'CONFIG.TAB_APP' | translate }}</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="backup">
+          <ion-label>{{ 'CONFIG.TAB_BACKUP' | translate }}</ion-label>
         </ion-segment-button>
       </ion-segment>
     </div>
@@ -72,6 +76,38 @@
               <span>{{ 'CONFIG.SECTION_BUSINESS' | translate }}</span>
             </div>
             <div class="fields-grid">
+              <div class="field-box span-3">
+                <label>{{ 'CONFIG.TICKET_LOGO' | translate }}</label>
+                <div class="logo-row">
+                  @if (form.controls.logoUrl.value) {
+                    <img class="logo-preview" [src]="form.controls.logoUrl.value" alt="Logo" />
+                  }
+                  <div class="logo-actions">
+                    <label class="file-btn">
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        (change)="onLogoSelected($event)"
+                        [disabled]="!canUpdate"
+                      />
+                      {{ 'CONFIG.TICKET_LOGO_PICK' | translate }}
+                    </label>
+                    @if (form.controls.logoUrl.value) {
+                      <ion-button
+                        fill="outline"
+                        color="medium"
+                        size="small"
+                        (click)="clearLogo()"
+                        [disabled]="!canUpdate"
+                      >
+                        <ion-icon name="trash-outline" slot="start"></ion-icon>
+                        {{ 'CONFIG.TICKET_LOGO_CLEAR' | translate }}
+                      </ion-button>
+                    }
+                  </div>
+                </div>
+                <small class="field-hint">{{ 'CONFIG.TICKET_LOGO_HINT' | translate }}</small>
+              </div>
               <div class="field-box span-2">
                 <label>{{ 'CONFIG.BUSINESS_NAME' | translate }}</label>
                 <ion-item lines="none" class="field-item">
@@ -162,16 +198,108 @@
             </div>
             <div class="fields-grid">
               <div class="field-box span-3">
+                <label>{{ 'CONFIG.TICKET_LOGO' | translate }}</label>
+                <div class="logo-row">
+                  @if (form.controls.logoUrl.value) {
+                    <img class="logo-preview" [src]="form.controls.logoUrl.value" alt="Logo" />
+                  }
+                  <div class="logo-actions">
+                    <label class="file-btn">
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        (change)="onLogoSelected($event)"
+                        [disabled]="!canUpdate"
+                      />
+                      {{ 'CONFIG.TICKET_LOGO_PICK' | translate }}
+                    </label>
+                    @if (form.controls.logoUrl.value) {
+                      <ion-button
+                        fill="outline"
+                        color="medium"
+                        size="small"
+                        (click)="clearLogo()"
+                        [disabled]="!canUpdate"
+                      >
+                        <ion-icon name="trash-outline" slot="start"></ion-icon>
+                        {{ 'CONFIG.TICKET_LOGO_CLEAR' | translate }}
+                      </ion-button>
+                    }
+                  </div>
+                </div>
+                <small class="field-hint">{{ 'CONFIG.TICKET_LOGO_HINT' | translate }}</small>
+              </div>
+              <div class="field-box span-3">
                 <label>{{ 'CONFIG.TICKET_HEADER' | translate }}</label>
                 <ion-item lines="none" class="field-item">
-                  <ion-textarea formControlName="ticketHeader" [autoGrow]="true" rows="2"></ion-textarea>
+                  <ion-textarea
+                    formControlName="ticketHeader"
+                    [autoGrow]="true"
+                    rows="2"
+                    [placeholder]="'CONFIG.TICKET_HEADER_HINT' | translate"
+                  ></ion-textarea>
                 </ion-item>
+                <small class="field-hint">{{ 'CONFIG.TICKET_HEADER_HINT' | translate }}</small>
               </div>
               <div class="field-box span-3">
                 <label>{{ 'CONFIG.TICKET_FOOTER' | translate }}</label>
                 <ion-item lines="none" class="field-item">
-                  <ion-textarea formControlName="ticketFooter" [autoGrow]="true" rows="2"></ion-textarea>
+                  <ion-textarea
+                    formControlName="ticketFooter"
+                    [autoGrow]="true"
+                    rows="3"
+                    [placeholder]="'CONFIG.TICKET_FOOTER_HINT' | translate"
+                  ></ion-textarea>
                 </ion-item>
+                <small class="field-hint">{{ 'CONFIG.TICKET_FOOTER_HINT' | translate }}</small>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-section pv-card">
+            <div class="section-title">
+              <ion-icon name="receipt-outline"></ion-icon>
+              <span>{{ 'CONFIG.SECTION_INVOICE_NUMBER' | translate }}</span>
+            </div>
+            <div class="fields-grid">
+              <div class="field-box">
+                <label>{{ 'CONFIG.INVOICE_PREFIX' | translate }}<span class="req">*</span></label>
+                <ion-item lines="none" class="field-item">
+                  <ion-input
+                    formControlName="invoicePrefix"
+                    maxlength="20"
+                    [placeholder]="'CONFIG.INVOICE_PREFIX_HINT' | translate"
+                  ></ion-input>
+                </ion-item>
+                <small class="field-hint">{{ 'CONFIG.INVOICE_PREFIX_HINT' | translate }}</small>
+              </div>
+              <div class="field-box">
+                <label>{{ 'CONFIG.INVOICE_PADDING' | translate }}<span class="req">*</span></label>
+                <ion-item lines="none" class="field-item">
+                  <ion-input
+                    type="number"
+                    formControlName="invoiceNumberPadding"
+                    min="1"
+                    max="10"
+                  ></ion-input>
+                </ion-item>
+                <small class="field-hint">{{ 'CONFIG.INVOICE_PADDING_HINT' | translate }}</small>
+              </div>
+              <div class="field-box">
+                <label>{{ 'CONFIG.INVOICE_NEXT' | translate }}<span class="req">*</span></label>
+                <ion-item lines="none" class="field-item">
+                  <ion-input
+                    type="number"
+                    formControlName="invoiceNextNumber"
+                    min="1"
+                  ></ion-input>
+                </ion-item>
+                <small class="field-hint">{{ 'CONFIG.INVOICE_NEXT_HINT' | translate }}</small>
+              </div>
+              <div class="field-box span-3 invoice-preview-box">
+                <label>{{ 'CONFIG.INVOICE_PREVIEW' | translate }}</label>
+                <strong class="invoice-preview">{{ invoicePreview() }}</strong>
+                <small class="field-hint">{{ 'CONFIG.INVOICE_PREVIEW_HINT' | translate }}</small>
               </div>
             </div>
           </section>
@@ -203,6 +331,71 @@
                   </ion-select>
                 </ion-item>
               </div>
+            </div>
+          </section>
+        }
+
+        @if (activeTab() === 'backup') {
+          <section class="form-section pv-card">
+            <div class="section-title">
+              <ion-icon name="cloud-download-outline"></ion-icon>
+              <span>{{ 'CONFIG.SECTION_BACKUP' | translate }}</span>
+            </div>
+            <p class="backup-hint">{{ 'CONFIG.BACKUP_HINT' | translate }}</p>
+            <div class="backup-actions">
+              <ion-button
+                fill="outline"
+                (click)="downloadBackup()"
+                [disabled]="!canUpdate || backingUp() || restoring()"
+              >
+                @if (backingUp()) {
+                  <ion-spinner name="crescent" slot="start"></ion-spinner>
+                } @else {
+                  <ion-icon name="download-outline" slot="start"></ion-icon>
+                }
+                {{ 'CONFIG.BACKUP_DOWNLOAD' | translate }}
+              </ion-button>
+            </div>
+          </section>
+
+          <section class="form-section pv-card backup-restore-card">
+            <div class="section-title">
+              <ion-icon name="cloud-upload-outline"></ion-icon>
+              <span>{{ 'CONFIG.SECTION_RESTORE' | translate }}</span>
+            </div>
+            <p class="backup-hint danger-text">{{ 'CONFIG.RESTORE_WARNING' | translate }}</p>
+            <div class="backup-actions">
+              <input
+                #backupFileInput
+                type="file"
+                accept=".sql,application/sql,text/plain"
+                hidden
+                (change)="onBackupFileSelected($event)"
+              />
+              <ion-button
+                color="warning"
+                fill="outline"
+                (click)="backupFileInput.click()"
+                [disabled]="!canUpdate || backingUp() || restoring()"
+              >
+                <ion-icon name="document-outline" slot="start"></ion-icon>
+                {{ 'CONFIG.RESTORE_PICK_FILE' | translate }}
+              </ion-button>
+              @if (restoreFileName()) {
+                <span class="restore-file-name">{{ restoreFileName() }}</span>
+              }
+              <ion-button
+                color="danger"
+                (click)="confirmRestore()"
+                [disabled]="!canUpdate || !restoreFile() || backingUp() || restoring()"
+              >
+                @if (restoring()) {
+                  <ion-spinner name="crescent" slot="start"></ion-spinner>
+                } @else {
+                  <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+                }
+                {{ 'CONFIG.RESTORE_RUN' | translate }}
+              </ion-button>
             </div>
           </section>
         }

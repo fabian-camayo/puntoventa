@@ -29,27 +29,30 @@
 
       <div class="fields-grid">
         <div class="field-box">
-          <label>{{ 'POS.PAYMENT_TYPE' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'POS.PAYMENT_TYPE' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.type)">
             <ion-select formControlName="type" interface="popover">
               <ion-select-option value="WITHDRAWAL">{{ 'POS.CASH_WITHDRAWAL' | translate }}</ion-select-option>
               <ion-select-option value="DEPOSIT">{{ 'POS.CASH_DEPOSIT' | translate }}</ion-select-option>
             </ion-select>
           </ion-item>
+          <app-field-error [control]="form.controls.type" />
         </div>
 
         <div class="field-box">
-          <label>{{ 'POS.CASH_MOVEMENT_AMOUNT' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'POS.CASH_MOVEMENT_AMOUNT' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.amount)">
             <ion-input type="number" inputmode="decimal" formControlName="amount" min="0"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.amount" />
         </div>
 
         <div class="field-box span-2">
           <label>{{ 'POS.CASH_MOVEMENT_REASON' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.description)">
             <ion-textarea formControlName="description" [autoGrow]="true" rows="2"></ion-textarea>
           </ion-item>
+          <app-field-error [control]="form.controls.description" />
         </div>
       </div>
     </section>

@@ -22,6 +22,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
 import { APP_MODES, AppMode } from '@puntoventa/shared';
 import { ConfigService } from '../../core/services/config.service';
 
@@ -169,6 +170,24 @@ export class SetupPage implements OnInit {
             duration: 5000,
           });
           await t.present();
+        } else {
+          await this.waitForBackend(20000);
+          try {
+            await firstValueFrom(
+              this.config.runSetup({
+                mode: values.mode,
+                serverHost: values.serverHost || 'localhost',
+                serverPort: Number(values.serverPort) || Number(values.apiPort),
+                businessName: values.businessName,
+                adminUsername: values.adminUsername,
+                adminPassword: values.adminPassword,
+                adminFirstName: values.adminFirstName,
+                adminLastName: values.adminLastName,
+              }),
+            );
+          } catch {
+            // Si el seed automático ya creó admin/configurado, continuar al login
+          }
         }
       }
 
@@ -182,6 +201,15 @@ export class SetupPage implements OnInit {
       await t.present();
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  private async waitForBackend(timeoutMs: number): Promise<void> {
+    if (!window.electronAPI) return;
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      if (await window.electronAPI.isBackendRunning()) return;
+      await new Promise((r) => setTimeout(r, 500));
     }
   }
 

@@ -4,11 +4,26 @@
   </ion-refresher>
 
   <div class="page-container">
+    <app-admin-back></app-admin-back>
     <div class="page-title-bar">
       <h1>
         <ion-icon name="layers-outline"></ion-icon>
         {{ 'ADMIN.INVENTORY' | translate }}
       </h1>
+      @if (canExport) {
+        <ion-button
+          fill="outline"
+          (click)="exportExcel()"
+          [disabled]="exporting() || !branchId()"
+        >
+          @if (exporting()) {
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
+          } @else {
+            <ion-icon name="download-outline" slot="start"></ion-icon>
+          }
+          {{ 'INVENTORY.EXPORT_EXCEL' | translate }}
+        </ion-button>
+      }
     </div>
 
     <div class="pv-toolbar-card">

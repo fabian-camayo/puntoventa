@@ -1,0 +1,136 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ 'POS.SESSION_SUMMARY' | translate }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="refresh()" [disabled]="loading()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button (click)="close()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="summary-content">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  @if (loading() && !summary()) {
+    <div class="loading-state">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>{{ 'COMMON.LOADING' | translate }}</p>
+    </div>
+  } @else if (summary(); as data) {
+    <div class="cash-hero">
+      <ion-icon name="cash-outline"></ion-icon>
+      <div>
+        <span class="cash-label">{{ 'POS.CASH_IN_DRAWER' | translate }}</span>
+        <strong class="cash-amount">{{ data.cashInDrawer | appCurrency:'1.0-0' }}</strong>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">{{ 'POS.OPENING_AMOUNT' | translate }}</span>
+        <strong>{{ data.session.openingAmount | appCurrency:'1.0-0' }}</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">{{ 'POS.SALES_TOTAL' | translate }}</span>
+        <strong>{{ (data.session.salesTotal ?? 0) | appCurrency:'1.0-0' }}</strong>
+        <small>{{ data.session.salesCount ?? 0 }} {{ 'POS.SALES_COUNT' | translate }}</small>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">{{ 'POS.CASH_FROM_SALES' | translate }}</span>
+        <strong>{{ data.cashFromSales | appCurrency:'1.0-0' }}</strong>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">{{ 'POS.CASH_MOVEMENTS_NET' | translate }}</span>
+        <strong>
+          {{ (data.cashDeposits - data.cashWithdrawals - data.cashRefunds) | appCurrency:'1.0-0' }}
+        </strong>
+        <small>
+          +{{ data.cashDeposits | appCurrency:'1.0-0' }}
+          / −{{ (data.cashWithdrawals + data.cashRefunds) | appCurrency:'1.0-0' }}
+        </small>
+      </div>
+    </div>
+
+    <div class="session-meta">
+      <span>{{ data.session.registerName }}</span>
+      <span>{{ 'POS.OPENED_AT' | translate }}: {{ formatDate(data.session.openedAt) }}</span>
+    </div>
+
+    <ion-segment [value]="tab()" (ionChange)="setTab($any($event.detail.value))">
+      <ion-segment-button value="sales">
+        <ion-label>{{ 'POS.TODAY_SALES' | translate }}</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="movements">
+        <ion-label>{{ 'POS.CASH_MOVEMENTS' | translate }}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    @if (tab() === 'sales') {
+      @if (data.sales.length === 0) {
+        <div class="empty-state">
+          <ion-icon name="receipt-outline"></ion-icon>
+          <p>{{ 'POS.NO_SESSION_SALES' | translate }}</p>
+        </div>
+      } @else {
+        <ion-list lines="full" class="summary-list">
+          @for (sale of data.sales; track trackSale($index, sale)) {
+            <ion-item>
+              <ion-label>
+                <h2>{{ sale.documentNumber ?? '—' }}</h2>
+                <p>
+                  {{ formatDate(sale.completedAt) }}
+                  · {{ sale.itemCount }} {{ 'POS.ITEMS' | translate }}
+                  @if (sale.customerName) {
+                    · {{ sale.customerName }}
+                  }
+                </p>
+              </ion-label>
+              <ion-badge slot="end" color="success">
+                {{ sale.total | appCurrency:'1.0-0' }}
+              </ion-badge>
+            </ion-item>
+          }
+        </ion-list>
+      }
+    } @else {
+      @if (data.movements.length === 0) {
+        <div class="empty-state">
+          <ion-icon name="swap-horizontal-outline"></ion-icon>
+          <p>{{ 'POS.NO_MOVEMENTS' | translate }}</p>
+        </div>
+      } @else {
+        <ion-list lines="full" class="summary-list">
+          @for (m of data.movements; track trackMovement($index, m)) {
+            <ion-item>
+              <ion-label>
+                <h2>{{ movementLabel(m) }}</h2>
+                <p>
+                  {{ formatDate(m.createdAt) }}
+                  @if (m.description) {
+                    · {{ m.description }}
+                  }
+                  @else if (m.reference) {
+                    · {{ m.reference }}
+                  }
+                </p>
+              </ion-label>
+              <strong
+                slot="end"
+                [class.amount-out]="movementSign(m.type) < 0"
+                [class.amount-in]="movementSign(m.type) > 0"
+              >
+                {{ movementSign(m.type) < 0 ? '−' : '+' }}{{ m.amount | appCurrency:'1.0-0' }}
+              </strong>
+            </ion-item>
+          }
+        </ion-list>
+      }
+    }
+  }
+</ion-content>

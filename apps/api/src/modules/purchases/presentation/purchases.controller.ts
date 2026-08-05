@@ -39,6 +39,13 @@ export class PurchasesController {
     return this.purchasesService.findAll(branchId, { page, limit, search, status });
   }
 
+  @Get('next-document-number')
+  @RequirePermissions('purchases.view', 'purchases.create')
+  @ApiOperation({ summary: 'Obtener siguiente número de documento de compra' })
+  nextDocumentNumber(@Query('branchId') branchId: string) {
+    return this.purchasesService.nextDocumentNumber(branchId);
+  }
+
   @Get(':id')
   @RequirePermissions('purchases.view')
   @ApiOperation({ summary: 'Obtener compra por ID' })

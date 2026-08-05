@@ -57,6 +57,7 @@ model Branch {
   inventoryAdjustments InventoryAdjustment[]
   businessConfig      BusinessConfig?
   productImportTypes  ProductImportType[]
+  bankAccounts        BankAccount[]
 
   @@unique([companyId, code])
   @@map("branches")
@@ -178,8 +179,15 @@ model BusinessConfig {
   currency          String   @default("COP") @db.VarChar(3)
   currencySymbol    String   @default("$") @map("currency_symbol") @db.VarChar(5)
   taxRate           Decimal  @default(0) @map("tax_rate") @db.Decimal(5, 2)
+  logoUrl           String?  @map("logo_url") @db.LongText
   ticketHeader      String?  @map("ticket_header") @db.Text
   ticketFooter      String?  @map("ticket_footer") @db.Text
+  /// Prefijo del número de factura de venta. Ej: FEV → FEV001
+  invoicePrefix     String   @default("FEV") @map("invoice_prefix") @db.VarChar(20)
+  /// Cantidad de dígitos del consecutivo (relleno con ceros). Ej: 3 → 001
+  invoiceNumberPadding Int   @default(3) @map("invoice_number_padding")
+  /// Siguiente consecutivo a asignar en la próxima venta
+  invoiceNextNumber Int      @default(1) @map("invoice_next_number")
   allowNegativeStock Boolean @default(false) @map("allow_negative_stock")
   defaultCustomerId String?  @map("default_customer_id") @db.Char(36)
   createdAt         DateTime @default(now()) @map("created_at")
@@ -231,6 +239,7 @@ model Register {
   branch           Branch            @relation(fields: [branchId], references: [id])
   sessions         RegisterSession[]
   sales            Sale[]
+  purchases        Purchase[]
   userRegisters    UserRegister[]
   terminals        Terminal[]
 
@@ -484,6 +493,7 @@ model Supplier {
   taxId     String?  @map("tax_id") @db.VarChar(50)
   email     String?  @db.VarChar(150)
   phone     String?  @db.VarChar(30)
+  city      String?  @db.VarChar(100)
   address   String?  @db.VarChar(500)
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
@@ -567,25 +577,61 @@ enum PurchaseStatus {
   CANCELLED
 }
 
-model Purchase {
-  id           String         @id @default(uuid()) @db.Char(36)
-  branchId     String         @map("branch_id") @db.Char(36)
-  supplierId   String         @map("supplier_id") @db.Char(36)
-  userId       String         @map("user_id") @db.Char(36)
-  documentNumber String       @map("document_number") @db.VarChar(50)
-  status       PurchaseStatus @default(DRAFT)
-  subtotal     Decimal        @default(0) @db.Decimal(12, 2)
-  taxAmount    Decimal        @default(0) @map("tax_amount") @db.Decimal(12, 2)
-  total        Decimal        @default(0) @db.Decimal(12, 2)
-  notes        String?        @db.VarChar(1000)
-  receivedAt   DateTime?      @map("received_at")
-  createdAt    DateTime       @default(now()) @map("created_at")
-  updatedAt    DateTime       @updatedAt @map("updated_at")
+enum PurchasePaymentTerm {
+  CASH
+  CREDIT
+}
 
-  branch   Branch         @relation(fields: [branchId], references: [id])
-  supplier Supplier       @relation(fields: [supplierId], references: [id])
-  user     User           @relation(fields: [userId], references: [id])
-  items    PurchaseItem[]
+enum PurchaseFundSource {
+  REGISTER
+  BANK_ACCOUNT
+}
+
+model BankAccount {
+  id            String   @id @default(uuid()) @db.Char(36)
+  branchId      String   @map("branch_id") @db.Char(36)
+  code          String   @db.VarChar(30)
+  name          String   @db.VarChar(150)
+  bankName      String?  @map("bank_name") @db.VarChar(150)
+  accountNumber String?  @map("account_number") @db.VarChar(50)
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  branch    Branch     @relation(fields: [branchId], references: [id])
+  purchases Purchase[]
+
+  @@unique([branchId, code])
+  @@map("bank_accounts")
+}
+
+model Purchase {
+  id             String               @id @default(uuid()) @db.Char(36)
+  branchId       String               @map("branch_id") @db.Char(36)
+  supplierId     String               @map("supplier_id") @db.Char(36)
+  userId         String               @map("user_id") @db.Char(36)
+  documentNumber String               @map("document_number") @db.VarChar(50)
+  status         PurchaseStatus       @default(DRAFT)
+  paymentTerm    PurchasePaymentTerm  @default(CASH) @map("payment_term")
+  fundSource     PurchaseFundSource?  @map("fund_source")
+  bankAccountId  String?              @map("bank_account_id") @db.Char(36)
+  registerId     String?              @map("register_id") @db.Char(36)
+  reduceCash     Boolean              @default(true) @map("reduce_cash")
+  purchaseDate   DateTime             @default(now()) @map("purchase_date") @db.Date
+  subtotal       Decimal              @default(0) @db.Decimal(12, 2)
+  taxAmount      Decimal              @default(0) @map("tax_amount") @db.Decimal(12, 2)
+  total          Decimal              @default(0) @db.Decimal(12, 2)
+  notes          String?              @db.VarChar(1000)
+  receivedAt     DateTime?            @map("received_at")
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+
+  branch      Branch       @relation(fields: [branchId], references: [id])
+  supplier    Supplier     @relation(fields: [supplierId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
+  bankAccount BankAccount? @relation(fields: [bankAccountId], references: [id])
+  register    Register?    @relation(fields: [registerId], references: [id])
+  items       PurchaseItem[]
 
   @@unique([branchId, documentNumber])
   @@map("purchases")

@@ -16,6 +16,7 @@ import {
   ToastController,
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
+import { AdminBackButton } from '@shared/components/admin-back-button/admin-back-button.component';
 import { Subject, takeUntil, firstValueFrom } from 'rxjs';
 import { addIcons } from 'ionicons';
 import {
@@ -53,6 +54,7 @@ addIcons({ desktopOutline, trashOutline, createOutline, wifiOutline, cashOutline
     IonRefresher,
     IonRefresherContent,
     TranslateModule,
+    AdminBackButton,
   ],
 })
 export class TerminalsPage implements OnInit, OnDestroy {

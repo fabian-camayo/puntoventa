@@ -1,10 +1,14 @@
 <header class="top-nav">
   <div class="top-nav-inner">
     <button class="brand" type="button" (click)="navigateTo('/pos')">
-      <span class="brand-icon">
-        <ion-icon name="storefront-outline"></ion-icon>
-      </span>
-      <span class="brand-text">PuntoVenta</span>
+      @if (logoUrl()) {
+        <img class="brand-logo" [src]="logoUrl()!" [alt]="businessName() || 'Logo'" />
+      } @else {
+        <span class="brand-icon">
+          <ion-icon name="storefront-outline"></ion-icon>
+        </span>
+      }
+      <span class="brand-text">{{ businessName() || 'PuntoVenta' }}</span>
     </button>
 
     <nav class="top-nav-links" aria-label="Navegación principal">

@@ -25,11 +25,13 @@ Function PvEscapeDollars
   Push $R2
   Push $R3
   StrCpy $R1 ""
-  StrCpy $R2 0
+  StrCpy $R2 "0"
   loop:
     StrCpy $R3 $R0 1 $R2
-    StrCmp $R3 "" done
-    StrCmp $R3 "$" is_dollar
+    StrLen $R9 $R3
+    IntCmp $R9 0 done
+    ; "$$" en literales NSIS = caracter $
+    StrCmp $R3 "$$" is_dollar 0
       StrCpy $R1 "$R1$R3"
       Goto next
     is_dollar:
@@ -56,37 +58,37 @@ Function PvDbPageCreate
     Abort
   ${EndIf}
 
-  ${NSD_CreateLabel} 0 0 100% 24u "MySQL debe estar instalado. Indique los datos de conexion (tambien puede configurarlos al iniciar la app)."
+  ${NSD_CreateLabel} 0 0 100% 36u "Base de datos MySQL (debe estar en ejecucion). Si la base no existe, PuntoVenta la crea. Deje la contrasena vacia solo si root no tiene clave."
   Pop $0
 
-  ${NSD_CreateLabel} 0 28u 90u 12u "Host MySQL:"
+  ${NSD_CreateLabel} 0 40u 90u 12u "Host MySQL:"
   Pop $0
-  ${NSD_CreateText} 100u 26u 200u 12u "localhost"
+  ${NSD_CreateText} 100u 38u 200u 12u "localhost"
   Pop $PvHwndDbHost
 
-  ${NSD_CreateLabel} 0 46u 90u 12u "Puerto MySQL:"
+  ${NSD_CreateLabel} 0 58u 90u 12u "Puerto MySQL:"
   Pop $0
-  ${NSD_CreateText} 100u 44u 80u 12u "3306"
+  ${NSD_CreateText} 100u 56u 80u 12u "3306"
   Pop $PvHwndDbPort
 
-  ${NSD_CreateLabel} 0 64u 90u 12u "Usuario:"
+  ${NSD_CreateLabel} 0 76u 90u 12u "Usuario:"
   Pop $0
-  ${NSD_CreateText} 100u 62u 200u 12u "root"
+  ${NSD_CreateText} 100u 74u 200u 12u "root"
   Pop $PvHwndDbUser
 
-  ${NSD_CreateLabel} 0 82u 90u 12u "Contrasena:"
+  ${NSD_CreateLabel} 0 94u 90u 12u "Contrasena:"
   Pop $0
-  ${NSD_CreatePassword} 100u 80u 200u 12u ""
+  ${NSD_CreatePassword} 100u 92u 200u 12u ""
   Pop $PvHwndDbPassword
 
-  ${NSD_CreateLabel} 0 100u 90u 12u "Base de datos:"
+  ${NSD_CreateLabel} 0 112u 90u 12u "Base de datos:"
   Pop $0
-  ${NSD_CreateText} 100u 98u 200u 12u "puntoventa"
+  ${NSD_CreateText} 100u 110u 200u 12u "puntoventa"
   Pop $PvHwndDbName
 
-  ${NSD_CreateLabel} 0 118u 90u 12u "Puerto API:"
+  ${NSD_CreateLabel} 0 130u 90u 12u "Puerto API:"
   Pop $0
-  ${NSD_CreateText} 100u 116u 80u 12u "3000"
+  ${NSD_CreateText} 100u 128u 80u 12u "3000"
   Pop $PvHwndApiPort
 
   nsDialogs::Show
@@ -128,7 +130,6 @@ FunctionEnd
 !macroend
 
 !macro customInstall
-  ; Copia para todos los usuarios que lancen la app (ruta del exe)
   FileOpen $0 "$INSTDIR\installer.env" w
   FileWrite $0 "# Generado por el instalador PuntoVenta$\r$\n"
   !insertmacro PvWriteEnvLine $0 "DB_HOST" "$PvDbHost"
@@ -143,7 +144,6 @@ FunctionEnd
   !insertmacro PvWriteEnvLine $0 "SERVER_PORT" "$PvApiPort"
   FileClose $0
 
-  ; Acceso rapido para el usuario que instala
   SetShellVarContext current
   CreateDirectory "$APPDATA\PuntoVenta"
   CopyFiles /SILENT "$INSTDIR\installer.env" "$APPDATA\PuntoVenta\.env"

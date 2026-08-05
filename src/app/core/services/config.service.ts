@@ -16,8 +16,12 @@ export interface BusinessConfigDto {
   currency: string;
   currencySymbol: string;
   taxRate: number;
+  logoUrl?: string;
   ticketHeader?: string;
   ticketFooter?: string;
+  invoicePrefix?: string;
+  invoiceNumberPadding?: number;
+  invoiceNextNumber?: number;
   allowNegativeStock: boolean;
   defaultCustomerId?: string;
 }
@@ -31,8 +35,12 @@ export interface UpdateBusinessConfigPayload {
   currency?: string;
   currencySymbol?: string;
   taxRate?: number;
+  logoUrl?: string | null;
   ticketHeader?: string;
   ticketFooter?: string;
+  invoicePrefix?: string;
+  invoiceNumberPadding?: number;
+  invoiceNextNumber?: number;
   allowNegativeStock?: boolean;
   defaultCustomerId?: string;
 }
@@ -98,6 +106,21 @@ export class ConfigService {
       .pipe(map((r) => r.data));
   }
 
+  runSetup(payload: {
+    mode: AppMode;
+    serverHost?: string;
+    serverPort?: number;
+    businessName?: string;
+    adminUsername?: string;
+    adminPassword?: string;
+    adminFirstName?: string;
+    adminLastName?: string;
+  }): Observable<{ success: boolean; message: string }> {
+    return this.http
+      .post<{ data: { success: boolean; message: string } }>(`${this.apiUrl}/config/setup`, payload)
+      .pipe(map((r) => r.data));
+  }
+
   getBusinessConfig(branchId: string): Observable<BusinessConfigDto> {
     return this.http
       .get<{ data: BusinessConfigDto }>(`${this.apiUrl}/config/business/${branchId}`)
@@ -116,6 +139,23 @@ export class ConfigService {
   updateAppSetting(key: string, value: string, category = 'app'): Observable<AppSettingDto> {
     return this.http
       .put<{ data: AppSettingDto }>(`${this.apiUrl}/config/settings`, { key, value, category })
+      .pipe(map((r) => r.data));
+  }
+
+  downloadDatabaseBackup(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/config/backup`, {
+      responseType: 'blob',
+    });
+  }
+
+  restoreDatabaseBackup(file: File): Observable<{ ok: true; statements: number }> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    return this.http
+      .post<{ data: { ok: true; statements: number } }>(
+        `${this.apiUrl}/config/backup/restore`,
+        formData,
+      )
       .pipe(map((r) => r.data));
   }
 }

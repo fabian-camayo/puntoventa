@@ -31,48 +31,62 @@
 
       <div class="fields-grid">
         <div class="field-box">
-          <label>{{ 'SUPPLIERS.CODE' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'SUPPLIERS.CODE' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.code)">
             <ion-input formControlName="code" [readonly]="isEdit" placeholder="PROV01"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.code" />
           @if (!isEdit) {
             <small class="field-hint">{{ 'SUPPLIERS.CODE_HINT' | translate }}</small>
           }
         </div>
 
         <div class="field-box span-2">
-          <label>{{ 'SUPPLIERS.NAME' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'SUPPLIERS.NAME' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.name)">
             <ion-input formControlName="name"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.name" />
         </div>
 
         <div class="field-box">
           <label>{{ 'SUPPLIERS.TAX_ID' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.taxId)">
             <ion-input formControlName="taxId"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.taxId" />
         </div>
 
         <div class="field-box">
           <label>{{ 'SUPPLIERS.EMAIL' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.email)">
             <ion-input type="email" formControlName="email"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.email" />
         </div>
 
         <div class="field-box">
-          <label>{{ 'SUPPLIERS.PHONE' | translate }}</label>
-          <ion-item lines="none" class="field-item">
-            <ion-input type="tel" formControlName="phone"></ion-input>
+          <label>{{ 'SUPPLIERS.PHONE' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.phone)">
+            <ion-input type="tel" formControlName="phone" placeholder="3001234567"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.phone" />
+        </div>
+
+        <div class="field-box">
+          <label>{{ 'SUPPLIERS.CITY' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.city)">
+            <ion-input formControlName="city" placeholder="Bogotá"></ion-input>
+          </ion-item>
+          <app-field-error [control]="form.controls.city" />
         </div>
 
         <div class="field-box span-3">
           <label>{{ 'SUPPLIERS.ADDRESS' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.address)">
             <ion-textarea formControlName="address" [autoGrow]="true" rows="2"></ion-textarea>
           </ion-item>
+          <app-field-error [control]="form.controls.address" />
         </div>
       </div>
 

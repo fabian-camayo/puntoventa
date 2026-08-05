@@ -30,28 +30,32 @@
       </div>
       <div class="fields-grid">
         <div class="field-box">
-          <label>{{ 'PRODUCTS.SKU' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'PRODUCTS.SKU' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.sku)">
             <ion-input formControlName="sku" [readonly]="isEdit"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.sku" />
         </div>
         <div class="field-box span-2">
-          <label>{{ 'PRODUCTS.NAME' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'PRODUCTS.NAME' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.name)">
             <ion-input formControlName="name"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.name" />
         </div>
         <div class="field-box">
           <label>{{ 'PRODUCTS.BARCODE' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.barcode)">
             <ion-input formControlName="barcode"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.barcode" />
         </div>
         <div class="field-box span-3">
           <label>{{ 'PRODUCTS.DESCRIPTION' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.description)">
             <ion-textarea formControlName="description" [autoGrow]="true" rows="2"></ion-textarea>
           </ion-item>
+          <app-field-error [control]="form.controls.description" />
         </div>
       </div>
     </section>
@@ -63,17 +67,19 @@
       </div>
       <div class="fields-grid">
         <div class="field-box">
-          <label>{{ 'PRODUCTS.SALE_PRICE' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'PRODUCTS.SALE_PRICE' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.salePrice)">
             <ion-input type="number" formControlName="salePrice"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.salePrice" />
         </div>
         @if (canViewCosts) {
           <div class="field-box">
             <label>{{ 'PRODUCTS.COST_PRICE' | translate }}</label>
-            <ion-item lines="none" class="field-item">
+            <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.costPrice)">
               <ion-input type="number" formControlName="costPrice"></ion-input>
             </ion-item>
+            <app-field-error [control]="form.controls.costPrice" />
           </div>
         }
         <div class="field-box span-2 tax-fields">
@@ -87,9 +93,10 @@
           @if (form.controls.applyTax.value) {
             <div class="tax-rate-field">
               <label>{{ 'PRODUCTS.TAX_RATE' | translate }}</label>
-              <ion-item lines="none" class="field-item">
+              <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.taxRate)">
                 <ion-input type="number" formControlName="taxRate" min="0" max="100"></ion-input>
               </ion-item>
+              <app-field-error [control]="form.controls.taxRate" />
             </div>
           } @else {
             <p class="tax-exempt-note">{{ 'PRODUCTS.NO_TAX' | translate }}</p>
@@ -106,7 +113,7 @@
       <div class="fields-grid">
         <div class="field-box span-2">
           <label>{{ 'PRODUCTS.CATEGORY' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.categoryId)">
             <ion-select formControlName="categoryId" interface="popover" placeholder="{{ 'PRODUCTS.NO_CATEGORY' | translate }}">
               <ion-select-option value="">{{ 'PRODUCTS.NO_CATEGORY' | translate }}</ion-select-option>
               @for (cat of categories; track cat.id) {
@@ -114,12 +121,14 @@
               }
             </ion-select>
           </ion-item>
+          <app-field-error [control]="form.controls.categoryId" />
         </div>
         <div class="field-box">
           <label>{{ 'PRODUCTS.MIN_STOCK' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.minStock)">
             <ion-input type="number" formControlName="minStock"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.minStock" />
         </div>
       </div>
 
@@ -148,14 +157,15 @@
 
       <div class="fields-grid">
         <div class="field-box span-2">
-          <label>{{ 'PRODUCTS.BASE_UNIT' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'PRODUCTS.BASE_UNIT' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.baseUnitTypeId)">
             <ion-select formControlName="baseUnitTypeId" interface="popover">
               @for (ut of unitTypes(); track ut.id) {
                 <ion-select-option [value]="ut.id">{{ ut.code }} — {{ ut.name }}</ion-select-option>
               }
             </ion-select>
           </ion-item>
+          <app-field-error [control]="form.controls.baseUnitTypeId" />
           <small class="field-hint">Factor = 1 (stock se lleva en esta unidad)</small>
         </div>
       </div>

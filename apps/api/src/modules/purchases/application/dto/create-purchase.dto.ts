@@ -6,10 +6,15 @@ import {
   IsArray,
   ValidateNested,
   IsNumber,
+  IsBoolean,
+  IsEnum,
+  IsDateString,
   Min,
+  ValidateIf,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { PurchaseFundSource, PurchasePaymentTerm } from '@prisma/client';
 
 export class CreatePurchaseItemDto {
   @ApiProperty()
@@ -56,6 +61,44 @@ export class CreatePurchaseDto {
   @IsString()
   @IsNotEmpty()
   documentNumber!: string;
+
+  @ApiProperty({ example: '2026-07-27' })
+  @IsDateString()
+  @IsNotEmpty()
+  purchaseDate!: string;
+
+  @ApiPropertyOptional({ enum: PurchasePaymentTerm })
+  @IsOptional()
+  @IsEnum(PurchasePaymentTerm)
+  paymentTerm?: PurchasePaymentTerm;
+
+  @ApiPropertyOptional({ enum: PurchaseFundSource })
+  @ValidateIf((o: CreatePurchaseDto) => (o.paymentTerm ?? PurchasePaymentTerm.CASH) === PurchasePaymentTerm.CASH)
+  @IsEnum(PurchaseFundSource)
+  fundSource?: PurchaseFundSource;
+
+  @ApiPropertyOptional()
+  @ValidateIf(
+    (o: CreatePurchaseDto) =>
+      (o.paymentTerm ?? PurchasePaymentTerm.CASH) === PurchasePaymentTerm.CASH &&
+      o.fundSource === PurchaseFundSource.BANK_ACCOUNT,
+  )
+  @IsUUID()
+  bankAccountId?: string;
+
+  @ApiPropertyOptional()
+  @ValidateIf(
+    (o: CreatePurchaseDto) =>
+      (o.paymentTerm ?? PurchasePaymentTerm.CASH) === PurchasePaymentTerm.CASH &&
+      o.fundSource === PurchaseFundSource.REGISTER,
+  )
+  @IsUUID()
+  registerId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  reduceCash?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()

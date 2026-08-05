@@ -15,6 +15,7 @@ import {
   ToastController,
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
+import { AdminBackButton } from '@shared/components/admin-back-button/admin-back-button.component';
 import { Subject, takeUntil } from 'rxjs';
 import { addIcons } from 'ionicons';
 import {
@@ -59,6 +60,7 @@ type StatusFilter = 'ALL' | 'OPEN' | 'CLOSED';
     IonRefresher,
     IonRefresherContent,
     TranslateModule,
+    AdminBackButton,
     AppCurrencyPipe,
   ],
 })

@@ -6,6 +6,14 @@
       </ion-button>
     </ion-buttons>
     <ion-title>{{ 'POS.CHANGE_CUSTOMER' | translate }}</ion-title>
+    @if (canCreate) {
+      <ion-buttons slot="end">
+        <ion-button class="create-btn" (click)="openCreate()">
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          {{ 'CUSTOMERS.NEW' | translate }}
+        </ion-button>
+      </ion-buttons>
+    }
   </ion-toolbar>
 </ion-header>
 
@@ -26,6 +34,13 @@
       <div class="empty-state">
         <ion-icon name="people-outline"></ion-icon>
         <p>{{ 'CUSTOMERS.EMPTY_TITLE' | translate }}</p>
+        <span>{{ 'CUSTOMERS.EMPTY_HINT' | translate }}</span>
+        @if (canCreate) {
+          <ion-button (click)="openCreate()">
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            {{ 'CUSTOMERS.NEW' | translate }}
+          </ion-button>
+        }
       </div>
     } @else {
       <ion-list lines="full">

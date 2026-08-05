@@ -5,7 +5,7 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
-import { RegisterSessionStatus, Prisma, CashMovementType } from '@prisma/client';
+import { RegisterSessionStatus, Prisma, CashMovementType, SaleStatus } from '@prisma/client';
 import { RegisterDto, RegisterSessionDto, CashMovementDto } from '@puntoventa/shared';
 import {
   isTerminalOnline,
@@ -318,6 +318,80 @@ export class RegistersService {
     const session = await this.registerRepository.findSessionById(sessionId);
     if (!session) throw new NotFoundException('Sesión de caja no encontrada');
     return this.mapSessionToDto(session);
+  }
+
+  /** Resumen para el cajero: efectivo en caja, ventas y movimientos de la sesión. */
+  async getPosSummary(sessionId: string) {
+    const session = await this.registerRepository.findSessionById(sessionId);
+    if (!session) throw new NotFoundException('Sesión de caja no encontrada');
+
+    const [sales, movements] = await Promise.all([
+      this.prisma.sale.findMany({
+        where: {
+          registerSessionId: sessionId,
+          status: SaleStatus.COMPLETED,
+        },
+        include: {
+          customer: { select: { name: true } },
+          user: { select: { firstName: true, lastName: true, username: true } },
+          _count: { select: { items: true } },
+        },
+        orderBy: { completedAt: 'desc' },
+      }),
+      this.prisma.cashMovement.findMany({
+        where: { registerSessionId: sessionId },
+        include: { user: true },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+
+    const sessionDto = this.mapSessionToDto(session);
+    const cashInDrawer = sessionDto.expectedAmount ?? Number(session.openingAmount);
+
+    let cashFromSales = 0;
+    let cashDeposits = 0;
+    let cashWithdrawals = 0;
+    let cashRefunds = 0;
+
+    for (const m of movements) {
+      const amount = Number(m.amount);
+      switch (m.type) {
+        case CashMovementType.SALE:
+          cashFromSales += amount;
+          break;
+        case CashMovementType.DEPOSIT:
+        case CashMovementType.INCOME:
+          cashDeposits += amount;
+          break;
+        case CashMovementType.WITHDRAWAL:
+        case CashMovementType.EXPENSE:
+          cashWithdrawals += amount;
+          break;
+        case CashMovementType.REFUND:
+          cashRefunds += amount;
+          break;
+      }
+    }
+
+    return {
+      session: sessionDto,
+      cashInDrawer,
+      cashFromSales,
+      cashDeposits,
+      cashWithdrawals,
+      cashRefunds,
+      sales: sales.map((s) => ({
+        id: s.id,
+        documentNumber: s.documentNumber ?? undefined,
+        total: Number(s.total),
+        itemCount: s._count.items,
+        customerName: s.customer?.name,
+        cashierName:
+          `${s.user.firstName} ${s.user.lastName}`.trim() || s.user.username,
+        completedAt: s.completedAt?.toISOString(),
+      })),
+      movements: movements.map((m) => this.mapCashMovementToDto(m)),
+    };
   }
 
   private mapRegisterToDto(register: {

@@ -25,7 +25,7 @@
           <ion-spinner name="crescent"></ion-spinner>
         } @else {
           <ion-icon name="checkmark-outline" slot="start"></ion-icon>
-          {{ 'COMMON.SAVE' | translate }}
+          {{ 'PURCHASES.SAVE_DRAFT' | translate }}
         }
       </ion-button>
     </ion-buttons>
@@ -42,8 +42,8 @@
 
       <div class="fields-grid">
         <div class="field-box span-2">
-          <label>{{ 'PURCHASES.SUPPLIER' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'PURCHASES.SUPPLIER' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.supplierId)">
             <ion-select
               formControlName="supplierId"
               interface="popover"
@@ -56,28 +56,134 @@
               }
             </ion-select>
           </ion-item>
+          <app-field-error [control]="form.controls.supplierId" />
         </div>
 
         <div class="field-box">
-          <label>{{ 'PURCHASES.DOCUMENT' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'PURCHASES.DOCUMENT' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.documentNumber)">
             <ion-input formControlName="documentNumber"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.documentNumber" />
+        </div>
+
+        <div class="field-box">
+          <label>{{ 'PURCHASES.PURCHASE_DATE' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.purchaseDate)">
+            <ion-input type="date" formControlName="purchaseDate"></ion-input>
+          </ion-item>
+          <app-field-error [control]="form.controls.purchaseDate" />
         </div>
 
         <div class="field-box span-3">
           <label>{{ 'PURCHASES.NOTES' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.notes)">
             <ion-textarea formControlName="notes" [autoGrow]="true" rows="2"></ion-textarea>
           </ion-item>
+          <app-field-error [control]="form.controls.notes" />
         </div>
       </div>
     </section>
 
     <section class="form-section">
       <div class="section-title">
-        <ion-icon name="cube-outline"></ion-icon>
-        <span>{{ 'PURCHASES.SECTION_ITEMS' | translate }}</span>
+        <ion-icon name="cash-outline"></ion-icon>
+        <span>{{ 'PURCHASES.SECTION_PAYMENT' | translate }}</span>
+      </div>
+
+      <div class="fields-grid">
+        <div class="field-box">
+          <label>{{ 'PURCHASES.PAYMENT_TERM' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.paymentTerm)">
+            <ion-select formControlName="paymentTerm" interface="popover">
+              <ion-select-option value="CASH">{{ 'PURCHASES.TERM_CASH' | translate }}</ion-select-option>
+              <ion-select-option value="CREDIT">{{ 'PURCHASES.TERM_CREDIT' | translate }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <app-field-error [control]="form.controls.paymentTerm" />
+        </div>
+
+        @if (isCash) {
+          <div class="field-box">
+            <label>{{ 'PURCHASES.FUND_SOURCE' | translate }}<span class="req">*</span></label>
+            <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.fundSource)">
+              <ion-select formControlName="fundSource" interface="popover">
+                <ion-select-option value="REGISTER">{{ 'PURCHASES.FUND_REGISTER' | translate }}</ion-select-option>
+                <ion-select-option value="BANK_ACCOUNT">{{ 'PURCHASES.FUND_BANK' | translate }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+            <app-field-error [control]="form.controls.fundSource" />
+          </div>
+        }
+
+        @if (isRegisterFund) {
+          <div class="field-box">
+            <label>{{ 'PURCHASES.REGISTER' | translate }}<span class="req">*</span></label>
+            <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.registerId)">
+              <ion-select
+                formControlName="registerId"
+                interface="popover"
+                [placeholder]="'PURCHASES.SELECT_REGISTER' | translate"
+              >
+                @for (reg of registers(); track reg.id) {
+                  <ion-select-option [value]="reg.id">
+                    {{ reg.code }} — {{ reg.name }}
+                  </ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+            <app-field-error [control]="form.controls.registerId" />
+          </div>
+        }
+
+        @if (isBankFund) {
+          <div class="field-box span-2">
+            <label>{{ 'PURCHASES.BANK_ACCOUNT' | translate }}<span class="req">*</span></label>
+            <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.bankAccountId)">
+              <ion-select
+                formControlName="bankAccountId"
+                interface="popover"
+                [placeholder]="'PURCHASES.SELECT_BANK_ACCOUNT' | translate"
+              >
+                @for (account of bankAccounts(); track account.id) {
+                  <ion-select-option [value]="account.id">
+                    {{ account.code }} — {{ account.name }}
+                    @if (account.bankName) {
+                      ({{ account.bankName }})
+                    }
+                  </ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+            <app-field-error [control]="form.controls.bankAccountId" />
+          </div>
+        }
+      </div>
+
+      @if (isRegisterFund) {
+        <div class="toggle-row">
+          <ion-item lines="none" class="toggle-item">
+            <ion-toggle formControlName="reduceCash" labelPlacement="start">
+              {{ 'PURCHASES.REDUCE_CASH' | translate }}
+            </ion-toggle>
+          </ion-item>
+          <small class="field-hint">{{ 'PURCHASES.REDUCE_CASH_HINT' | translate }}</small>
+        </div>
+      }
+    </section>
+
+    <section class="form-section">
+      <div class="section-title section-title--with-action">
+        <div class="section-title-left">
+          <ion-icon name="cube-outline"></ion-icon>
+          <span>{{ 'PURCHASES.SECTION_ITEMS' | translate }}</span>
+        </div>
+        @if (canCreateProduct) {
+          <ion-button size="small" fill="outline" (click)="openCreateProduct()">
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            {{ 'PURCHASES.NEW_PRODUCT' | translate }}
+          </ion-button>
+        }
       </div>
 
       <div class="product-search">
@@ -106,6 +212,14 @@
               </ion-item>
             }
           </ion-list>
+        } @else if (searchQuery().trim().length >= 2 && !searching() && canCreateProduct) {
+          <div class="search-empty-create">
+            <p>{{ 'PURCHASES.PRODUCT_NOT_FOUND' | translate }}</p>
+            <ion-button size="small" fill="clear" (click)="openCreateProduct()">
+              <ion-icon name="add-outline" slot="start"></ion-icon>
+              {{ 'PURCHASES.NEW_PRODUCT' | translate }}
+            </ion-button>
+          </div>
         }
       </div>
 
@@ -125,10 +239,15 @@
         </div>
 
         @for (line of lines(); track line.key) {
-          <div class="line-row">
+          <div class="line-row" [class.below-cost]="isBelowSalePrice(line)">
             <div class="col-product">
               <strong>{{ line.productName }}</strong>
               <small>{{ line.sku }}</small>
+              @if (isBelowSalePrice(line)) {
+                <small class="below-cost-hint">
+                  Costo {{ baseUnitCost(line) }} &gt; precio venta {{ line.salePrice }}
+                </small>
+              }
             </div>
             <div class="col-unit">
               @if (line.availableUnits.length > 1) {
@@ -153,16 +272,26 @@
               }
             </div>
             <div class="col-qty">
-              <ion-item lines="none" class="field-item compact">
+              <ion-item
+                lines="none"
+                class="field-item compact"
+                [class.invalid]="!(line.quantity >= 0.001)"
+              >
                 <ion-input
                   type="number"
+                  min="0.001"
+                  step="any"
                   [value]="line.quantity"
                   (ionInput)="onLineNumberChange(line.key, 'quantity', $event)"
                 ></ion-input>
               </ion-item>
             </div>
             <div class="col-cost">
-              <ion-item lines="none" class="field-item compact">
+              <ion-item
+                lines="none"
+                class="field-item compact"
+                [class.invalid]="isBelowSalePrice(line)"
+              >
                 <ion-input
                   type="number"
                   [value]="line.unitCost"

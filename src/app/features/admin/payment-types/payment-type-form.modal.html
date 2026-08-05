@@ -31,27 +31,30 @@
 
       <div class="fields-grid">
         <div class="field-box">
-          <label>{{ 'PAYMENT_TYPES.CODE' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'PAYMENT_TYPES.CODE' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.code)">
             <ion-input formControlName="code" [readonly]="isEdit" placeholder="CASH"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.code" />
           @if (!isEdit) {
             <small class="field-hint">{{ 'PAYMENT_TYPES.CODE_HINT' | translate }}</small>
           }
         </div>
 
         <div class="field-box span-2">
-          <label>{{ 'PAYMENT_TYPES.NAME' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'PAYMENT_TYPES.NAME' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.name)">
             <ion-input formControlName="name"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.name" />
         </div>
 
         <div class="field-box">
           <label>{{ 'PAYMENT_TYPES.SORT_ORDER' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.sortOrder)">
             <ion-input type="number" formControlName="sortOrder"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.sortOrder" />
         </div>
       </div>
 

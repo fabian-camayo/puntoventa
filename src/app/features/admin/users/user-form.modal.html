@@ -31,50 +31,59 @@
 
       <div class="fields-grid">
         <div class="field-box">
-          <label>{{ 'USERS.USERNAME' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'USERS.USERNAME' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.username)">
             <ion-input formControlName="username" [readonly]="isEdit"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.username" />
         </div>
 
         <div class="field-box">
           <label>
             {{ 'USERS.PASSWORD' | translate }}
+            @if (!isEdit) {
+              <span class="req">*</span>
+            }
             @if (isEdit) {
               <span class="optional">({{ 'USERS.PASSWORD_OPTIONAL' | translate }})</span>
             }
           </label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.password)">
             <ion-input type="password" formControlName="password"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.password" />
         </div>
 
         <div class="field-box">
-          <label>{{ 'USERS.FIRST_NAME' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'USERS.FIRST_NAME' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.firstName)">
             <ion-input formControlName="firstName"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.firstName" />
         </div>
 
         <div class="field-box">
-          <label>{{ 'USERS.LAST_NAME' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'USERS.LAST_NAME' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.lastName)">
             <ion-input formControlName="lastName"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.lastName" />
         </div>
 
         <div class="field-box span-2">
           <label>{{ 'USERS.EMAIL' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.email)">
             <ion-input type="email" formControlName="email"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.email" />
         </div>
 
         <div class="field-box">
           <label>{{ 'USERS.PIN' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.pin)">
             <ion-input type="password" formControlName="pin" maxlength="6"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.pin" />
           <small class="field-hint">{{ 'USERS.PIN_HINT' | translate }}</small>
         </div>
       </div>
@@ -94,7 +103,7 @@
               <ion-spinner name="crescent"></ion-spinner>
             </div>
           } @else {
-            <ion-item lines="none" class="field-item">
+            <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.roleIds)">
               <ion-select
                 formControlName="roleIds"
                 multiple
@@ -106,6 +115,7 @@
                 }
               </ion-select>
             </ion-item>
+            <app-field-error [control]="form.controls.roleIds" />
           }
         </div>
       </div>

@@ -16,6 +16,7 @@ import {
   ToastController,
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
+import { AdminBackButton } from '@shared/components/admin-back-button/admin-back-button.component';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { addIcons } from 'ionicons';
@@ -27,6 +28,7 @@ import {
 import { SaleListItemDto, SaleStatus, SaleDto } from '@puntoventa/shared';
 import { SaleService } from '@core/services/sale.service';
 import { ConfigService } from '@core/services/config.service';
+import { AuthService } from '@core/services/auth.service';
 import { AppCurrencyPipe } from '@shared/pipes/app-currency.pipe';
 import { SaleDetailModal } from './sale-detail.modal';
 
@@ -57,21 +59,30 @@ type StatusFilter = 'ALL' | SaleStatus;
     IonRefresher,
     IonRefresherContent,
     TranslateModule,
+    AdminBackButton,
     AppCurrencyPipe,
   ],
 })
 export class SalesPage implements OnInit, OnDestroy {
   private readonly saleService = inject(SaleService);
   private readonly configService = inject(ConfigService);
+  private readonly auth = inject(AuthService);
   private readonly modalCtrl = inject(ModalController);
   private readonly toast = inject(ToastController);
   private readonly destroy$ = new Subject<void>();
   private readonly search$ = new Subject<string>();
 
   readonly SaleStatus = SaleStatus;
+  readonly canVoid = this.auth.hasPermission('sales.void');
+  readonly canDelete = this.auth.hasPermission('sales.delete');
 
   branchId = signal<string | null>(null);
   businessName = signal('');
+  taxId = signal<string | undefined>(undefined);
+  businessAddress = signal<string | undefined>(undefined);
+  businessPhone = signal<string | undefined>(undefined);
+  businessEmail = signal<string | undefined>(undefined);
+  logoUrl = signal<string | undefined>(undefined);
   ticketHeader = signal<string | undefined>(undefined);
   ticketFooter = signal<string | undefined>(undefined);
   sales = signal<SaleListItemDto[]>([]);
@@ -161,7 +172,15 @@ export class SalesPage implements OnInit, OnDestroy {
         component: SaleDetailModal,
         componentProps: {
           sale: detail,
+          branchId: this.branchId(),
+          canVoid: this.canVoid,
+          canDelete: this.canDelete,
           businessName: this.businessName(),
+          taxId: this.taxId(),
+          address: this.businessAddress(),
+          phone: this.businessPhone(),
+          email: this.businessEmail(),
+          logoUrl: this.logoUrl(),
           ticketHeader: this.ticketHeader(),
           ticketFooter: this.ticketFooter(),
           registerName: sale.registerName,
@@ -169,6 +188,10 @@ export class SalesPage implements OnInit, OnDestroy {
         cssClass: 'pv-form-modal',
       });
       await modal.present();
+      const { role } = await modal.onDidDismiss();
+      if (role === 'changed') {
+        await this.loadSales();
+      }
     } catch {
       await this.showToast('SALES.LOAD_DETAIL_ERROR', 'danger');
     }
@@ -188,6 +211,11 @@ export class SalesPage implements OnInit, OnDestroy {
       next: (res) => {
         this.branchId.set(res.branchId);
         this.businessName.set(res.businessName ?? res.branchName);
+        this.taxId.set(res.taxId);
+        this.businessAddress.set(res.address);
+        this.businessPhone.set(res.phone);
+        this.businessEmail.set(res.email);
+        this.logoUrl.set(res.logoUrl);
         this.ticketHeader.set(res.ticketHeader);
         this.ticketFooter.set(res.ticketFooter);
         this.loadSales();

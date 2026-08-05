@@ -46,6 +46,7 @@ export class SuppliersService {
       taxId: dto.taxId,
       email: dto.email,
       phone: dto.phone,
+      city: dto.city,
       address: dto.address,
       isActive: dto.isActive ?? true,
     });
@@ -104,6 +105,7 @@ export class SuppliersService {
     taxId: string | null;
     email: string | null;
     phone: string | null;
+    city: string | null;
     address: string | null;
     isActive: boolean;
   }) {
@@ -115,6 +117,7 @@ export class SuppliersService {
       taxId: supplier.taxId ?? undefined,
       email: supplier.email ?? undefined,
       phone: supplier.phone ?? undefined,
+      city: supplier.city ?? undefined,
       address: supplier.address ?? undefined,
       isActive: supplier.isActive,
     };

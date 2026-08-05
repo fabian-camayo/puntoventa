@@ -4,6 +4,7 @@
   </ion-refresher>
 
   <div class="page-container">
+    <app-admin-back></app-admin-back>
     <div class="page-title-bar">
       <h1>
         <ion-icon name="cart-outline"></ion-icon>
@@ -71,9 +72,10 @@
         <div class="table-header">
           <span class="col-doc">{{ 'PURCHASES.DOCUMENT' | translate }}</span>
           <span class="col-supplier">{{ 'PURCHASES.SUPPLIER' | translate }}</span>
+          <span class="col-term">{{ 'PURCHASES.PAYMENT_TERM' | translate }}</span>
           <span class="col-status">{{ 'PURCHASES.STATUS' | translate }}</span>
           <span class="col-total">{{ 'PURCHASES.TOTAL' | translate }}</span>
-          <span class="col-date">{{ 'PURCHASES.DATE' | translate }}</span>
+          <span class="col-date">{{ 'PURCHASES.PURCHASE_DATE' | translate }}</span>
           <span class="col-actions"></span>
         </div>
 
@@ -85,13 +87,18 @@
                   <strong>{{ purchase.documentNumber }}</strong>
                 </span>
                 <span class="col-supplier">{{ purchase.supplierName ?? '—' }}</span>
+                <span class="col-term">
+                  <ion-badge [color]="purchase.paymentTerm === 'CREDIT' ? 'warning' : 'primary'">
+                    {{ 'PURCHASES.TERM_' + purchase.paymentTerm | translate }}
+                  </ion-badge>
+                </span>
                 <span class="col-status">
                   <ion-badge [color]="statusColor(purchase.status)">
                     {{ 'PURCHASES.STATUS_' + purchase.status | translate }}
                   </ion-badge>
                 </span>
                 <span class="col-total">{{ purchase.total | appCurrency:'1.0-0' }}</span>
-                <span class="col-date">{{ formatDate(purchase.receivedAt ?? purchase.createdAt) }}</span>
+                <span class="col-date">{{ formatDate(purchase.purchaseDate || purchase.receivedAt || purchase.createdAt) }}</span>
                 <div class="col-actions">
                   @if (canUpdate && purchase.status === 'DRAFT') {
                     <ion-button fill="clear" size="small" (click)="openEdit(purchase)">

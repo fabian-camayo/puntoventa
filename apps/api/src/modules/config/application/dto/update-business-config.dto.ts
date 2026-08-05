@@ -58,12 +58,46 @@ export class UpdateBusinessConfigDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  logoUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   ticketHeader?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   ticketFooter?: string;
+
+  @ApiPropertyOptional({
+    description: 'Prefijo de factura. Ej: FEV → FEV001',
+    example: 'FEV',
+  })
+  @IsOptional()
+  @IsString()
+  invoicePrefix?: string;
+
+  @ApiPropertyOptional({
+    description: 'Dígitos del consecutivo (1-10). Ej: 3 → 001',
+    example: 3,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(10)
+  @Type(() => Number)
+  invoiceNumberPadding?: number;
+
+  @ApiPropertyOptional({
+    description: 'Siguiente número de factura a generar',
+    example: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
+  invoiceNextNumber?: number;
 
   @ApiPropertyOptional()
   @IsOptional()

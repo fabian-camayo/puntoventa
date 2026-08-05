@@ -26,6 +26,8 @@ import {
   RoleService,
   UpdateRolePayload,
 } from '@core/services/role.service';
+import { FieldErrorComponent } from '@shared/components/field-error/field-error.component';
+import { isControlInvalid, notifyInvalidForm } from '@shared/utils/form-validation';
 
 addIcons({ closeOutline, checkmarkOutline, shieldOutline });
 
@@ -48,6 +50,7 @@ addIcons({ closeOutline, checkmarkOutline, shieldOutline });
     IonIcon,
     IonSpinner,
     TranslateModule,
+    FieldErrorComponent,
   ],
 })
 export class RoleFormModal implements OnInit {
@@ -61,6 +64,7 @@ export class RoleFormModal implements OnInit {
   saving = signal(false);
   isEdit = false;
   private codeManuallyEdited = false;
+  readonly isInvalid = isControlInvalid;
 
   form = this.fb.nonNullable.group({
     code: ['', [Validators.required, Validators.maxLength(40)]],
@@ -98,10 +102,7 @@ export class RoleFormModal implements OnInit {
   }
 
   async save(): Promise<void> {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (await notifyInvalidForm(this.form, this.toast)) return;
 
     const raw = this.form.getRawValue();
     this.saving.set(true);

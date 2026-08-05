@@ -13,6 +13,7 @@ import { SuppliersModule } from './modules/suppliers/suppliers.module';
 import { PurchasesModule } from './modules/purchases/purchases.module';
 import { SalesModule } from './modules/sales/sales.module';
 import { PaymentTypesModule } from './modules/payment-types/payment-types.module';
+import { BankAccountsModule } from './modules/bank-accounts/bank-accounts.module';
 import { UnitTypesModule } from './modules/unit-types/unit-types.module';
 import { ProductImportTypesModule } from './modules/product-import-types/product-import-types.module';
 import { RegistersModule } from './modules/registers/registers.module';
@@ -43,6 +44,7 @@ import { DiscoveryModule } from './modules/discovery/discovery.module';
     PurchasesModule,
     SalesModule,
     PaymentTypesModule,
+    BankAccountsModule,
     UnitTypesModule,
     ProductImportTypesModule,
     RegistersModule,

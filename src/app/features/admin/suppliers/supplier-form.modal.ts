@@ -26,6 +26,12 @@ import {
   SupplierService,
   UpdateSupplierPayload,
 } from '@core/services/supplier.service';
+import { FieldErrorComponent } from '@shared/components/field-error/field-error.component';
+import {
+  extractApiError,
+  isControlInvalid,
+  notifyInvalidForm,
+} from '@shared/utils/form-validation';
 
 addIcons({ closeOutline, checkmarkOutline, businessOutline });
 
@@ -48,6 +54,7 @@ addIcons({ closeOutline, checkmarkOutline, businessOutline });
     IonIcon,
     IonSpinner,
     TranslateModule,
+    FieldErrorComponent,
   ],
 })
 export class SupplierFormModal implements OnInit {
@@ -62,13 +69,15 @@ export class SupplierFormModal implements OnInit {
   saving = signal(false);
   isEdit = false;
   private codeManuallyEdited = false;
+  readonly isInvalid = isControlInvalid;
 
   form = this.fb.nonNullable.group({
     code: ['', [Validators.required, Validators.maxLength(30)]],
     name: ['', [Validators.required, Validators.maxLength(150)]],
     taxId: ['', [Validators.maxLength(40)]],
     email: ['', [Validators.email, Validators.maxLength(120)]],
-    phone: ['', [Validators.maxLength(40)]],
+    phone: ['', [Validators.required, Validators.maxLength(40)]],
+    city: ['', [Validators.required, Validators.maxLength(100)]],
     address: ['', [Validators.maxLength(250)]],
     isActive: [true],
   });
@@ -83,6 +92,7 @@ export class SupplierFormModal implements OnInit {
         taxId: this.supplier.taxId ?? '',
         email: this.supplier.email ?? '',
         phone: this.supplier.phone ?? '',
+        city: this.supplier.city ?? '',
         address: this.supplier.address ?? '',
         isActive: this.supplier.isActive,
       });
@@ -105,10 +115,7 @@ export class SupplierFormModal implements OnInit {
   }
 
   async save(): Promise<void> {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (await notifyInvalidForm(this.form, this.toast)) return;
 
     const raw = this.form.getRawValue();
     this.saving.set(true);
@@ -120,6 +127,7 @@ export class SupplierFormModal implements OnInit {
           taxId: raw.taxId || undefined,
           email: raw.email || undefined,
           phone: raw.phone || undefined,
+          city: raw.city || undefined,
           address: raw.address || undefined,
           isActive: raw.isActive,
         };
@@ -132,6 +140,7 @@ export class SupplierFormModal implements OnInit {
           taxId: raw.taxId || undefined,
           email: raw.email || undefined,
           phone: raw.phone || undefined,
+          city: raw.city || undefined,
           address: raw.address || undefined,
           isActive: raw.isActive,
         };
@@ -140,9 +149,7 @@ export class SupplierFormModal implements OnInit {
 
       this.dismiss(true);
     } catch (err: unknown) {
-      const message =
-        (err as { error?: { message?: string } })?.error?.message ??
-        'No se pudo guardar el proveedor';
+      const message = extractApiError(err, 'No se pudo guardar el proveedor');
       const t = await this.toast.create({ message, duration: 3500, color: 'danger' });
       await t.present();
     } finally {

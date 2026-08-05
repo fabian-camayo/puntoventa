@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { DEFAULT_PERMISSIONS, buildPermissionCode } from '@puntoventa/shared';
 
 const prisma = new PrismaClient();

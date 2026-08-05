@@ -12,27 +12,28 @@ export class InventoryRepository {
     const limit = params?.limit ?? 20;
     const skip = (page - 1) * limit;
 
-    const where: Prisma.InventoryItemWhereInput = {
-      branchId,
-      ...(params?.search
-        ? {
-            product: {
-              OR: [
-                { name: { contains: params.search } },
-                { sku: { contains: params.search } },
-              ],
-            },
-          }
-        : {}),
-    };
+    const where = this.buildStockWhere(branchId, params?.search);
 
     return Promise.all([
       this.prisma.inventoryItem.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { updatedAt: 'desc' },
-        include: { product: { select: { id: true, sku: true, name: true, unit: true } } },
+        orderBy: [{ product: { name: 'asc' } }, { updatedAt: 'desc' }],
+        include: {
+          product: {
+            select: {
+              id: true,
+              sku: true,
+              name: true,
+              unit: true,
+              costPrice: true,
+              salePrice: true,
+              minStock: true,
+              category: { select: { name: true } },
+            },
+          },
+        },
       }),
       this.prisma.inventoryItem.count({ where }),
     ]).then(([items, total]) => ({
@@ -42,6 +43,47 @@ export class InventoryRepository {
       limit,
       totalPages: Math.ceil(total / limit),
     }));
+  }
+
+  findAllStockForExport(branchId: string, search?: string) {
+    const where = this.buildStockWhere(branchId, search);
+    return this.prisma.inventoryItem.findMany({
+      where,
+      orderBy: [{ product: { name: 'asc' } }],
+      include: {
+        product: {
+          select: {
+            id: true,
+            sku: true,
+            name: true,
+            unit: true,
+            costPrice: true,
+            salePrice: true,
+            minStock: true,
+            category: { select: { name: true } },
+          },
+        },
+      },
+    });
+  }
+
+  private buildStockWhere(
+    branchId: string,
+    search?: string,
+  ): Prisma.InventoryItemWhereInput {
+    return {
+      branchId,
+      ...(search
+        ? {
+            product: {
+              OR: [
+                { name: { contains: search } },
+                { sku: { contains: search } },
+              ],
+            },
+          }
+        : {}),
+    };
   }
 
   findAdjustmentById(id: string) {

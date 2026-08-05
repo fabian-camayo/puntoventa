@@ -17,6 +17,7 @@ import {
   ToastController,
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
+import { AdminBackButton } from '@shared/components/admin-back-button/admin-back-button.component';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, firstValueFrom, takeUntil } from 'rxjs';
 import { addIcons } from 'ionicons';
@@ -35,6 +36,7 @@ import {
   PurchaseStatus,
 } from '@core/services/purchase.service';
 import { SupplierDto, SupplierService } from '@core/services/supplier.service';
+import { ProductService } from '@core/services/product.service';
 import { ConfigService } from '@core/services/config.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppCurrencyPipe } from '@shared/pipes/app-currency.pipe';
@@ -71,12 +73,14 @@ type StatusFilter = 'ALL' | PurchaseStatus;
     IonRefresher,
     IonRefresherContent,
     TranslateModule,
+    AdminBackButton,
     AppCurrencyPipe,
   ],
 })
 export class PurchasesPage implements OnInit, OnDestroy {
   private readonly purchaseService = inject(PurchaseService);
   private readonly supplierService = inject(SupplierService);
+  private readonly productService = inject(ProductService);
   private readonly configService = inject(ConfigService);
   private readonly auth = inject(AuthService);
   private readonly modalCtrl = inject(ModalController);
@@ -156,6 +160,13 @@ export class PurchasesPage implements OnInit, OnDestroy {
 
   formatDate(value?: string): string {
     if (!value) return '—';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const parts = value.split('-').map(Number);
+      const y = parts[0] ?? 0;
+      const m = parts[1] ?? 1;
+      const d = parts[2] ?? 1;
+      return new Date(y, m - 1, d).toLocaleDateString('es-CO', { dateStyle: 'short' });
+    }
     return new Date(value).toLocaleString('es-CO', {
       dateStyle: 'short',
       timeStyle: 'short',
@@ -178,9 +189,12 @@ export class PurchasesPage implements OnInit, OnDestroy {
     });
     await modal.present();
     const { role } = await modal.onDidDismiss();
-    if (role === 'saved') {
+    if (role === 'saved' || role === 'received') {
       await this.loadPurchases();
-      await this.showToast('PURCHASES.SAVED_OK', 'success');
+      await this.showToast(
+        role === 'received' ? 'PURCHASES.RECEIVED_OK' : 'PURCHASES.SAVED_OK',
+        'success',
+      );
     }
   }
 
@@ -202,9 +216,12 @@ export class PurchasesPage implements OnInit, OnDestroy {
       });
       await modal.present();
       const { role } = await modal.onDidDismiss();
-      if (role === 'saved') {
+      if (role === 'saved' || role === 'received') {
         await this.loadPurchases();
-        await this.showToast('PURCHASES.SAVED_OK', 'success');
+        await this.showToast(
+          role === 'received' ? 'PURCHASES.RECEIVED_OK' : 'PURCHASES.SAVED_OK',
+          'success',
+        );
       }
     } catch {
       await this.showToast('PURCHASES.LOAD_DETAIL_ERROR', 'danger');
@@ -214,9 +231,31 @@ export class PurchasesPage implements OnInit, OnDestroy {
   async confirmReceive(purchase: PurchaseDto): Promise<void> {
     if (!this.canUpdate || purchase.status !== 'DRAFT') return;
 
+    let message =
+      purchase.reduceCash && purchase.fundSource === 'REGISTER'
+        ? `¿Recibir "${purchase.documentNumber}"? Se actualizará el inventario y se descontará el efectivo de la caja.`
+        : `¿Recibir "${purchase.documentNumber}"? Se actualizará el inventario.`;
+
+    try {
+      const detail = await firstValueFrom(this.purchaseService.get(purchase.id));
+      const below = await this.findItemsBelowSalePrice(detail);
+      if (below.length > 0) {
+        const names = below
+          .slice(0, 5)
+          .map((n) => `• ${n}`)
+          .join('\n');
+        const more = below.length > 5 ? `\n… y ${below.length - 5} más` : '';
+        message +=
+          `\n\nAdvertencia: el costo queda por encima del precio de venta en:\n${names}${more}` +
+          '\n\nSi continúa, podrá vender por debajo del costo.';
+      }
+    } catch {
+      /* si no se puede validar, se mantiene el mensaje base */
+    }
+
     const alert = await this.alertCtrl.create({
       header: 'Recibir compra',
-      message: `¿Confirmar recepción de "${purchase.documentNumber}"? El inventario se actualizará.`,
+      message,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
@@ -228,6 +267,25 @@ export class PurchasesPage implements OnInit, OnDestroy {
       ],
     });
     await alert.present();
+  }
+
+  private async findItemsBelowSalePrice(detail: PurchaseDto): Promise<string[]> {
+    const below: string[] = [];
+    for (const item of detail.items ?? []) {
+      try {
+        const product = await firstValueFrom(this.productService.getById(item.productId));
+        const factor = item.stockFactor && item.stockFactor > 0 ? item.stockFactor : 1;
+        const baseCost = item.unitCost / factor;
+        if (product.salePrice > 0 && baseCost > product.salePrice) {
+          below.push(
+            `${item.productName ?? product.name}: costo ${baseCost} > venta ${product.salePrice}`,
+          );
+        }
+      } catch {
+        /* omitir producto no cargable */
+      }
+    }
+    return below;
   }
 
   async confirmCancel(purchase: PurchaseDto): Promise<void> {
@@ -336,11 +394,11 @@ export class PurchasesPage implements OnInit, OnDestroy {
     color: 'success' | 'danger' | 'warning',
   ): Promise<void> {
     const messages: Record<string, string> = {
-      'PURCHASES.SAVED_OK': 'Compra guardada correctamente',
+      'PURCHASES.SAVED_OK': 'Compra guardada como borrador',
       'PURCHASES.LOAD_ERROR': 'Error al cargar compras',
       'PURCHASES.CONTEXT_ERROR': 'No se pudo cargar la sucursal',
       'PURCHASES.LOAD_DETAIL_ERROR': 'No se pudo cargar el detalle de la compra',
-      'PURCHASES.RECEIVED_OK': 'Compra recibida correctamente',
+      'PURCHASES.RECEIVED_OK': 'Compra recibida: inventario actualizado',
       'PURCHASES.RECEIVE_ERROR': 'No se pudo recibir la compra',
       'PURCHASES.CANCELLED_OK': 'Compra cancelada',
       'PURCHASES.CANCEL_ERROR': 'No se pudo cancelar la compra',

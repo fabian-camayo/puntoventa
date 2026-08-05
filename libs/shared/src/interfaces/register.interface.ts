@@ -76,6 +76,27 @@ export interface CashMovementDto {
   userName?: string;
 }
 
+export interface PosSessionSaleItem {
+  id: string;
+  documentNumber?: string;
+  total: number;
+  itemCount: number;
+  customerName?: string;
+  cashierName?: string;
+  completedAt?: string;
+}
+
+export interface PosSessionSummaryDto {
+  session: RegisterSessionDto;
+  cashInDrawer: number;
+  cashFromSales: number;
+  cashDeposits: number;
+  cashWithdrawals: number;
+  cashRefunds: number;
+  sales: PosSessionSaleItem[];
+  movements: CashMovementDto[];
+}
+
 export interface CreateCashMovementRequest {
   type: 'WITHDRAWAL' | 'DEPOSIT';
   amount: number;

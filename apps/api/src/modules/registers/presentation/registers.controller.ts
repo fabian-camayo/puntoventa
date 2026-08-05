@@ -58,10 +58,17 @@ export class RegistersController {
   }
 
   @Get('sessions/:sessionId/movements')
-  @RequirePermissions('registers.view', 'registers.cash_movement')
+  @RequirePermissions('registers.view', 'registers.cash_movement', 'registers.open', 'sales.create')
   @ApiOperation({ summary: 'Listar movimientos de efectivo de una sesión' })
   listCashMovements(@Param('sessionId') sessionId: string) {
     return this.registersService.listCashMovements(sessionId);
+  }
+
+  @Get('sessions/:sessionId/pos-summary')
+  @RequirePermissions('registers.open', 'registers.view', 'sales.create', 'registers.cash_movement')
+  @ApiOperation({ summary: 'Resumen de caja para el POS (efectivo y ventas del turno)' })
+  getPosSummary(@Param('sessionId') sessionId: string) {
+    return this.registersService.getPosSummary(sessionId);
   }
 
   @Post('sessions/:sessionId/movements')
@@ -76,14 +83,14 @@ export class RegistersController {
   }
 
   @Get('sessions/:sessionId')
-  @RequirePermissions('registers.view')
+  @RequirePermissions('registers.view', 'registers.open', 'sales.create')
   @ApiOperation({ summary: 'Obtener detalle de sesión de caja' })
   getSession(@Param('sessionId') sessionId: string) {
     return this.registersService.getSessionById(sessionId);
   }
 
   @Get()
-  @RequirePermissions('registers.view')
+  @RequirePermissions('registers.view', 'purchases.create', 'purchases.update')
   @ApiOperation({ summary: 'Listar cajas registradoras' })
   findAll(
     @Query('branchId') branchId: string,
@@ -103,7 +110,7 @@ export class RegistersController {
   }
 
   @Get(':id/session')
-  @RequirePermissions('registers.view', 'registers.open')
+  @RequirePermissions('registers.view', 'registers.open', 'sales.create')
   @ApiOperation({ summary: 'Obtener sesión activa de una caja' })
   getActiveSession(@Param('id') registerId: string) {
     return this.registersService.getActiveSession(registerId);

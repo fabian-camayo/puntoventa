@@ -6,6 +6,11 @@ export interface PosContextDto {
   registerCode: string;
   registerBoundToTerminal?: boolean;
   businessName?: string;
+  taxId?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  logoUrl?: string;
   ticketHeader?: string;
   ticketFooter?: string;
   defaultCustomerId?: string;

@@ -10,6 +10,30 @@
   padding: var(--pv-space-page);
 }
 
+.page-container:has(> app-admin-back + .page-title-bar) {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 8px;
+  align-items: center;
+
+  > app-admin-back {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    margin: 0 0 20px;
+  }
+
+  > .page-title-bar {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  > :not(app-admin-back):not(.page-title-bar) {
+    grid-column: 1 / -1;
+  }
+}
+
 .page-title-bar {
   display: flex;
   align-items: center;
@@ -26,8 +50,10 @@
     font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--pv-text-primary);
+    min-width: 0;
 
     ion-icon {
+      flex-shrink: 0;
       font-size: 1.6rem;
       color: var(--pv-accent);
     }

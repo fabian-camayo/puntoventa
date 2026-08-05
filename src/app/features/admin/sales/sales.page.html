@@ -4,6 +4,7 @@
   </ion-refresher>
 
   <div class="page-container">
+    <app-admin-back></app-admin-back>
     <div class="page-title-bar">
       <h1>
         <ion-icon name="receipt-outline"></ion-icon>
@@ -36,6 +37,12 @@
           (click)="setStatusFilter(SaleStatus.ACTIVE)"
         >
           <ion-label>{{ 'SALES.FILTER_ACTIVE' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip
+          [color]="statusFilter() === SaleStatus.VOIDED ? 'primary' : 'medium'"
+          (click)="setStatusFilter(SaleStatus.VOIDED)"
+        >
+          <ion-label>{{ 'SALES.FILTER_VOIDED' | translate }}</ion-label>
         </ion-chip>
         <ion-chip
           [color]="statusFilter() === 'ALL' ? 'primary' : 'medium'"

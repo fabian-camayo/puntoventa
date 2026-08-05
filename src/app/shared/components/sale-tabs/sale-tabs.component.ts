@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { IonButton, IonIcon } from '@ionic/angular/standalone';
+import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import { addOutline, closeOutline } from 'ionicons/icons';
 import { SaleTab } from '@puntoventa/shared';
@@ -11,7 +12,7 @@ addIcons({ addOutline, closeOutline });
   selector: 'app-sale-tabs',
   templateUrl: './sale-tabs.component.html',
   styleUrls: ['./sale-tabs.component.scss'],
-  imports: [IonButton, IonIcon, AppCurrencyPipe],
+  imports: [IonButton, IonIcon, AppCurrencyPipe, TranslateModule],
 })
 export class SaleTabsComponent {
   @Input() tabs: SaleTab[] = [];

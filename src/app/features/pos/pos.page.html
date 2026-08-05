@@ -10,7 +10,7 @@
     ></app-sale-tabs>
 
     @if (!isRegisterOpen()) {
-      <div class="register-status-bar">
+      <div class="register-status-bar register-status-bar--closed">
         <div class="register-status-info">
           <ion-icon name="lock-closed-outline"></ion-icon>
           @if (canSelectRegister()) {
@@ -29,8 +29,11 @@
               {{ 'REGISTERS.SESSION_CLOSED' | translate }}
             </span>
           } @else {
-            <span>
-              {{ 'REGISTERS.SESSION_CLOSED' | translate }} — {{ registerName() }}
+            <span class="register-state-text">
+              {{ 'REGISTERS.SESSION_CLOSED' | translate }}
+              @if (registerName()) {
+                · {{ registerName() }}
+              }
             </span>
           }
         </div>
@@ -40,6 +43,29 @@
           </ion-button>
         }
       </div>
+    } @else {
+      <button
+        type="button"
+        class="register-status-bar register-status-bar--open"
+        (click)="openSessionSummary()"
+        [attr.title]="registerName()"
+      >
+        <ion-icon name="wallet-outline"></ion-icon>
+        <span class="register-chip-name">{{ registerName() }}</span>
+        <span class="register-chip-sep" aria-hidden="true"></span>
+        <span class="stat-inline" [attr.title]="'POS.CASH_IN_DRAWER' | translate">
+          <small>{{ 'POS.CASH_IN_DRAWER' | translate }}</small>
+          <strong>{{ cashInDrawer() | appCurrency:'1.0-0' }}</strong>
+        </span>
+        <span class="stat-inline" [attr.title]="'POS.TODAY_SALES' | translate">
+          <small>{{ 'POS.TODAY_SALES' | translate }}</small>
+          <strong>
+            {{ sessionSalesCount() }}
+            ·
+            {{ sessionSalesTotal() | appCurrency:'1.0-0' }}
+          </strong>
+        </span>
+      </button>
     }
   </div>
 
@@ -71,28 +97,28 @@
       }
 
       <section class="pos-card cart-card">
-        <div class="sale-customer-bar">
-          <button
-            type="button"
-            class="customer-btn"
-            [disabled]="!canOperateSale()"
-            (click)="openCustomerPicker()"
-          >
-            <ion-icon name="person-outline"></ion-icon>
-            <span>{{ activeSale()?.customerName || ('POS.CHANGE_CUSTOMER' | translate) }}</span>
-          </button>
-        </div>
         <div class="cart-search">
-          <ion-searchbar
-            [value]="searchQuery()"
-            [placeholder]="'POS.SEARCH_PLACEHOLDER' | translate"
-            [debounce]="0"
-            [disabled]="!canOperateSale()"
-            (ionInput)="onSearchInput($event)"
-            (keydown)="onSearchKeydown($event)"
-            class="product-search"
-            autofocus
-          ></ion-searchbar>
+          <div class="cart-search-row">
+            <button
+              type="button"
+              class="customer-btn"
+              [disabled]="!canOperateSale()"
+              (click)="openCustomerPicker()"
+            >
+              <ion-icon name="person-outline"></ion-icon>
+              <span>{{ activeSale()?.customerName || ('POS.CHANGE_CUSTOMER' | translate) }}</span>
+            </button>
+            <ion-searchbar
+              [value]="searchQuery()"
+              [placeholder]="'POS.SEARCH_PLACEHOLDER' | translate"
+              [debounce]="0"
+              [disabled]="!canOperateSale()"
+              (ionInput)="onSearchInput($event)"
+              (keydown)="onSearchKeydown($event)"
+              class="product-search"
+              autofocus
+            ></ion-searchbar>
+          </div>
 
           @if (searchQuery().length > 0) {
             <ion-list class="search-results">

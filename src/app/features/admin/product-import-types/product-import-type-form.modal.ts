@@ -35,6 +35,8 @@ import {
   ProductImportTypeDto,
 } from '@puntoventa/shared';
 import { ProductImportTypeService } from '@core/services/product-import-type.service';
+import { FieldErrorComponent } from '@shared/components/field-error/field-error.component';
+import { isControlInvalid, notifyInvalidForm } from '@shared/utils/form-validation';
 
 addIcons({ closeOutline, checkmarkOutline, cloudUploadOutline, documentOutline });
 
@@ -60,6 +62,7 @@ addIcons({ closeOutline, checkmarkOutline, cloudUploadOutline, documentOutline }
     IonIcon,
     IonSpinner,
     TranslateModule,
+    FieldErrorComponent,
   ],
 })
 export class ProductImportTypeFormModal implements OnInit {
@@ -75,6 +78,7 @@ export class ProductImportTypeFormModal implements OnInit {
   readingExcel = signal(false);
   isEdit = false;
   private codeManuallyEdited = false;
+  readonly isInvalid = isControlInvalid;
 
   readonly fields = PRODUCT_IMPORT_FIELDS;
   sampleHeaders = signal<string[]>([]);
@@ -161,10 +165,7 @@ export class ProductImportTypeFormModal implements OnInit {
   }
 
   async save(): Promise<void> {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (await notifyInvalidForm(this.form, this.toast)) return;
 
     const mappings = this.mappings();
     for (const field of this.fields.filter((f) => f.required)) {

@@ -1,6 +1,19 @@
-import { IsOptional, IsString, IsArray, ValidateNested, IsNumber, Min } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsArray,
+  ValidateNested,
+  IsNumber,
+  IsBoolean,
+  IsEnum,
+  IsUUID,
+  Min,
+  ValidateIf,
+  IsDateString,
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { PurchaseFundSource, PurchasePaymentTerm } from '@prisma/client';
 import { CreatePurchaseItemDto } from './create-purchase.dto';
 
 export class UpdatePurchaseDto {
@@ -8,6 +21,39 @@ export class UpdatePurchaseDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @ApiPropertyOptional({ example: '2026-07-27' })
+  @IsOptional()
+  @IsDateString()
+  purchaseDate?: string;
+
+  @ApiPropertyOptional({ enum: PurchasePaymentTerm })
+  @IsOptional()
+  @IsEnum(PurchasePaymentTerm)
+  paymentTerm?: PurchasePaymentTerm;
+
+  @ApiPropertyOptional({ enum: PurchaseFundSource })
+  @IsOptional()
+  @ValidateIf((o: UpdatePurchaseDto) => o.paymentTerm !== PurchasePaymentTerm.CREDIT)
+  @IsEnum(PurchaseFundSource)
+  fundSource?: PurchaseFundSource | null;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsUUID()
+  bankAccountId?: string | null;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
+  @IsUUID()
+  registerId?: string | null;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  reduceCash?: boolean;
 
   @ApiPropertyOptional({ type: [CreatePurchaseItemDto] })
   @IsOptional()

@@ -22,6 +22,8 @@ import { closeOutline, checkmarkOutline, resizeOutline } from 'ionicons/icons';
 import { firstValueFrom } from 'rxjs';
 import { UnitTypeDto } from '@puntoventa/shared';
 import { UnitTypeService } from '@core/services/unit-type.service';
+import { FieldErrorComponent } from '@shared/components/field-error/field-error.component';
+import { isControlInvalid, notifyInvalidForm } from '@shared/utils/form-validation';
 
 addIcons({ closeOutline, checkmarkOutline, resizeOutline });
 
@@ -44,6 +46,7 @@ addIcons({ closeOutline, checkmarkOutline, resizeOutline });
     IonIcon,
     IonSpinner,
     TranslateModule,
+    FieldErrorComponent,
   ],
 })
 export class UnitTypeFormModal implements OnInit {
@@ -57,6 +60,7 @@ export class UnitTypeFormModal implements OnInit {
   saving = signal(false);
   isEdit = false;
   private codeManuallyEdited = false;
+  readonly isInvalid = isControlInvalid;
 
   form = this.fb.nonNullable.group({
     code: ['', [Validators.required, Validators.maxLength(20)]],
@@ -96,10 +100,7 @@ export class UnitTypeFormModal implements OnInit {
   }
 
   async save(): Promise<void> {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (await notifyInvalidForm(this.form, this.toast)) return;
 
     const raw = this.form.getRawValue();
     this.saving.set(true);

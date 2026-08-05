@@ -31,24 +31,27 @@
 
       <div class="fields-grid">
         <div class="field-box">
-          <label>{{ 'REGISTERS.CODE' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'REGISTERS.CODE' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.code)">
             <ion-input formControlName="code" [readonly]="isEdit" placeholder="CAJA01"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.code" />
         </div>
 
         <div class="field-box span-2">
-          <label>{{ 'REGISTERS.NAME' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'REGISTERS.NAME' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.name)">
             <ion-input formControlName="name" placeholder="Caja principal"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.name" />
         </div>
 
         <div class="field-box span-3">
           <label>{{ 'REGISTERS.DESCRIPTION' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.description)">
             <ion-textarea formControlName="description" [autoGrow]="true" rows="2"></ion-textarea>
           </ion-item>
+          <app-field-error [control]="form.controls.description" />
         </div>
       </div>
 

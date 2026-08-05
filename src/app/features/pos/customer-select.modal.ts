@@ -16,11 +16,13 @@ import {
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
-import { closeOutline, checkmarkOutline, peopleOutline } from 'ionicons/icons';
+import { closeOutline, checkmarkOutline, peopleOutline, addOutline } from 'ionicons/icons';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { CustomerDto, CustomerService } from '@core/services/customer.service';
+import { AuthService } from '@core/services/auth.service';
+import { CustomerFormModal } from '../admin/customers/customer-form.modal';
 
-addIcons({ closeOutline, checkmarkOutline, peopleOutline });
+addIcons({ closeOutline, checkmarkOutline, peopleOutline, addOutline });
 
 @Component({
   selector: 'app-customer-select-modal',
@@ -45,11 +47,14 @@ addIcons({ closeOutline, checkmarkOutline, peopleOutline });
 export class CustomerSelectModal implements OnInit, OnDestroy {
   private readonly customerService = inject(CustomerService);
   private readonly modalCtrl = inject(ModalController);
+  private readonly auth = inject(AuthService);
   private readonly destroy$ = new Subject<void>();
   private readonly search$ = new Subject<string>();
 
   @Input() branchId = '';
   @Input() selectedCustomerId: string | null = null;
+
+  readonly canCreate = this.auth.hasPermission('customers.create');
 
   loading = signal(false);
   customers = signal<CustomerDto[]>([]);
@@ -79,6 +84,22 @@ export class CustomerSelectModal implements OnInit, OnDestroy {
 
   dismiss(): void {
     void this.modalCtrl.dismiss(null, 'cancel');
+  }
+
+  async openCreate(): Promise<void> {
+    if (!this.canCreate || !this.branchId) return;
+
+    const modal = await this.modalCtrl.create({
+      component: CustomerFormModal,
+      componentProps: { branchId: this.branchId },
+      cssClass: 'pv-form-modal',
+    });
+    await modal.present();
+    const { data, role } = await modal.onDidDismiss<CustomerDto | null>();
+    if (role !== 'saved' || !data?.id) return;
+
+    // Select the newly created customer for the sale.
+    this.select(data);
   }
 
   private loadCustomers(search: string): Promise<void> {

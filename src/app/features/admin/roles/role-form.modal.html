@@ -31,27 +31,30 @@
 
       <div class="fields-grid">
         <div class="field-box">
-          <label>{{ 'ROLES.CODE' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'ROLES.CODE' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.code)">
             <ion-input formControlName="code" [readonly]="isEdit" placeholder="CAJERO"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.code" />
           @if (!isEdit) {
             <small class="field-hint">{{ 'ROLES.CODE_HINT' | translate }}</small>
           }
         </div>
 
         <div class="field-box span-2">
-          <label>{{ 'ROLES.NAME' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'ROLES.NAME' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.name)">
             <ion-input formControlName="name"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.name" />
         </div>
 
         <div class="field-box span-3">
           <label>{{ 'ROLES.DESCRIPTION' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.description)">
             <ion-textarea formControlName="description" [autoGrow]="true" rows="2"></ion-textarea>
           </ion-item>
+          <app-field-error [control]="form.controls.description" />
         </div>
       </div>
 

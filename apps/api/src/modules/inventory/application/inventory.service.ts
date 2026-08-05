@@ -36,6 +36,68 @@ export class InventoryService {
     };
   }
 
+  async exportStockExcel(
+    branchId: string,
+    search?: string,
+  ): Promise<{ buffer: Buffer; filename: string }> {
+    const items = await this.inventoryRepository.findAllStockForExport(
+      branchId,
+      search,
+    );
+
+    const ExcelJS = (await import('exceljs')).default;
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'PuntoVenta';
+    workbook.created = new Date();
+
+    const sheet = workbook.addWorksheet('Inventario', {
+      views: [{ state: 'frozen', ySplit: 1 }],
+    });
+
+    sheet.columns = [
+      { header: 'SKU', key: 'sku', width: 18 },
+      { header: 'Producto', key: 'name', width: 40 },
+      { header: 'Categoría', key: 'category', width: 22 },
+      { header: 'Unidad', key: 'unit', width: 12 },
+      { header: 'Cantidad', key: 'quantity', width: 12 },
+      { header: 'Reservado', key: 'reserved', width: 12 },
+      { header: 'Disponible', key: 'available', width: 12 },
+      { header: 'Stock mínimo', key: 'minStock', width: 14 },
+      { header: 'Costo', key: 'costPrice', width: 12 },
+      { header: 'Precio venta', key: 'salePrice', width: 14 },
+      { header: 'Actualizado', key: 'updatedAt', width: 20 },
+    ];
+
+    const headerRow = sheet.getRow(1);
+    headerRow.font = { bold: true };
+    headerRow.alignment = { vertical: 'middle' };
+
+    for (const item of items) {
+      const quantity = Number(item.quantity);
+      const reserved = Number(item.reserved);
+      sheet.addRow({
+        sku: item.product.sku,
+        name: item.product.name,
+        category: item.product.category?.name ?? '',
+        unit: item.product.unit,
+        quantity,
+        reserved,
+        available: quantity - reserved,
+        minStock: item.product.minStock != null ? Number(item.product.minStock) : '',
+        costPrice: Number(item.product.costPrice),
+        salePrice: Number(item.product.salePrice),
+        updatedAt: item.updatedAt.toISOString().slice(0, 19).replace('T', ' '),
+      });
+    }
+
+    const buffer = Buffer.from(await workbook.xlsx.writeBuffer());
+    const date = new Date().toISOString().slice(0, 10);
+    return {
+      buffer,
+      filename: `inventario-${date}.xlsx`,
+    };
+  }
+
   async findAdjustments(branchId: string, params?: { page?: number; limit?: number }) {
     const result = await this.inventoryRepository.findAdjustmentsByBranch(branchId, params);
     return {

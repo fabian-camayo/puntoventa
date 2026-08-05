@@ -4,6 +4,7 @@
   </ion-refresher>
 
   <div class="page-container">
+    <app-admin-back></app-admin-back>
     <div class="page-title-bar">
       <h1>
         <ion-icon name="business-outline"></ion-icon>
@@ -59,8 +60,8 @@
         <div class="table-header">
           <span class="col-code">{{ 'SUPPLIERS.CODE' | translate }}</span>
           <span class="col-name">{{ 'SUPPLIERS.NAME' | translate }}</span>
-          <span class="col-tax">{{ 'SUPPLIERS.TAX_ID' | translate }}</span>
           <span class="col-phone">{{ 'SUPPLIERS.PHONE' | translate }}</span>
+          <span class="col-city">{{ 'SUPPLIERS.CITY' | translate }}</span>
           <span class="col-status">{{ 'SUPPLIERS.STATUS' | translate }}</span>
           <span class="col-actions"></span>
         </div>
@@ -82,8 +83,8 @@
                     <small class="sub">{{ item.email }}</small>
                   }
                 </span>
-                <span class="col-tax">{{ item.taxId || '—' }}</span>
                 <span class="col-phone">{{ item.phone || '—' }}</span>
+                <span class="col-city">{{ item.city || '—' }}</span>
                 <span class="col-status">
                   <ion-badge [color]="item.isActive ? 'success' : 'medium'">
                     {{ (item.isActive ? 'SUPPLIERS.ACTIVE' : 'SUPPLIERS.INACTIVE') | translate }}

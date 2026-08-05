@@ -22,6 +22,8 @@ import { addIcons } from 'ionicons';
 import { closeOutline, checkmarkOutline, cashOutline } from 'ionicons/icons';
 import { firstValueFrom } from 'rxjs';
 import { RegisterService } from '@core/services/register.service';
+import { FieldErrorComponent } from '@shared/components/field-error/field-error.component';
+import { isControlInvalid, notifyInvalidForm } from '@shared/utils/form-validation';
 
 addIcons({ closeOutline, checkmarkOutline, cashOutline });
 
@@ -45,6 +47,7 @@ addIcons({ closeOutline, checkmarkOutline, cashOutline });
     IonIcon,
     IonSpinner,
     TranslateModule,
+    FieldErrorComponent,
   ],
 })
 export class CashMovementModal {
@@ -56,6 +59,7 @@ export class CashMovementModal {
   @Input() sessionId = '';
 
   saving = signal(false);
+  readonly isInvalid = isControlInvalid;
 
   form = this.fb.nonNullable.group({
     type: ['WITHDRAWAL' as 'WITHDRAWAL' | 'DEPOSIT', Validators.required],
@@ -68,10 +72,8 @@ export class CashMovementModal {
   }
 
   async save(): Promise<void> {
-    if (this.form.invalid || !this.sessionId) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (await notifyInvalidForm(this.form, this.toast)) return;
+    if (!this.sessionId) return;
 
     const raw = this.form.getRawValue();
     this.saving.set(true);

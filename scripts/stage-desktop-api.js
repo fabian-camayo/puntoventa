@@ -64,7 +64,7 @@ if (process.platform !== 'win32') {
   );
 }
 
-// Prisma client generado en la raíz del monorepo
+// Prisma client + engines (incluye query engine Windows) desde el monorepo
 const prismaClient = path.join(root, 'node_modules/.prisma');
 const prismaPkg = path.join(root, 'node_modules/@prisma/client');
 if (fs.existsSync(prismaClient)) {

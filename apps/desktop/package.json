@@ -23,7 +23,20 @@
     },
     "files": [
       "dist/**/*",
-      "package.json"
+      "package.json",
+      {
+        "from": "../../libs/shared/package.json",
+        "to": "node_modules/@puntoventa/shared/package.json"
+      },
+      {
+        "from": "../../libs/shared/dist",
+        "to": "node_modules/@puntoventa/shared/dist"
+      },
+      {
+        "from": "../../node_modules/tslib",
+        "to": "node_modules/tslib",
+        "filter": ["**/*"]
+      }
     ],
     "extraResources": [
       {
@@ -60,7 +73,8 @@
     }
   },
   "dependencies": {
-    "@puntoventa/shared": "*"
+    "@puntoventa/shared": "*",
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

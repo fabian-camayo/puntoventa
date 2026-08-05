@@ -9,9 +9,24 @@ import {
   Headers,
   Ip,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  StreamableFile,
+  Header,
+  BadRequestException,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiConsumes,
+  ApiBody,
+  ApiProduces,
+} from '@nestjs/swagger';
+import { memoryStorage } from 'multer';
 import { ConfigService } from '../application/config.service';
+import { DatabaseBackupService } from '../application/database-backup.service';
 import { UpdateBusinessConfigDto } from '../application/dto/update-business-config.dto';
 import { UpdateAppSettingDto } from '../application/dto/update-app-setting.dto';
 import { SetupWizardDto } from '../application/dto/setup-wizard.dto';
@@ -21,11 +36,19 @@ import { RequirePermissions, Public } from '../../../presentation/decorators/per
 import { CurrentUser } from '../../../presentation/decorators/current-user.decorator';
 import { JwtPayload, SetupWizardRequest } from '@puntoventa/shared';
 
+const sqlBackupUpload = FileInterceptor('file', {
+  storage: memoryStorage(),
+  limits: { fileSize: 200 * 1024 * 1024 },
+});
+
 @ApiTags('Configuración')
 @Controller('config')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ConfigController {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly databaseBackup: DatabaseBackupService,
+  ) {}
 
   @Get('app')
   @Public()
@@ -74,6 +97,49 @@ export class ConfigController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.configService.updateBusinessConfig(branchId, dto, user);
+  }
+
+  @Get('backup')
+  @RequirePermissions('config.update')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Descargar copia de seguridad de la base de datos (.sql)' })
+  @ApiProduces('application/sql')
+  @Header('Content-Type', 'application/sql; charset=utf-8')
+  async downloadBackup(): Promise<StreamableFile> {
+    const { buffer, filename } = await this.databaseBackup.createBackup();
+    return new StreamableFile(buffer, {
+      type: 'application/sql; charset=utf-8',
+      disposition: `attachment; filename="${filename}"`,
+    });
+  }
+
+  @Post('backup/restore')
+  @RequirePermissions('config.update')
+  @ApiBearerAuth()
+  @UseInterceptors(sqlBackupUpload)
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary' },
+      },
+      required: ['file'],
+    },
+  })
+  @ApiOperation({
+    summary: 'Restaurar base de datos desde un archivo .sql (reemplaza todos los datos)',
+  })
+  async restoreBackup(
+    @UploadedFile() file: Express.Multer.File | undefined,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('Seleccione un archivo .sql de respaldo');
+    }
+    const result = await this.databaseBackup.restoreBackup(file.buffer, file.originalname);
+    await this.configService.logBackupRestore(user, file.originalname, result.statements);
+    return result;
   }
 
   @Get('settings')

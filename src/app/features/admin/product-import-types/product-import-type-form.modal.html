@@ -31,29 +31,33 @@
 
       <div class="fields-grid">
         <div class="field-box">
-          <label>{{ 'PRODUCT_IMPORT_TYPES.CODE' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'PRODUCT_IMPORT_TYPES.CODE' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.code)">
             <ion-input formControlName="code" [readonly]="isEdit" placeholder="PROVEEDOR_A"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.code" />
         </div>
         <div class="field-box span-2">
-          <label>{{ 'PRODUCT_IMPORT_TYPES.NAME' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'PRODUCT_IMPORT_TYPES.NAME' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.name)">
             <ion-input formControlName="name"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.name" />
         </div>
         <div class="field-box">
-          <label>{{ 'PRODUCT_IMPORT_TYPES.HEADER_ROW' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <label>{{ 'PRODUCT_IMPORT_TYPES.HEADER_ROW' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.headerRow)">
             <ion-input type="number" formControlName="headerRow" min="1"></ion-input>
           </ion-item>
+          <app-field-error [control]="form.controls.headerRow" />
           <small class="field-hint">{{ 'PRODUCT_IMPORT_TYPES.HEADER_ROW_HINT' | translate }}</small>
         </div>
         <div class="field-box span-3">
           <label>{{ 'PRODUCT_IMPORT_TYPES.DESCRIPTION' | translate }}</label>
-          <ion-item lines="none" class="field-item">
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.description)">
             <ion-textarea formControlName="description" [autoGrow]="true" rows="2"></ion-textarea>
           </ion-item>
+          <app-field-error [control]="form.controls.description" />
         </div>
       </div>
 

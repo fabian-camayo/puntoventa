@@ -32,12 +32,22 @@
           <ion-item lines="none" class="field-item">
             <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
             <ion-input
-              type="password"
+              [type]="showPassword() ? 'text' : 'password'"
               formControlName="password"
               autocomplete="current-password"
               [placeholder]="'AUTH.PASSWORD' | translate"
               (keydown.enter)="onSubmit()"
             ></ion-input>
+            <button
+              type="button"
+              class="password-toggle"
+              slot="end"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="(showPassword() ? 'AUTH.HIDE_PASSWORD' : 'AUTH.SHOW_PASSWORD') | translate"
+              [title]="(showPassword() ? 'AUTH.HIDE_PASSWORD' : 'AUTH.SHOW_PASSWORD') | translate"
+            >
+              <ion-icon [name]="showPassword() ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </button>
           </ion-item>
         </div>
 

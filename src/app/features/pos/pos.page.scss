@@ -10,40 +10,122 @@
   padding: 8px 16px 0;
   background: var(--pv-bg-app);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: stretch;
   gap: 8px;
+  min-width: 0;
+
+  app-sale-tabs {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 .register-status-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 6px 12px;
+  gap: 8px;
+  flex-shrink: 0;
+  max-width: min(420px, 48vw);
+  min-height: 40px;
+  padding: 4px 10px;
   border: 1px solid var(--pv-border);
   border-radius: var(--pv-radius-md);
   background: color-mix(in srgb, #64748b 8%, var(--pv-bg-primary));
+  box-shadow: var(--pv-shadow-sm);
+}
+
+.register-status-bar--closed {
+  justify-content: space-between;
+}
+
+.register-status-bar--open {
+  border-color: color-mix(in srgb, var(--ion-color-success) 35%, var(--pv-border));
+  background: color-mix(in srgb, var(--ion-color-success) 10%, var(--pv-bg-primary));
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+
+  > ion-icon {
+    flex-shrink: 0;
+    font-size: 1rem;
+    color: var(--ion-color-success-shade, var(--ion-color-success));
+  }
+
+  &:hover {
+    filter: brightness(0.98);
+  }
+}
+
+.register-chip-name {
+  flex-shrink: 1;
+  max-width: 88px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--pv-text-primary);
+}
+
+.register-chip-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 4px 0;
+  background: color-mix(in srgb, var(--pv-border) 80%, transparent);
+  flex-shrink: 0;
+}
+
+.stat-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  line-height: 1.15;
+
+  small {
+    font-size: 0.58rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--pv-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 110px;
+  }
+
+  strong {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--pv-text-primary);
+    white-space: nowrap;
+  }
 }
 
 .register-status-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
+  gap: 6px;
+  min-width: 0;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--pv-text-primary);
 
   ion-icon {
-    font-size: 1.1rem;
+    flex-shrink: 0;
+    font-size: 1rem;
   }
 }
 
 .register-select {
-  --padding-start: 8px;
-  --padding-end: 8px;
-  min-width: 120px;
-  max-width: 220px;
+  --padding-start: 6px;
+  --padding-end: 6px;
+  min-width: 90px;
+  max-width: 140px;
   font-weight: 700;
+  font-size: 0.78rem;
   border: 1px solid var(--pv-border);
   border-radius: var(--pv-radius-md);
   background: var(--pv-bg-primary);
@@ -51,7 +133,26 @@
 
 .register-state-text {
   font-weight: 600;
+  font-size: 0.75rem;
   color: var(--pv-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 720px) {
+  .pos-subheader {
+    flex-wrap: wrap;
+  }
+
+  .register-status-bar {
+    max-width: none;
+    width: 100%;
+  }
+
+  .register-chip-name {
+    max-width: 120px;
+  }
 }
 
 .pos-loading {
@@ -143,31 +244,42 @@
   border-bottom: 1px solid var(--pv-border);
 }
 
-.sale-customer-bar {
-  flex-shrink: 0;
-  padding: 8px 10px 0;
-  border-bottom: 1px solid var(--pv-border);
+.cart-search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  min-width: 0;
 }
 
 .customer-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 8px 10px;
-  margin-bottom: 8px;
+  gap: 6px;
+  flex: 0 1 220px;
+  max-width: 260px;
+  min-width: 140px;
+  height: 40px;
+  padding: 0 10px;
   border: 1px solid var(--pv-border);
   border-radius: var(--pv-radius-md);
   background: var(--pv-bg-secondary);
   color: var(--pv-text-primary);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   cursor: pointer;
   text-align: left;
 
   ion-icon {
+    flex-shrink: 0;
     color: var(--pv-accent);
-    font-size: 1.15rem;
+    font-size: 1.1rem;
+  }
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &:disabled {
@@ -177,7 +289,9 @@
 }
 
 .product-search {
-  padding: 8px 10px;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
   --background: var(--pv-bg-secondary);
   --border-radius: var(--pv-radius-md);
   --box-shadow: none;

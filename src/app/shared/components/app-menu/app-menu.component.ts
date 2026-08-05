@@ -29,9 +29,12 @@ import {
   resizeOutline,
   cloudUploadOutline,
   documentOutline,
+  walletOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@core/services/auth.service';
+import { ConfigService } from '@core/services/config.service';
 import { ThemeService } from '@core/services/theme.service';
+import { firstValueFrom } from 'rxjs';
 
 addIcons({
   cartOutline,
@@ -57,6 +60,7 @@ addIcons({
   resizeOutline,
   cloudUploadOutline,
   documentOutline,
+  walletOutline,
 });
 
 export interface NavItem {
@@ -115,6 +119,12 @@ const NAV_ITEMS: NavItem[] = [
     icon: 'card-outline',
     route: '/admin/payment-types',
     permission: 'payment_types.view',
+  },
+  {
+    labelKey: 'ADMIN.BANK_ACCOUNTS',
+    icon: 'wallet-outline',
+    route: '/admin/bank-accounts',
+    permission: 'bank_accounts.view',
   },
   {
     labelKey: 'ADMIN.UNIT_TYPES',
@@ -186,12 +196,15 @@ const NAV_ITEMS: NavItem[] = [
 })
 export class AppMenuComponent implements OnInit {
   private readonly auth = inject(AuthService);
+  private readonly configService = inject(ConfigService);
   private readonly router = inject(Router);
   private readonly navCtrl = inject(NavController);
   private readonly theme = inject(ThemeService);
 
   visibleItems = signal<NavItem[]>([]);
   userName = signal('');
+  businessName = signal('');
+  logoUrl = signal<string | undefined>(undefined);
   currentUrl = signal(this.router.url);
 
   ngOnInit(): void {
@@ -199,11 +212,21 @@ export class AppMenuComponent implements OnInit {
     this.auth.user$.subscribe((user) => {
       this.userName.set(user ? `${user.firstName} ${user.lastName}` : '');
       this.refreshMenu();
+      void this.loadBranding();
     });
 
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
-      .subscribe((e) => this.currentUrl.set(e.urlAfterRedirects));
+      .subscribe((e) => {
+        const previous = this.currentUrl();
+        this.currentUrl.set(e.urlAfterRedirects);
+        if (
+          previous.startsWith('/admin/config') &&
+          !e.urlAfterRedirects.startsWith('/admin/config')
+        ) {
+          void this.loadBranding();
+        }
+      });
   }
 
   isActive(route: string): boolean {
@@ -257,5 +280,20 @@ export class AppMenuComponent implements OnInit {
     });
 
     this.visibleItems.set(items);
+  }
+
+  private async loadBranding(): Promise<void> {
+    if (!this.auth.isAuthenticated) {
+      this.businessName.set('');
+      this.logoUrl.set(undefined);
+      return;
+    }
+    try {
+      const ctx = await firstValueFrom(this.configService.getPosContext());
+      this.businessName.set(ctx.businessName?.trim() || ctx.branchName || '');
+      this.logoUrl.set(ctx.logoUrl || undefined);
+    } catch {
+      // Sin contexto aún (setup / offline): mantener marca por defecto
+    }
   }
 }

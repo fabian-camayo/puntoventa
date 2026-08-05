@@ -26,6 +26,12 @@ import {
   CustomerService,
   UpdateCustomerPayload,
 } from '@core/services/customer.service';
+import { FieldErrorComponent } from '@shared/components/field-error/field-error.component';
+import {
+  extractApiError,
+  isControlInvalid,
+  notifyInvalidForm,
+} from '@shared/utils/form-validation';
 
 addIcons({ closeOutline, checkmarkOutline, peopleOutline });
 
@@ -48,6 +54,7 @@ addIcons({ closeOutline, checkmarkOutline, peopleOutline });
     IonIcon,
     IonSpinner,
     TranslateModule,
+    FieldErrorComponent,
   ],
 })
 export class CustomerFormModal implements OnInit {
@@ -62,6 +69,7 @@ export class CustomerFormModal implements OnInit {
   saving = signal(false);
   isEdit = false;
   private codeManuallyEdited = false;
+  readonly isInvalid = isControlInvalid;
 
   form = this.fb.nonNullable.group({
     code: ['', [Validators.required, Validators.maxLength(30)]],
@@ -102,15 +110,12 @@ export class CustomerFormModal implements OnInit {
     });
   }
 
-  dismiss(saved = false): void {
-    void this.modalCtrl.dismiss(null, saved ? 'saved' : 'cancel');
+  dismiss(saved = false, customer: CustomerDto | null = null): void {
+    void this.modalCtrl.dismiss(customer, saved ? 'saved' : 'cancel');
   }
 
   async save(): Promise<void> {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (await notifyInvalidForm(this.form, this.toast)) return;
 
     const raw = this.form.getRawValue();
     this.saving.set(true);
@@ -121,6 +126,7 @@ export class CustomerFormModal implements OnInit {
           ? Number(raw.creditLimit)
           : undefined;
 
+      let saved: CustomerDto;
       if (this.isEdit && this.customer) {
         const payload: UpdateCustomerPayload = {
           name: raw.name,
@@ -131,7 +137,7 @@ export class CustomerFormModal implements OnInit {
           creditLimit,
           isActive: raw.isActive,
         };
-        await firstValueFrom(this.customerService.update(this.customer.id, payload));
+        saved = await firstValueFrom(this.customerService.update(this.customer.id, payload));
       } else {
         const payload: CreateCustomerPayload = {
           branchId: this.branchId,
@@ -144,14 +150,12 @@ export class CustomerFormModal implements OnInit {
           creditLimit,
           isActive: raw.isActive,
         };
-        await firstValueFrom(this.customerService.create(payload));
+        saved = await firstValueFrom(this.customerService.create(payload));
       }
 
-      this.dismiss(true);
+      this.dismiss(true, saved);
     } catch (err: unknown) {
-      const message =
-        (err as { error?: { message?: string } })?.error?.message ??
-        'No se pudo guardar el cliente';
+      const message = extractApiError(err, 'No se pudo guardar el cliente');
       const t = await this.toast.create({ message, duration: 3500, color: 'danger' });
       await t.present();
     } finally {

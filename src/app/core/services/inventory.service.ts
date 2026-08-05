@@ -38,4 +38,17 @@ export class InventoryService {
       )
       .pipe(map((r) => r.data));
   }
+
+  exportStockExcel(
+    branchId: string,
+    search?: string,
+  ): Observable<Blob> {
+    const query: Record<string, string> = { branchId };
+    if (search) query['search'] = search;
+
+    return this.http.get(`${this.config.apiBaseUrl}/inventory/stock/export`, {
+      params: query,
+      responseType: 'blob',
+    });
+  }
 }

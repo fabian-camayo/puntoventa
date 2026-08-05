@@ -6,6 +6,8 @@ import { PaginatedResult } from '@puntoventa/shared';
 import { ConfigService } from './config.service';
 
 export type PurchaseStatus = 'DRAFT' | 'RECEIVED' | 'CANCELLED';
+export type PurchasePaymentTerm = 'CASH' | 'CREDIT';
+export type PurchaseFundSource = 'REGISTER' | 'BANK_ACCOUNT';
 
 export interface PurchaseItemDto {
   id?: string;
@@ -31,6 +33,14 @@ export interface PurchaseDto {
   supplierName?: string;
   documentNumber: string;
   status: PurchaseStatus;
+  paymentTerm: PurchasePaymentTerm;
+  fundSource?: PurchaseFundSource;
+  bankAccountId?: string;
+  bankAccountName?: string;
+  registerId?: string;
+  registerName?: string;
+  reduceCash: boolean;
+  purchaseDate: string;
   subtotal: number;
   taxAmount: number;
   total: number;
@@ -44,6 +54,12 @@ export interface CreatePurchasePayload {
   branchId: string;
   supplierId: string;
   documentNumber: string;
+  purchaseDate: string;
+  paymentTerm: PurchasePaymentTerm;
+  fundSource?: PurchaseFundSource;
+  bankAccountId?: string;
+  registerId?: string;
+  reduceCash?: boolean;
   notes?: string;
   items: Array<{
     productId: string;
@@ -56,6 +72,12 @@ export interface CreatePurchasePayload {
 
 export interface UpdatePurchasePayload {
   notes?: string;
+  purchaseDate?: string;
+  paymentTerm?: PurchasePaymentTerm;
+  fundSource?: PurchaseFundSource | null;
+  bankAccountId?: string | null;
+  registerId?: string | null;
+  reduceCash?: boolean;
   items?: Array<{
     productId: string;
     unitTypeId?: string;
@@ -98,6 +120,14 @@ export class PurchaseService {
     return this.http
       .get<{ data: PurchaseDto }>(`${this.baseUrl}/${id}`)
       .pipe(map((r) => r.data));
+  }
+
+  nextDocumentNumber(branchId: string): Observable<string> {
+    return this.http
+      .get<{ data: { documentNumber: string } }>(`${this.baseUrl}/next-document-number`, {
+        params: { branchId },
+      })
+      .pipe(map((r) => r.data.documentNumber));
   }
 
   create(payload: CreatePurchasePayload): Observable<PurchaseDto> {

@@ -18,6 +18,7 @@ export const ADMIN_ROUTES: Routes = [
         'purchases.view',
         'categories.view',
         'payment_types.view',
+        'bank_accounts.view',
         'unit_types.view',
         'product_import_types.view',
         'products.import',
@@ -69,6 +70,13 @@ export const ADMIN_ROUTES: Routes = [
       import('./payment-types/payment-types.page').then((m) => m.PaymentTypesPage),
     canActivate: [permissionGuard],
     data: { permission: 'payment_types.view' },
+  },
+  {
+    path: 'bank-accounts',
+    loadComponent: () =>
+      import('./bank-accounts/bank-accounts.page').then((m) => m.BankAccountsPage),
+    canActivate: [permissionGuard],
+    data: { permission: 'bank_accounts.view' },
   },
   {
     path: 'unit-types',

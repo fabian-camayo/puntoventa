@@ -40,6 +40,7 @@ import {
   saveOutline,
   searchOutline,
   cartOutline,
+  walletOutline,
   lockOpenOutline,
   lockClosedOutline,
 } from 'ionicons/icons';
@@ -69,6 +70,7 @@ import { AppCurrencyPipe } from '../../shared/pipes/app-currency.pipe';
 import { RegisterSessionModal } from './register-session.modal';
 import { CashMovementModal } from './cash-movement.modal';
 import { CustomerSelectModal } from './customer-select.modal';
+import { SessionSummaryModal } from './session-summary.modal';
 
 addIcons({
   addOutline,
@@ -82,6 +84,7 @@ addIcons({
   saveOutline,
   searchOutline,
   cartOutline,
+  walletOutline,
   lockOpenOutline,
   lockClosedOutline,
 });
@@ -150,6 +153,11 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   registerId = signal<string | null>(null);
   registerName = signal<string>('');
   businessName = signal<string>('');
+  taxId = signal<string | undefined>(undefined);
+  businessAddress = signal<string | undefined>(undefined);
+  businessPhone = signal<string | undefined>(undefined);
+  businessEmail = signal<string | undefined>(undefined);
+  logoUrl = signal<string | undefined>(undefined);
   ticketHeader = signal<string | undefined>(undefined);
   ticketFooter = signal<string | undefined>(undefined);
   defaultCustomerId = signal<string | null>(null);
@@ -235,6 +243,11 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     () => this.activeSale()?.status === SaleStatus.COMPLETED,
   );
   readonly isRegisterOpen = computed(() => this.activeSession()?.status === 'OPEN');
+  readonly cashInDrawer = computed(
+    () => this.activeSession()?.expectedAmount ?? this.activeSession()?.openingAmount ?? 0,
+  );
+  readonly sessionSalesCount = computed(() => this.activeSession()?.salesCount ?? 0);
+  readonly sessionSalesTotal = computed(() => this.activeSession()?.salesTotal ?? 0);
   readonly canOperateSale = computed(
     () => this.isRegisterOpen() && !this.isSaleCompleted(),
   );
@@ -268,6 +281,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   ionViewWillEnter(): void {
+    this.refreshBusinessBranding();
     void this.loadActiveSession().then(() => {
       if (!this.branchId() || !this.registerId()) {
         this.loadPosContext();
@@ -389,6 +403,24 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     if (role === 'saved') {
       await this.loadActiveSession();
       await this.showToast('Movimiento de caja registrado', 'success');
+    }
+  }
+
+  async openSessionSummary(): Promise<void> {
+    const sessionId = this.activeSession()?.id;
+    if (!sessionId || !this.isRegisterOpen()) return;
+
+    const modal = await this.modalCtrl.create({
+      component: SessionSummaryModal,
+      componentProps: { sessionId },
+      cssClass: 'pv-form-modal',
+    });
+    await modal.present();
+    const { data } = await modal.onDidDismiss<RegisterSessionDto | null>();
+    if (data) {
+      this.activeSession.set(data);
+    } else {
+      await this.loadActiveSession();
     }
   }
 
@@ -557,16 +589,25 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
         }),
       );
 
-      const tabLabel = current.tabLabel;
-      this.activeSale.set({
+      const completedSale: SaleDto & { tabLabel?: string } = {
         ...completed,
         items: completed.items ?? [],
-        tabLabel,
-      });
+      };
+
+      // Imprime con los datos de la venta terminada antes de limpiar la pantalla
+      this.printSaleReceipt(completedSale);
+
       this.tabs.update((tabs) => tabs.filter((tab) => tab.id !== current.id));
       this.activeTabId.set(null);
+      this.activeSale.set(null);
+      this.clearSearch();
       await this.loadActiveSession();
-      await this.showToast('Venta guardada. Stock actualizado.', 'success');
+
+      if (this.isRegisterOpen()) {
+        await this.createNewTab();
+      }
+
+      await this.showToast('Venta realizada. Nueva venta lista.', 'success');
     } catch (err: unknown) {
       const message = (err as { error?: { message?: string } })?.error?.message;
       await this.showToast(message ?? 'Error al guardar la venta', 'danger');
@@ -578,6 +619,11 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   onPrintReceipt(): void {
     const sale = this.activeSale();
     if (!sale || !this.canPrintReceipt()) return;
+    this.printSaleReceipt(sale);
+  }
+
+  private printSaleReceipt(sale: SaleDto): void {
+    if (!sale.documentNumber) return;
 
     const user = this.getCurrentUser();
     const cashierName = user
@@ -587,6 +633,11 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     this.receiptPrint.printReceipt({
       sale,
       businessName: this.businessName() || undefined,
+      taxId: this.taxId(),
+      address: this.businessAddress(),
+      phone: this.businessPhone(),
+      email: this.businessEmail(),
+      logoUrl: this.logoUrl(),
       ticketHeader: this.ticketHeader(),
       ticketFooter: this.ticketFooter(),
       registerName: this.registerName() || undefined,
@@ -746,9 +797,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     this.configService.getPosContext().subscribe({
       next: (res) => {
         this.branchId.set(res.branchId);
-        this.businessName.set(res.businessName ?? res.branchName);
-        this.ticketHeader.set(res.ticketHeader);
-        this.ticketFooter.set(res.ticketFooter);
+        this.applyBusinessBranding(res);
         this.defaultCustomerId.set(res.defaultCustomerId ?? null);
         void this.loadAvailableRegisters(
           res.branchId,
@@ -762,6 +811,34 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
         await this.showToast('No se pudo cargar la configuración de caja', 'danger');
       },
     });
+  }
+
+  private refreshBusinessBranding(): void {
+    this.configService.getPosContext().subscribe({
+      next: (res) => this.applyBusinessBranding(res),
+      error: () => undefined,
+    });
+  }
+
+  private applyBusinessBranding(res: {
+    businessName?: string;
+    branchName: string;
+    taxId?: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+    logoUrl?: string;
+    ticketHeader?: string;
+    ticketFooter?: string;
+  }): void {
+    this.businessName.set(res.businessName ?? res.branchName);
+    this.taxId.set(res.taxId);
+    this.businessAddress.set(res.address);
+    this.businessPhone.set(res.phone);
+    this.businessEmail.set(res.email);
+    this.logoUrl.set(res.logoUrl);
+    this.ticketHeader.set(res.ticketHeader);
+    this.ticketFooter.set(res.ticketFooter);
   }
 
   private async loadAvailableRegisters(

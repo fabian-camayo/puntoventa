@@ -5,6 +5,7 @@ import {
   RouteReuseStrategy,
   provideRouter,
   withPreloading,
+  withHashLocation,
   PreloadAllModules,
 } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -34,7 +35,7 @@ bootstrapApplication(AppComponent, {
       mode: 'md',
       animated: true,
     }),
-    provideRouter(routes, withPreloading(PreloadAllModules)),
+    provideRouter(routes, withHashLocation(), withPreloading(PreloadAllModules)),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     importProvidersFrom(
       TranslateModule.forRoot({

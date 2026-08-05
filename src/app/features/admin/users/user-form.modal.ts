@@ -28,6 +28,8 @@ import {
   UserService,
 } from '@core/services/user.service';
 import { RoleDto, RoleService } from '@core/services/role.service';
+import { FieldErrorComponent } from '@shared/components/field-error/field-error.component';
+import { isControlInvalid, notifyInvalidForm } from '@shared/utils/form-validation';
 
 addIcons({ closeOutline, checkmarkOutline, personOutline });
 
@@ -51,6 +53,7 @@ addIcons({ closeOutline, checkmarkOutline, personOutline });
     IonIcon,
     IonSpinner,
     TranslateModule,
+    FieldErrorComponent,
   ],
 })
 export class UserFormModal implements OnInit {
@@ -67,6 +70,7 @@ export class UserFormModal implements OnInit {
   loadingRoles = signal(true);
   isEdit = false;
   roles = signal<RoleDto[]>([]);
+  readonly isInvalid = isControlInvalid;
 
   form = this.fb.nonNullable.group({
     username: ['', [Validators.required, Validators.maxLength(50)]],
@@ -110,10 +114,7 @@ export class UserFormModal implements OnInit {
   }
 
   async save(): Promise<void> {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (await notifyInvalidForm(this.form, this.toast)) return;
 
     const raw = this.form.getRawValue();
     this.saving.set(true);

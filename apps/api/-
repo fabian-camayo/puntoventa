@@ -1,0 +1,1302 @@
+-- MySQL dump 10.13  Distrib 8.4.10, for Linux (x86_64)
+--
+-- Host: localhost    Database: puntoventa
+-- ------------------------------------------------------
+-- Server version	8.4.10-0ubuntu0.26.04.1
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `_prisma_migrations`
+--
+
+DROP TABLE IF EXISTS `_prisma_migrations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `_prisma_migrations` (
+  `id` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `checksum` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `finished_at` datetime(3) DEFAULT NULL,
+  `migration_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `logs` text COLLATE utf8mb4_unicode_ci,
+  `rolled_back_at` datetime(3) DEFAULT NULL,
+  `started_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `applied_steps_count` int unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `_prisma_migrations`
+--
+
+LOCK TABLES `_prisma_migrations` WRITE;
+/*!40000 ALTER TABLE `_prisma_migrations` DISABLE KEYS */;
+INSERT INTO `_prisma_migrations` VALUES ('0584ffb6-a3ba-49fb-85e0-4826bfc7f7c8','27d3c1d7af7c77a2eaa5414e7b28d738b1830f28d63f2a1f7fdb2b620e496e6a','2026-07-14 21:26:59.438','20260714180000_unit_types_stock_factor',NULL,NULL,'2026-07-14 21:26:58.948',1),('32f3ab1b-5816-401b-add6-c1c47e00e73c','8340025391a3bd67c93e85fd7b91f3333f8c1deb0e91795f691a79f6078ba4cf','2026-07-27 21:48:17.835','20260727280000_logo_url_longtext',NULL,NULL,'2026-07-27 21:48:17.739',1),('3bd91995-4174-442b-bfa1-1f93d83d7203','4b6ea2f2b70b11aa382d886c68e03e2d290f83ff3ca8ad54926d25ba4633100d','2026-07-08 02:59:45.330','20260708030000_add_terminal_last_scan',NULL,NULL,'2026-07-08 02:59:45.285',1),('4ff8f1ce-0457-49d2-9e65-2ab3a1fa1628','493739db2337bb654269695a5bc13eda379c90a9a368a534a1ea4857fb992ee3','2026-07-28 02:43:10.747','20260727270000_invoice_number_format',NULL,NULL,'2026-07-28 02:43:10.726',1),('76d77fde-3d8f-429f-8677-f7b809f79e6c','85e9b2bc19c651e2a2331287c7e26fe1ae8c762f0a65ea045f3e4cf689caccd9','2026-07-28 02:43:10.693','20260727250000_purchase_date',NULL,NULL,'2026-07-28 02:43:10.545',1),('86a94624-65c7-4e02-8290-ec868d14d306','a6a3bc537ebd29688dfa1a6d30e53277ee20a7c44e8f6d26a1aee611643c7699','2026-07-14 20:42:13.185','20260714160000_payment_types_and_cash_movements',NULL,NULL,'2026-07-14 20:42:12.889',1),('96928aac-4c69-4f3e-8adc-6efd1daf0bbf','e3599ed34f16b6bc027a2a97215ef9a08c256625e8dd232edc6668146926e518','2026-07-03 03:41:36.788','20260703034136_add_user_register_assignment',NULL,NULL,'2026-07-03 03:41:36.605',1),('983f92a6-0228-4251-b1a3-267e141bb8ce','d51c0eac921b42c4d3d33473d15148058e3f700a407b9f24e30aa08a59a8ec5b','2026-07-01 03:15:30.553','20250626120000_init',NULL,NULL,'2026-07-01 03:15:26.658',1),('bffb9745-0d8f-4122-b5c3-38e0e6acf1bc','eb80f91e5ad76eb06ecba4007c321b24938b88b6032b048c2f8a631e7abbf9fa','2026-07-28 02:43:10.539','20260727240000_purchase_payment_and_bank_accounts',NULL,NULL,'2026-07-28 02:43:10.185',1),('d220ea5a-b811-45be-af86-751305850c00','8b5338f66408c26081c039e5386c4de10c4b0aeaf2c4cad669a8776ed431c2a3','2026-07-28 02:43:10.721','20260727260000_business_logo',NULL,NULL,'2026-07-28 02:43:10.697',1),('d2ff656b-4903-41d8-a462-2c2b9d94dfd7','3c35049907a4405bd4e10d997826929b316d124a78abda1a0ea6270bc856f4af','2026-07-14 21:40:27.947','20260714190000_product_import_types',NULL,NULL,'2026-07-14 21:40:27.822',1),('daae6cf5-5507-4c05-a322-422a6834b237','60c83de7f061cd9af504de187da4907d15341e8310e990c230ea0569ee7bdff6','2026-07-03 03:57:57.634','20260703035757_add_terminals',NULL,NULL,'2026-07-03 03:57:57.454',1),('e9b0e4be-bfc4-4257-bb54-0fbeca9f26b7','438d4600adee18d6ed8ebe92273f3cd49ad654e12bf09bbbd1dd72aaa3c461ce','2026-07-01 03:15:30.577','20250701031000_default_currency_cop',NULL,NULL,'2026-07-01 03:15:30.558',1),('ebea0f31-bb4b-4399-8871-9d497834cdaf','38abb10357200918194c28ce7b3689ecea71474c613d11d4a4b0b5468b572957','2026-07-28 02:43:10.182','20260727230000_supplier_city',NULL,NULL,'2026-07-28 02:43:10.113',1);
+/*!40000 ALTER TABLE `_prisma_migrations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `app_settings`
+--
+
+DROP TABLE IF EXISTS `app_settings`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `app_settings` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `category` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'general',
+  `is_secret` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `app_settings_key_key` (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `app_settings`
+--
+
+LOCK TABLES `app_settings` WRITE;
+/*!40000 ALTER TABLE `app_settings` DISABLE KEYS */;
+INSERT INTO `app_settings` VALUES ('41f45180-cbec-4d53-98f2-80982dce0d4a','app.mode','STANDALONE','system',0,'2026-07-01 03:15:43.217','2026-07-01 03:15:43.217'),('4463b5bc-a4b4-4629-b276-29171b552217','app.branch_id','a738fa70-0756-4511-9997-7704cb57965d','app',0,'2026-07-01 03:15:43.228','2026-07-15 02:42:13.463'),('a6f107cd-1280-4f29-921c-a8c67a1bf174','app.theme','system','app',0,'2026-07-28 02:50:59.189','2026-07-28 02:51:39.161'),('ac824be4-0324-4858-bf3c-b778f5461349','app.configured','true','system',0,'2026-07-01 03:15:43.222','2026-07-01 03:15:43.222'),('c9678113-29c4-4f7c-94a5-7b4222b79ddc','app.register_id','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b','app',0,'2026-07-01 03:15:43.233','2026-07-15 02:42:13.467'),('d9a9f255-67d0-44b1-bd53-c57246c780ad','app.language','es','app',0,'2026-07-28 02:50:59.188','2026-07-28 02:51:39.162');
+/*!40000 ALTER TABLE `app_settings` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `audit_logs`
+--
+
+DROP TABLE IF EXISTS `audit_logs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `audit_logs` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `action` enum('CREATE','UPDATE','DELETE','LOGIN','LOGOUT','SALE','VOID','REFUND','OPEN_REGISTER','CLOSE_REGISTER','ADJUST_INVENTORY','CONFIG_CHANGE') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `module` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `entity_type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `entity_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `old_values` json DEFAULT NULL,
+  `new_values` json DEFAULT NULL,
+  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `audit_logs_module_entity_type_idx` (`module`,`entity_type`),
+  KEY `audit_logs_user_id_idx` (`user_id`),
+  KEY `audit_logs_created_at_idx` (`created_at`),
+  CONSTRAINT `audit_logs_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `audit_logs`
+--
+
+LOCK TABLES `audit_logs` WRITE;
+/*!40000 ALTER TABLE `audit_logs` DISABLE KEYS */;
+INSERT INTO `audit_logs` VALUES ('009a93f7-ad92-4308-844f-671297006e2a','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','e592d98c-9d1b-4d0d-a38f-f23337a12574',NULL,'{\"total\": 145}',NULL,NULL,'2026-07-08 02:48:38.112'),('04ee89bd-d6af-47a9-8ea0-137794ad4363','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGOUT','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,NULL,NULL,'2026-07-02 03:15:36.482'),('055398d8-b5a3-4b75-899c-56692bcdec47','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','746739cd-9897-411c-9967-918a5c764ea5',NULL,'{\"total\": 0}',NULL,NULL,'2026-07-01 03:25:51.304'),('0879a20f-e244-44c0-888c-c25fa4c622d7','86cb590d-3285-4881-8c8c-1e72f8c7d439','LOGOUT','auth','User','86cb590d-3285-4881-8c8c-1e72f8c7d439',NULL,NULL,NULL,NULL,'2026-07-14 20:55:26.481'),('08c80351-f29d-4826-8993-9819e6023b84','a901f0c4-99e1-4548-baa9-fdd3a61c3533','CONFIG_CHANGE','config','AppSetting','a6f107cd-1280-4f29-921c-a8c67a1bf174',NULL,'{\"key\": \"app.theme\"}',NULL,NULL,'2026-07-28 02:51:09.432'),('09f02cd7-db0f-401d-814b-15cab66ee5ac','a901f0c4-99e1-4548-baa9-fdd3a61c3533','CONFIG_CHANGE','config','BusinessConfig','90c50a0a-b08d-44f5-bc45-a0748c6d9fd7',NULL,'{\"businessName\": \"Mi Punto de Venta\"}',NULL,NULL,'2026-07-28 02:51:09.403'),('0a444318-161e-4780-a58f-74b918cd4d69','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-02 03:20:14.997'),('0b29cc5a-3ce5-4b6c-9cea-07ef87852527','a901f0c4-99e1-4548-baa9-fdd3a61c3533','SALE','sales','Sale','e592d98c-9d1b-4d0d-a38f-f23337a12574',NULL,'{\"total\": 58, \"documentNumber\": \"V-202607-000002\"}',NULL,NULL,'2026-07-08 02:49:25.483'),('0b99d5f6-785a-41f5-ba88-7ec3a0b85193','86cb590d-3285-4881-8c8c-1e72f8c7d439','LOGIN','auth','User','86cb590d-3285-4881-8c8c-1e72f8c7d439',NULL,NULL,'127.0.0.1',NULL,'2026-07-14 02:30:55.810'),('0ba0664e-170b-4065-916b-473b5d5b2a67','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','e592d98c-9d1b-4d0d-a38f-f23337a12574',NULL,'{\"total\": 58}',NULL,NULL,'2026-07-08 02:42:37.924'),('0bac059f-561b-4802-9103-bf760c262fee','a901f0c4-99e1-4548-baa9-fdd3a61c3533','CREATE','users','User','86cb590d-3285-4881-8c8c-1e72f8c7d439',NULL,'{\"username\": \"cajero1\"}',NULL,NULL,'2026-07-14 02:28:40.323'),('0e973a87-f85a-4e5a-a56c-168fade72c01','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-01 03:22:58.239'),('12851a48-7d31-470f-9963-490345c6ae4c','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','1dd8be85-ee2d-4a88-aa26-ae93362ef1da',NULL,'{\"status\": \"SUSPENDED\"}',NULL,NULL,'2026-07-02 04:20:44.186'),('12abec48-0b24-4022-90d2-47b09d385a90','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','26afa9c2-a4ac-4fca-b576-adf6175f74bb',NULL,'{\"total\": 29.75}',NULL,NULL,'2026-07-14 21:16:10.025'),('1a69972b-345d-4fa7-9874-9086fc217de6','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','746739cd-9897-411c-9967-918a5c764ea5',NULL,'{\"status\": \"SUSPENDED\"}',NULL,NULL,'2026-07-01 03:38:59.277'),('1c97eca2-21c6-452a-b645-0a5c2fe4df4c','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','b4191c16-ba22-457f-b91a-ceb55c9e5e85',NULL,'{\"status\": \"SUSPENDED\"}',NULL,NULL,'2026-07-02 03:20:27.034'),('218007a8-9455-4a17-b3a0-e61509f3df15','a901f0c4-99e1-4548-baa9-fdd3a61c3533','CONFIG_CHANGE','config','AppSetting','d9a9f255-67d0-44b1-bd53-c57246c780ad',NULL,'{\"key\": \"app.language\"}',NULL,NULL,'2026-07-28 02:51:39.171'),('23e63930-f4b0-4a33-b976-2ecb622a2ccc','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','registers','Terminal','491fddbb-e147-489a-b4b6-405a2a44f2a1',NULL,'{\"registerId\": \"e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b\"}',NULL,NULL,'2026-07-03 04:15:45.130'),('290d59c8-f296-4558-9b87-cd65d16c0588','86cb590d-3285-4881-8c8c-1e72f8c7d439','CLOSE_REGISTER','registers','RegisterSession','84d29537-1273-4c07-81fd-96dcb6d62c29',NULL,'{\"closingAmount\": 900}',NULL,NULL,'2026-07-14 20:03:15.293'),('2a501fab-2eee-4e01-9139-178e05875b1f','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','e592d98c-9d1b-4d0d-a38f-f23337a12574',NULL,'{\"total\": 116}',NULL,NULL,'2026-07-08 02:48:37.391'),('2c09b953-72f9-441a-9ec7-d20b06ce0597','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','9b1ee426-5df9-4e78-b4bf-7814d816ea08',NULL,'{\"total\": 29}',NULL,NULL,'2026-07-01 03:39:03.756'),('2e49f34a-ce45-4648-93ca-f84ed8b64a87','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','746739cd-9897-411c-9967-918a5c764ea5',NULL,'{\"total\": 29}',NULL,NULL,'2026-07-01 03:33:01.560'),('37158eca-144f-420d-8507-933f84911f5e','a901f0c4-99e1-4548-baa9-fdd3a61c3533','OPEN_REGISTER','registers','RegisterSession','03d387fb-cee4-4f9a-bd32-2ec32bc9e63d',NULL,'{\"registerId\": \"e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b\", \"openingAmount\": 100000}',NULL,NULL,'2026-07-03 03:24:40.826'),('3c2dcdec-77c8-4820-a078-a5928b9b17a1','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGOUT','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,NULL,NULL,'2026-07-02 03:14:23.547'),('3cb6f76c-ef5e-4c22-aa38-b09bd00edd9f','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-14 21:52:39.266'),('3d140333-a202-4f18-8007-9d695f9906dd','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','e592d98c-9d1b-4d0d-a38f-f23337a12574',NULL,'{\"total\": 29}',NULL,NULL,'2026-07-08 02:42:18.621'),('3f246f91-b5a1-4fbc-9363-804c1d343c84','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGOUT','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,NULL,NULL,'2026-07-02 04:12:22.687'),('3f33c8ac-f08c-4d42-88a3-db6321398896','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','746739cd-9897-411c-9967-918a5c764ea5',NULL,'{\"total\": 58}',NULL,NULL,'2026-07-01 03:33:05.611'),('4038b50b-bd34-43f9-ad3e-c7008d32fc35','86cb590d-3285-4881-8c8c-1e72f8c7d439','LOGIN','auth','User','86cb590d-3285-4881-8c8c-1e72f8c7d439',NULL,NULL,'127.0.0.1',NULL,'2026-07-14 20:05:54.661'),('45a73c2c-507f-481e-8769-ff909e7de7fe','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','99275ba9-655d-4a19-af7b-0b18ef8895b0',NULL,'{\"total\": 29.75}',NULL,NULL,'2026-07-14 19:54:56.057'),('46df610b-73ac-4c10-a62d-f222a16739a3','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','e592d98c-9d1b-4d0d-a38f-f23337a12574',NULL,'{\"total\": 174}',NULL,NULL,'2026-07-08 02:48:38.886'),('485e9d0b-f8f8-45b6-8b3a-c265773dfc4c','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','746739cd-9897-411c-9967-918a5c764ea5',NULL,'{\"total\": 174}',NULL,NULL,'2026-07-01 03:25:48.273'),('4d120bcf-f0d9-4d5a-9041-a1dc33e4d7ee','86cb590d-3285-4881-8c8c-1e72f8c7d439','UPDATE','sales','Sale','bd463639-d8ef-4fef-943b-b93072e45870',NULL,'{\"status\": \"SUSPENDED\"}',NULL,NULL,'2026-07-14 20:26:24.694'),('51ba64c8-dba7-4625-9f81-4809734a4fea','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-14 20:05:21.750'),('5548d358-5454-4614-b725-7ee3d2d963e4','a901f0c4-99e1-4548-baa9-fdd3a61c3533','CONFIG_CHANGE','config','AppSetting','d9a9f255-67d0-44b1-bd53-c57246c780ad',NULL,'{\"key\": \"app.language\"}',NULL,NULL,'2026-07-28 02:50:59.193'),('5622414e-735a-46e5-8edd-d61885c4c14d','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-02 03:58:43.925'),('57599934-ab12-47eb-a342-921872279793','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGOUT','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,NULL,NULL,'2026-07-14 02:29:29.334'),('590abfcb-658a-49eb-9254-4f6872e2fb1a','86cb590d-3285-4881-8c8c-1e72f8c7d439','CLOSE_REGISTER','registers','RegisterSession','03d387fb-cee4-4f9a-bd32-2ec32bc9e63d',NULL,'{\"closingAmount\": 100110}',NULL,NULL,'2026-07-14 02:31:23.979'),('5a3ea6b1-4353-46b1-8cf8-98eedac61806','86cb590d-3285-4881-8c8c-1e72f8c7d439','UPDATE','sales','Sale','22ea0713-9bb4-4069-b0f7-b581e496fe31',NULL,'{\"total\": 29.75}',NULL,NULL,'2026-07-14 20:27:11.075'),('5d56ce4b-4452-493b-8e1e-c26ddbc154c3','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-14 02:30:26.083'),('5ea48c26-bcd8-4bce-8a99-af47040f0d98','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-01 03:25:35.404'),('62420de5-1637-4d9d-a380-7b60b51976f9','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-03 03:23:49.667'),('639acf9c-459a-40fc-b497-adf811852d39','a901f0c4-99e1-4548-baa9-fdd3a61c3533','CONFIG_CHANGE','config','AppSetting','a6f107cd-1280-4f29-921c-a8c67a1bf174',NULL,'{\"key\": \"app.theme\"}',NULL,NULL,'2026-07-28 02:51:39.167'),('666dab5c-9076-460c-aaff-01b55475a597','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','e592d98c-9d1b-4d0d-a38f-f23337a12574',NULL,'{\"total\": 0}',NULL,NULL,'2026-07-08 02:48:42.847'),('6738a2dc-e2d3-4c54-abdb-1c2255a9cfea','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','e592d98c-9d1b-4d0d-a38f-f23337a12574',NULL,'{\"total\": 203}',NULL,NULL,'2026-07-08 02:48:39.073'),('69362688-4776-4d40-9a94-7883f3f1d3ad','86cb590d-3285-4881-8c8c-1e72f8c7d439','LOGOUT','auth','User','86cb590d-3285-4881-8c8c-1e72f8c7d439',NULL,NULL,NULL,NULL,'2026-07-14 20:05:19.505'),('69bc0875-9c85-4dfa-a0bb-043bcce4936c','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-14 02:24:10.544'),('6c1fc009-5a06-4711-a3d7-64cce12be517','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGOUT','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,NULL,NULL,'2026-07-14 21:52:37.240'),('6e396250-9d88-411d-96bd-04b57910d184','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-14 20:55:28.801'),('6ed3b79f-b1b2-4e50-b84d-cfff68878145','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','746739cd-9897-411c-9967-918a5c764ea5',NULL,'{\"total\": 145}',NULL,NULL,'2026-07-01 03:35:12.695'),('6f17d77a-d791-462b-8f7d-6ab9c618a292','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-02 03:13:28.822'),('74103008-cc65-4a53-9356-848187172b01','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGOUT','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,NULL,NULL,'2026-07-02 04:21:32.596'),('75fcde3f-9748-418d-8d19-7267f395b0cb','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGOUT','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,NULL,NULL,'2026-07-01 03:34:39.490'),('760a8fc6-b24b-42b8-8046-e88b78965557','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-02 03:14:32.772'),('797c41ec-52c5-4250-a24a-aefd26f76672','a901f0c4-99e1-4548-baa9-fdd3a61c3533','SALE','sales','Sale','9b1ee426-5df9-4e78-b4bf-7814d816ea08',NULL,'{\"total\": 29, \"documentNumber\": \"V-202606-000001\"}',NULL,NULL,'2026-07-01 03:44:29.073'),('7a2e0ac5-26e7-45b8-b529-c077445ba5a3','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','registers','Register','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b',NULL,NULL,NULL,NULL,'2026-07-14 20:05:39.403'),('7b91d355-6f37-4dd5-b733-6af448145a5a','a901f0c4-99e1-4548-baa9-fdd3a61c3533','SALE','sales','Sale','328e82c5-bfd7-4697-8253-6ae4c3d7b3c8',NULL,'{\"total\": 25, \"documentNumber\": \"V-202607-000003\"}',NULL,NULL,'2026-07-08 02:54:09.314'),('7d453582-0f2e-4452-bae9-076f9b398a58','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','users','User','86cb590d-3285-4881-8c8c-1e72f8c7d439',NULL,NULL,NULL,NULL,'2026-07-14 02:30:43.919'),('7f6b1a58-b500-47f1-a667-1e8e972f701d','a901f0c4-99e1-4548-baa9-fdd3a61c3533','CLOSE_REGISTER','registers','RegisterSession','1c347202-9275-42a4-b812-b90be1cea76e',NULL,'{\"closingAmount\": 900000}',NULL,NULL,'2026-07-02 04:21:24.990'),('815e020c-fdaa-4df4-99b3-1e3a2537870c','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','products','Product','32bcf753-556b-42a7-baf5-053d42680fd7',NULL,NULL,NULL,NULL,'2026-07-08 02:52:29.105'),('81aefeb3-bb1c-4e56-9f89-87604bb44f63','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-14 19:53:59.813'),('97e7deda-7168-4fa1-b5fc-a2e76acc58d0','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-28 02:44:04.334'),('a28185a9-5bd7-4d14-9dfe-5b787d918153','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','746739cd-9897-411c-9967-918a5c764ea5',NULL,'{\"total\": 58}',NULL,NULL,'2026-07-01 03:38:54.870'),('a72fde97-62b1-4b84-a72b-08a2a0728c5e','a901f0c4-99e1-4548-baa9-fdd3a61c3533','CONFIG_CHANGE','config','AppSetting','d9a9f255-67d0-44b1-bd53-c57246c780ad',NULL,'{\"key\": \"app.language\"}',NULL,NULL,'2026-07-28 02:51:09.430'),('ab9ab00b-98f1-47bd-a5b7-218fb6147a1e','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGOUT','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,NULL,NULL,'2026-07-02 03:58:35.890'),('ac859806-acd8-414f-816f-9c5ef06bb288','86cb590d-3285-4881-8c8c-1e72f8c7d439','UPDATE','sales','Sale','1ab15549-d27d-4244-8dfe-a9e69c9c03a6',NULL,'{\"total\": 87.75}',NULL,NULL,'2026-07-14 20:21:00.497'),('ac942365-c380-454d-8c24-8f65ff96eb16','86cb590d-3285-4881-8c8c-1e72f8c7d439','UPDATE','sales','Sale','1ab15549-d27d-4244-8dfe-a9e69c9c03a6',NULL,'{\"status\": \"SUSPENDED\"}',NULL,NULL,'2026-07-14 20:25:51.958'),('af15d455-b74a-4f2e-bce1-ec716109ba0b','a901f0c4-99e1-4548-baa9-fdd3a61c3533','OPEN_REGISTER','registers','RegisterSession','84d29537-1273-4c07-81fd-96dcb6d62c29',NULL,'{\"registerId\": \"e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b\", \"openingAmount\": 0}',NULL,NULL,'2026-07-14 19:54:14.710'),('b0f39d59-d528-4610-8c47-c970cf131185','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','efec1c96-1492-456f-85c1-2b2faa5e139e',NULL,'{\"status\": \"SUSPENDED\"}',NULL,NULL,'2026-07-14 19:54:54.447'),('b72e876d-28e3-42d6-9166-7ef8c0b2d58b','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','746739cd-9897-411c-9967-918a5c764ea5',NULL,'{\"total\": 58}',NULL,NULL,'2026-07-01 03:25:42.984'),('bd71e5ee-e7ae-4496-a6ff-3049bb9d79b1','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','63992670-c0a8-48a2-b2ad-e28fff38c28e',NULL,'{\"status\": \"SUSPENDED\"}',NULL,NULL,'2026-07-01 03:25:39.151'),('c1a49e11-7a76-4d26-bfcc-50921834651a','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','8a1875d6-e0f9-4e5a-af38-164cc50cecac',NULL,'{\"status\": \"SUSPENDED\"}',NULL,NULL,'2026-07-01 03:25:39.988'),('c632bee5-65fa-4989-9341-55eef594d5e9','86cb590d-3285-4881-8c8c-1e72f8c7d439','UPDATE','sales','Sale','1ab15549-d27d-4244-8dfe-a9e69c9c03a6',NULL,'{\"total\": 29.75}',NULL,NULL,'2026-07-14 20:20:53.398'),('c67a2302-9294-4d07-908a-879728b02a34','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','e592d98c-9d1b-4d0d-a38f-f23337a12574',NULL,'{\"total\": 58}',NULL,NULL,'2026-07-02 03:20:55.733'),('c6ba95cf-0149-42c7-a587-7cd109af3662','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGOUT','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,NULL,NULL,'2026-07-14 20:05:42.106'),('ca895060-1c1b-48fd-895d-d008ad899a10','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','e592d98c-9d1b-4d0d-a38f-f23337a12574',NULL,'{\"total\": 58}',NULL,NULL,'2026-07-08 02:48:46.974'),('caaf68c3-a1b1-4c41-8429-335e1cf1220e','86cb590d-3285-4881-8c8c-1e72f8c7d439','OPEN_REGISTER','registers','RegisterSession','2af51850-6bbd-42f9-b3d6-38c49c52975a',NULL,'{\"registerId\": \"e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b\", \"openingAmount\": 120000}',NULL,NULL,'2026-07-14 20:06:06.409'),('cac3b253-4ecb-412e-8706-0657d70c8b82','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','45f26d1d-c1c3-415d-964c-41cb61b5e9de',NULL,'{\"total\": 29}',NULL,NULL,'2026-07-01 03:55:40.478'),('cc0548c8-bf7b-4136-b3cb-a8446d0c57f4','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','33527071-4385-4691-99ea-14f960f81120',NULL,'{\"total\": 0}',NULL,NULL,'2026-07-03 03:35:38.685'),('cd668a53-7307-4da4-9dbb-a393ab25ba7c','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','e592d98c-9d1b-4d0d-a38f-f23337a12574',NULL,'{\"total\": 87}',NULL,NULL,'2026-07-08 02:48:37.026'),('d3f31cec-b58c-4772-9a0c-32b46321f776','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','e592d98c-9d1b-4d0d-a38f-f23337a12574',NULL,'{\"total\": 116}',NULL,NULL,'2026-07-02 03:20:59.130'),('d4942696-970e-4bf4-8b9e-da830d3ec4fb','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','45f26d1d-c1c3-415d-964c-41cb61b5e9de',NULL,'{\"status\": \"SUSPENDED\"}',NULL,NULL,'2026-07-01 03:55:46.251'),('d628d7e1-bbb9-4219-8d7b-cf46ebcb702e','a901f0c4-99e1-4548-baa9-fdd3a61c3533','CONFIG_CHANGE','config','BusinessConfig','90c50a0a-b08d-44f5-bc45-a0748c6d9fd7',NULL,'{\"businessName\": \"Mi Punto de Venta\"}',NULL,NULL,'2026-07-28 02:50:59.163'),('d64866dd-bde9-4712-a3dc-e8baa4d231a8','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-02 04:12:31.207'),('d728e44d-a96c-4539-9bf7-1e6cf14a5b4a','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','33527071-4385-4691-99ea-14f960f81120',NULL,'{\"total\": 116}',NULL,NULL,'2026-07-02 04:20:52.558'),('d7a88a24-b467-4dfd-bfe6-d4d4edd4184f','86cb590d-3285-4881-8c8c-1e72f8c7d439','SALE','sales','Sale','22ea0713-9bb4-4069-b0f7-b581e496fe31',NULL,'{\"total\": 29.75, \"documentNumber\": \"V-202607-000005\"}',NULL,NULL,'2026-07-14 20:52:46.224'),('d82a6845-fd30-471c-8886-87270fbdaff8','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGOUT','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,NULL,NULL,'2026-07-14 02:30:45.877'),('d99feb58-31da-498c-a112-bb721e07a6e4','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','746739cd-9897-411c-9967-918a5c764ea5',NULL,'{\"total\": 0}',NULL,NULL,'2026-07-01 03:38:50.126'),('db629452-6621-4478-bc45-aa952e94e335','a901f0c4-99e1-4548-baa9-fdd3a61c3533','SALE','sales','Sale','99275ba9-655d-4a19-af7b-0b18ef8895b0',NULL,'{\"total\": 29.75, \"documentNumber\": \"V-202607-000004\"}',NULL,NULL,'2026-07-14 19:55:21.193'),('dfd08962-4296-4aa6-b8a9-1817379338d5','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','328e82c5-bfd7-4697-8253-6ae4c3d7b3c8',NULL,'{\"total\": 25}',NULL,NULL,'2026-07-08 02:52:00.000'),('e05e83af-c09c-458a-a89e-f3e59db14685','a901f0c4-99e1-4548-baa9-fdd3a61c3533','OPEN_REGISTER','registers','RegisterSession','1c347202-9275-42a4-b812-b90be1cea76e',NULL,'{\"registerId\": \"e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b\", \"openingAmount\": 1000000}',NULL,NULL,'2026-07-02 04:16:43.590'),('e24edf9b-9f67-4e2e-8238-7d0e518d39f0','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-08 02:42:09.720'),('e40cb764-171e-4b6c-93e3-018b61f31924','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGOUT','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,NULL,NULL,'2026-07-14 20:02:17.696'),('e4ecb6c2-0d2b-4a2e-b47a-7c4a1da0ba10','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','33527071-4385-4691-99ea-14f960f81120',NULL,'{\"status\": \"SUSPENDED\"}',NULL,NULL,'2026-07-03 03:35:39.996'),('e5641e5d-950a-4a01-88f6-863ce8c483c5','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','e592d98c-9d1b-4d0d-a38f-f23337a12574',NULL,'{\"total\": 29}',NULL,NULL,'2026-07-02 04:20:47.619'),('e7eb3577-0947-4657-8abb-80502ad9f0b0','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','746739cd-9897-411c-9967-918a5c764ea5',NULL,'{\"total\": 116}',NULL,NULL,'2026-07-01 03:35:12.556'),('e892eb98-20c6-4974-aed4-500258694928','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','746739cd-9897-411c-9967-918a5c764ea5',NULL,'{\"total\": 116}',NULL,NULL,'2026-07-01 03:25:47.853'),('e955fdbf-cc12-4ffc-8be2-8ca984b38739','a901f0c4-99e1-4548-baa9-fdd3a61c3533','CONFIG_CHANGE','config','AppSetting','a6f107cd-1280-4f29-921c-a8c67a1bf174',NULL,'{\"key\": \"app.theme\"}',NULL,NULL,'2026-07-28 02:50:59.196'),('ea32ec91-2ea4-446c-b2f1-fd7d39e570db','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','45f26d1d-c1c3-415d-964c-41cb61b5e9de',NULL,'{\"total\": 58}',NULL,NULL,'2026-07-01 03:55:42.378'),('ebf7fcfd-28a4-49bc-800c-4828e7ecd1b2','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGOUT','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,NULL,NULL,'2026-07-01 03:55:57.753'),('ec439a25-15c1-48f6-933d-0770653b05d6','86cb590d-3285-4881-8c8c-1e72f8c7d439','LOGIN','auth','User','86cb590d-3285-4881-8c8c-1e72f8c7d439',NULL,NULL,'127.0.0.1',NULL,'2026-07-14 20:02:34.283'),('ee01b949-8dba-4e9c-9f4b-d602dbbe7605','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','24d82ba8-7395-451f-93fc-934397cc3675',NULL,'{\"status\": \"SUSPENDED\"}',NULL,NULL,'2026-07-02 03:20:27.765'),('f1047da5-0bf7-481d-85b1-457a43f97652','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','e592d98c-9d1b-4d0d-a38f-f23337a12574',NULL,'{\"total\": 0}',NULL,NULL,'2026-07-03 03:35:36.666'),('f3445d04-e94c-4186-8935-34b6bcfd19f9','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','e592d98c-9d1b-4d0d-a38f-f23337a12574',NULL,'{\"total\": 0}',NULL,NULL,'2026-07-02 04:12:42.327'),('f5090d46-815e-4d04-8fb5-de04d53a62c0','a901f0c4-99e1-4548-baa9-fdd3a61c3533','LOGIN','auth','User','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,NULL,'127.0.0.1',NULL,'2026-07-01 03:34:46.516'),('f6e50440-b55f-4e9f-9bbc-eb12f70767d6','a901f0c4-99e1-4548-baa9-fdd3a61c3533','UPDATE','sales','Sale','746739cd-9897-411c-9967-918a5c764ea5',NULL,'{\"total\": 87}',NULL,NULL,'2026-07-01 03:34:51.175'),('fa363204-ff29-4158-9220-d6be10ccd690','a901f0c4-99e1-4548-baa9-fdd3a61c3533','CONFIG_CHANGE','config','BusinessConfig','90c50a0a-b08d-44f5-bc45-a0748c6d9fd7',NULL,'{\"businessName\": \"Mi Punto de Venta\"}',NULL,NULL,'2026-07-28 02:51:39.145'),('fad09996-d88a-4ed9-918f-a8b44c44e23c','a901f0c4-99e1-4548-baa9-fdd3a61c3533','SALE','sales','Sale','26afa9c2-a4ac-4fca-b576-adf6175f74bb',NULL,'{\"total\": 29.75, \"documentNumber\": \"V-202607-000006\"}',NULL,NULL,'2026-07-14 21:16:42.905');
+/*!40000 ALTER TABLE `audit_logs` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `bank_accounts`
+--
+
+DROP TABLE IF EXISTS `bank_accounts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bank_accounts` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `branch_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `bank_name` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `account_number` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `bank_accounts_branch_id_code_key` (`branch_id`,`code`),
+  CONSTRAINT `bank_accounts_branch_id_fkey` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `bank_accounts`
+--
+
+LOCK TABLES `bank_accounts` WRITE;
+/*!40000 ALTER TABLE `bank_accounts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `bank_accounts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `branches`
+--
+
+DROP TABLE IF EXISTS `branches`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `branches` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `company_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `address` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `is_main` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `branches_company_id_code_key` (`company_id`,`code`),
+  CONSTRAINT `branches_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `branches`
+--
+
+LOCK TABLES `branches` WRITE;
+/*!40000 ALTER TABLE `branches` DISABLE KEYS */;
+INSERT INTO `branches` VALUES ('a738fa70-0756-4511-9997-7704cb57965d','2925244a-f553-43de-9dc8-44b4d4b9baf2','MAIN','Sucursal Principal','Calle Principal #123',NULL,1,1,'2026-07-01 03:15:42.271','2026-07-01 03:15:42.271');
+/*!40000 ALTER TABLE `branches` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `business_config`
+--
+
+DROP TABLE IF EXISTS `business_config`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `business_config` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `branch_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `business_name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tax_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `address` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `currency` varchar(3) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'COP',
+  `currency_symbol` varchar(5) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '$',
+  `tax_rate` decimal(5,2) NOT NULL DEFAULT '0.00',
+  `ticket_header` text COLLATE utf8mb4_unicode_ci,
+  `ticket_footer` text COLLATE utf8mb4_unicode_ci,
+  `invoice_prefix` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'FEV',
+  `invoice_number_padding` int NOT NULL DEFAULT '3',
+  `invoice_next_number` int NOT NULL DEFAULT '1',
+  `allow_negative_stock` tinyint(1) NOT NULL DEFAULT '0',
+  `default_customer_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  `logo_url` longtext COLLATE utf8mb4_unicode_ci,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `business_config_branch_id_key` (`branch_id`),
+  CONSTRAINT `business_config_branch_id_fkey` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `business_config`
+--
+
+LOCK TABLES `business_config` WRITE;
+/*!40000 ALTER TABLE `business_config` DISABLE KEYS */;
+INSERT INTO `business_config` VALUES ('90c50a0a-b08d-44f5-bc45-a0748c6d9fd7','a738fa70-0756-4511-9997-7704cb57965d','Mi Punto de Venta','123456','Calle 69cn #8d-51','3214567890','test@miventa.com','COP','$',16.00,'¡Gracias por su compra!','Vuelva pronto','FEV',3,1,0,'27bb28d8-d5d6-444f-a2f7-7daac61cfe45','2026-07-01 03:15:42.278','2026-07-28 02:51:39.125','data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEBAYFBQUGBgYHCQ4JCQgICRINDQoOFRIWFhUSFBQXGiEcFxgfGRQUHScdHyIjJSUlFhwpLCgkKyEkJST/2wBDAQYGBgkICREJCREkGBQYJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCT/wAARCAFoAWgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD6pooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKZPPFbQvNPIkUSDLO7AKo9STQA+kd1jUs7BVHUk4AryPxr8fbHTWktPD8a3UoODcyg+WP90dW+vA+teOeIPiFr3iSUvfX80o7IThF+ijAruo5fUqavRHJVxsIaLVn1FqXj3wvpORda3ZBhwVjfzGH4Lk1hy/GnwhGSFubqX3WA/1xXy4b2dz/rD+FN86Q9ZG/Ou6OVQXxM45ZjLoj6eb44eFh91b5vpEP8aZ/wALy8Ndob8/9s1/+Kr5l3Mf4j+dOBb1P51p/ZdLzM/7RqH0v/wvLw3/AM+9/wD98L/8VS/8Lx8N/wDPvf8A/fC//FV80gn1NOBPqar+y6PmS8xqn0p/wvDw5/z73/8A3wv/AMVS/wDC8PDn/Pvf/wDfC/8AxVfNoY+ppwY56mn/AGVR8xf2lVPpH/hd3h3/AJ97/wD74X/4qj/hdvh3/n3v/wDvhf8A4qvnEMcdTShj6mj+yaPmL+06p9Hf8Lt8O/8APvf/APfC/wDxVH/C6/D3/Pvff98L/wDFV86An1NODH1NP+yaPmL+1Kp9Ff8AC6/D3/Pvf/8AfC//ABVJ/wALs8O/8+99/wB8L/8AFV877z6mk3EnqaP7Jo+Yf2nVPon/AIXb4d/597//AL4X/wCKpP8Ahd3h3/n3v/8Avhf/AIqvnUsfU0wk+po/smj5h/adU+jP+F3+Hf8An2v/APvhf/iqP+F3+Hf+fa//AO+F/wDiq+cix9TTGY+ppf2VR8x/2nVPo/8A4Xh4c/59r/8A74X/AOKo/wCF4+HP+fa//wC+F/8Aiq+bixz1NNLH1NJ5VR8xrMqp9J/8Ly8N/wDPvf8A/fC//FUf8Lz8Nd4L8f8AAF/+Kr5pZj6mmljjqaX9l0vMpZjVPptfjh4XPVb5f+2Q/wAamj+NXhFzhp7uP3aA4/Svlsuw/iP50edIOkjD8al5XS7spZjU7I+vtN+IXhXVji21u0DHgLM3lE/QNjNdAkiSqHRldT0KnINfEa3k6f8ALQn61uaB4/13w3MJLC/nhHdA2UYe6ng1z1Mqa1hI3hmK2kj7BoryDwT8fbPUSlr4ijS2kJwLqIHZ/wACXqPqOPpXrlvcQ3UKT28qSxOMq6MGVh6givMq0Z03aaO+nVjUV4sfRRRWZoFFFFABRRRQAUUUUAFFFFABRRRQAUUVHcXEVpbyXE8ixwxKXd2PCqBkk0AU9d12w8N6ZNqWpTrDBEMknqx7ADuTXzJ8RfizqXjS6aCEta6Yjfu7dW6/7THuf0FRfFT4lXHjjWGjgZ49LtyRbxHjPYsfc/oOK4Udc17mDwSguee/5Hk4rFOT5Y7Dyxc5Y5PrQKQUoNeojzh4p1NFOFNCHjrTxxUYpwNMgeKcOtMFPFMTHinUynA1SYh4pwpgNOBpkseDS0zNLmmSPpM03dRmi4WAmkJ5oJppOKBgTTCaUmmk0DQhpKWm5qWUNammlNNFSUNbrTTTjzTTSGhpphNOJpppFIAxQggkH1Fd38Ovixqfgu7WGRmudNdsy25P6r6H9DXBmmGsqtKNSNpI1pzlB3ifbeg69p/iTTIdS02dZoJR26qe4I7EVoV8nfCv4kXPgfWVSd3k0u4YLcRDnHo49x+tfVtvcRXdvHcQSLJDKodHXoykZBFfOYrDujK3Q9zD11VjfqSUUUVzG4UUUUAFFFFABRRRQAUUUUAFeK/tDeO2sbSLwtZSES3CiW6ZT0TPyp+JGT+HrXtE0qQQvLIdqRqWY+gAya+KvGXiCbxT4n1DVpzzcTEoM8Kg4UfgAK78BR56nM9kcmMq8kLLdmSOtOFMFP7V754o4Uopo5pwqkIevIpwODTFOKd1poljweKcOlMWniqJY8U4GmA4pQaBDwc04U0GlBxTJY/NOBqMGnA0wJM5oz703mkJx3p3JsPyaM+9M3D1ozRcBSaQmgmm5ouMUmmmikNK4CE000pNNJpFIQ00mlNNPJpDEzTTTqaaRSGtxTDzTmptSyhDTDTjTSaRQ3PNfQv7PHjtr+0l8L3shMtupmtWY9Uz8y/gTkfU+lfPRrZ8G+IZvC3ibT9WhPMEoLjPDIeGB+oJrlxVH2tNrqdGHq+zmmfatFNhlSeJJYzuR1DKfUHpTq+aPdCiiigAooooAKKKKACiiigDkvixq50T4ea3dKcO9ubdfrIQn/sxNfHgr6h/aKn8r4eMmcebdxL9cZP9K+Xq9vLY2pt+Z5OPd5pDhThTB1pQa9M4R+acOaZTgaZI8GnA1GKeDzTEPHFOB4pgNKKpEtEgORThTB61Z06xutVvYbGxgkuLmZtscSDJY/5yfwobSV2Kz6EYNS2sEt7PHBbxPNLIQqIilmYnoAB1r0XSPhA9vpba1rlyPJs7wRXtlDw8cYbDsX9RkNwPu9+RXqcPw+XSLDXdN0a1gtoZ40n0+ccvFMB9wsfmKh0VgST94+lefWzGENI6nZTwM5avQ8W0/wCFPim9W83WaW0lpAJ3infa7KQxAUAEknaR6ZrrdH+Cmny3mjm81a5ubPUrZ5lkt0WMhwEZV53cFS5/4DXsHh6e31yztNfWJop7q1RJEJ+7gklSPVWLD86vaXpUOk6fBYwMzRW67Yy/JA5wPwBxXm1MxrS62O+ngKa13PK/Dnws8O3uj2F3/Z0t1cR3z292GmYAqkjxscAgDkBq1Lr4ZaLLH4jtLHQ7YThUNkzr90mMcBj/ALSnP1rutG0RNF+3CKVnS7u5LvaRjyy+MqPbIJ/GoPEXi3Q/CcUMutahHZrOxWMMCzOQMnAAJ471g8TUk9GzZYenFapHAf8ACJaEPi8NN/siyFp/Y3neR5Q2b/Nxux64q5b/AA10eOPw5aX2h2pnMkpvGRPvARuQCw7biv5CtjVtX8G6Jq1n4yv9YSKS9tPsts6vvSWLO/cqqCT1GT0Ga2D4z8PLd2Fp/a9p52ooJLVQ+RMp+6QRxzjjPXHFDrVNLXBUaet7HnviT4VeG7PR9Su/7MktpzdpDabJnwA7JGvBJB+Ziaw9X+Cemx6lq0Vnq1zbWunWcdw8lwgkyzbyV428BUB/4FXtGtaMmtpaRyStGltdRXRAGfMKHIU+2cH8Km1XSodX064sJ2ZYrhDG5TglT1qo42rG1pEywdOW6PmK/wDhX4nso7BltEunv4fPjigbMigKGIYEDBGQPqa5K6gmsriS2uYZIZ42KvHIpVlPoQelfX2vTWuiWtz4gljZ5LK1kVVU9VJB2gepKqK5mfwF/bOmaDp2s2dvcRxq9xqMpwHeQgny1I+YAu5bIPRMd67aWaS+2rnJUy5fYZ8w5FITXp+t/CDztNbWdCugILm88mys5jlpYy21WD+pILDI+7zmvNtSsLrSb6awvreS3uYW2yROMMp+n5fnXq0cRCr8DPPqUZ0/iRWJpM0E0hrYzSAnimE0p5ppNSUIaQmj3pppFIQ000ppuaQwNMJpTTSeagpH2L8KNXOt/DzRLpjl1txA31jJT/2WutrzH9nabzPh2kec+Vdyr9Oh/rXp1fMV48tSS8z36TvBMKKKKyNAooooAKKKKACiiigDyD9pmUp4O05M/fvx/wCi3r5tHpX0Z+08f+KW0ket9/7TavnIHNe9l/8ABPHxv8QdSikBpc13o5BwNOFMBpwNUSPpQabmnChEjgexpwI70wZ6AZr03wD8KrzUIptVuo4nvrB4p49GulKm5jOGy3TAYfd6jIwe4rOtXjSV5F06UqjsjL8I/Dm41eKz1fWPOsdBmnELXSqCck7QcdlLfLu6AmvW5fhbFaaFf2GmWK2t/ps4vdK1FMb5T95UcjkkEFDnjBU9enW+HbLStT067ubNg+maouXsWUBYZCCsi46qxPDL2YHuTXQ20CWttFbx7ikSBF3sWOAMDJPJPua8GvjKlSWp7FHCwgjn/B2o6Z4u8PrrcNkkZ1SMC8hcZy6jYysDwcYIzjkAV0ccaRoqIoVVACgDAA9KSKJIl2oiouScKMDJp9cbd2dUVZajUjSIBUUKPQDAp1Gap3WrWVmP3s65/uryfyFJJvYbaW5crzv4nI9hq2ja3bnVIp4Unt/OtNP+2xhXC5VkBBVjt+VgCMgg9q6aXxZbKcRQSOfcgCqFx42ERO4WsX/XST/9VbQpTTvYxnUg1a55n4X0fWPAsuhazrekajd2baddW3kQW5mktXkmZ1VkX7u5SAeODkGuw+HXw4t4PDWi3GvWUsepW/70QmZ1VAJXkiDoDtYoXJGQcEmtH/hYUe7H2zTPp5o/xq1beOPOPyi1m9o5Of61tONRrYzg6ae51worCh8V27f62CRD/skMK0bXVrO7H7qdd391uD+RrlcJLdHQqkXsy08aSqVdVdT2YZFJII2UrIFKtwQ3Q+1OzXk3xX8R6HfWOopcaYL+fw9Ov2i1nv3tCUkj4ePZ9/kr27HFEI8zsE5cqudt4v1DSvCXh1tYns42TSk3WkKDADldiqoHAzux04BrkLX4YRXnh60s9WsUu9T1W4+26pqDgb7ckbmVCeQeiDHGMk+hr6P47uvDnhwaXcafceJF0C3X+19RWVVSI/e2rv5kZVxnp09a9O32ur2LRrITFcRc7HKuFcdcjlTg9a1vKnsZ2jPc+XPGHw7uNJF7quh+dqGgW85g+1MoBDA4b/eUNld44JB+tcWa+v8AXNL0jTNLtJbxhFpOkrvWzCgpK4AEYx1Yg/dXuxHUgV4Z8Rvhfc6fDHrVskEF1fySSto0ALGBOW+U98D73QAnA4wK9XC5gnpVfzPOxGDa1geZE8U080mc0GvVucAh9KQ80GkNSxjTSGgmmk0mUIaTFKTSZ4qRo+lv2aZC/gy/Tsl+2PxRK9crxz9mM58JaoP+n/8A9prXsdfN4v8AjSPdw/8ADiFFFFc5sFFFFABRRRQAUUUUAeMftPn/AIpnR/8Ar+P/AKLavnEGvo39qD/kWNH/AOv0/wDotq+cRXv5f/BXzPIxn8QkzzS5pgNOrtOQfmlBpgpwp3JH0pbApoNd/wDCnwFP4ovZNUeygv7LTmV3snlCNdH+6M8Y+uAemRziKtVU48zKhTc5cqOi+F3w2t3W01HxPaXkaamg/s2eF8CF+SrPjlWOAUJ4PfkgV7lodheqqvrUNnNf2xaGK+iUBpojjBI6oTxlQcZGRxgViWdhqfhx4LrRrSe40O62tJpLqEnsWY5LRZOAoz80Z6dVPauzFfO160qkuZntUaSpqyKtppdnY3FzcW0IikunEk20nDsBjdjpnHU9+9W6SmTTJBG0kjBVHUmsDbYkJxzWRqXiKC0DJBiaUf8AfI/GuU8a/EOw0Kxe4v7oWtrj5Yx/rJj6Ad/p+dfO/jX4t6v4q82ysd2naa3ymND+8lH+23p7D6HNdlDCSnqzmq4lLRHsXjD41aNortDPqDXtwP8Al2s8Nt/3iDgfQnNeU678ctfv5GXSre302I9CR5sn4k8fpXnkdrzyKtx2vTivVp4WMeh5867e5Nf+JvEOqszXms6hNu6qZ2C/goOB+ArOaOWT/WO7/wC8c1pLbAdqkFuPSuhU0YuoZH2X2/SnLFLGco7qfYkVrfZx6UhtxTcBe0IrHxL4h0tw9nrOoQ7eirO238VJwfxFdnofxz8Qaa6rqsFvqcQ+8ceVJ+BHH6VxrWw9KryWvtWcqMXui41T6N8H/GzR9bkWCC/exuT0trwgBvZTnB+gOfavRFXQNenhm1fSdPmvIv8AVyz26OVP+yzAkV8SyW2DnFdn4O+LOteFWhtLstqGmJ8vlSH54x/sN7ehyPpXDWwS3idVPEtbnvk/wq1i5mvNHbWbZfC19fvf3MUUTLdz7iCYmfONuQORzgV0eh+ALPw74hutdS/lZXEu2JkVAgkZWbe4GXAKgLn7oyKzPBHj/T9b0+O5sLoXNsR88ZP7yE+hHb/OPe/8S9ATxl4MuYrd7iSWAfa4I4Bu86RASEZMgOD02k+ncV501NPlkdsHFq63NOTVvDWu6hFarqGnX99ZMbmO3juFd0YDG7YDyRnqRxWBd6VrOvTve2cNvbXEzCE3My8wxDOSB1YjsMgZPPevPtEhvvCFhceIdQ0K1tfE0j/Zo4ooQLTQ7ZhkSukW4qD8xJIycEEgZNev+ENc1DWNPZdXsDZahbsIpdpzDccAiWJu6MCD7ZwelcOLwKqyi3L3V07nRh8S4pq2r69jxb4n/DG1ijub7wxZ3ki6XHnUZpWysr8EspPLOMktjjHuMV49njivrbUrbUvEjXM2sWk9toNpuK6bGN8+oMpPMm0/cOOIx97+LjivA/il4DufDN5Hq6WMOn2OpOzR2Syh2tTx8pxx37ZA6ZPFfQYHE/8ALufyPJxdD7cThCaQmkJozXqM4RCaaeKU00nvSbGhGJzikJpDRSKPpD9mE58K6sPS/wD/AGmtey14z+zB/wAitq//AF/D/wBFrXs1fOYv+NI9vDfw4hRRRXMbBRRRQAUUUUAFFFFAHi/7UP8AyLGj/wDX8f8A0W1fOAr6O/ai48L6P/1/H/0W1fOANe9l/wDBXzPIxn8QeKeDkVFmnA13HIPzTgaYDQXAoFYu6TZJqmr2dhLeQWUdxKsbXE7AJGCeSa+q9D8Gx/2ZZ2E9tDaSaZEq2Gr6ZKFZ1bOSM5IzgFlbcpyOvbzD4KeEEu/D9/q0mlaXryXZ+zS2MsiiaOIEHIz8oJPOG252gg16Zo/gLUvCes27eG9clh0Av+/0m8BmSNep8ls5TnnHTk9eleNjaynLlT2PTwtLlXNbc7pSVUKSWwMZPelzTc0m6vOsdwk9wlvE0shCqoya8t+JvxMtfDFibm5PmTyZFraKeXP94+gHc/gK1fiH45svDmmzX95JiCLKxRj708mDgD6/p1r5O13XL/xXrE2q6g+6aU/Ko+7GvZV9hmu/CYbmfMzixFa2iG6xrGo+J9Sk1HVLhp7h+Mnoq9lUdgPSmw22McU+CALiraIBXtRgktDzJTbEjhAqXYBT7e3muZ44LeJ5ppWCIiDLMT0AA616iLHTfhJ4bll1WK1vPFmqQGOKylXelnC4ILMOh/Hr06ZNKpVVOyWrfQIU3PXZI8tUirllo+pakrNY2F1dKhwxhhZwp98CodO0+71W+gsbGFp7m4cJHGo5ZjX0n4OksPA2r6N8P7ExzXzwSXmpy45Dbcgfienoqj1zWWJxPsl7qu/0LoYf2j1eh82taXCXP2RoJFuN/l+UUO8NnG3HXOe1Xz4T8Qg/8gPU/wDwFf8AwrqGtXu/jqYV5/4qDefos24/oDXqfja/+Kp8SXUXhO1RtLiRArOkI3NtBbBcgnk9qzqYyUXFJLVX1Lp4ZSu29nY+d73TrvT5hBeWs9tKV3BJoyjEeuD9DRfaJqOnRxy3un3VtHJ9xpomQN9MivQNN1zUX+LWl3XxIVIJbdfLJmiVETAcxk44xvbr0/Kuz8S3WrWfhjxaPHGpafcWV4x/sWJGRmY5JQxgc4GU688H6kli5JpWWv8AWgRw8Wm7nz48QPaqc1tntWga1vDnhW78ST5T9zZocS3DD5V9h6mtcXiaWGpurWdkiMPRqVpqnSV2zO8EWviA+IYZfD0rQXEf+smP+rRO+/sQfTvivpDwV40hvr+8S31CKdrVhHPbpxzj7wz+Q/I15D4p12w8H6Z/Y+gAJO3LuOW/32PcnsK840PXdR8NazDq2nylZ4m+YNyJFP3lb1Br5nC+1zSf1qScaa+Fd/N/oe9iI08DH2CfNN/E+3kv1Pr7xH4Cg8WXkupWWu6hpa6hAttqEdqV23cK5wrZB2thmG4diabf/D63XxXY+IxqEdrbafFEArR/vI0iVhtWUthY2DfOMHIHWoPh344sPEOlQ6haSfuZcLNEfvQSY5B+nr3FYnxd0W78Q61a2upprUnhpbJ5FTS4vNMl6G+QSqAcrjBGRjPUiulwkpcj2OdSTjzLc9Qs7+01W286xvILmFiVEsEgdc/UZGa5PXPBkf8AZ13ZwWkV9PqcLR32ranKGaNBgjgYJwSSqrtUbc5Hfivhd4i8O+HL5jc6tpmnz3trbQ3Om2cTeTDdgspd2UGNGYFRwRzx2Fdhr3gPVPGGsT/8JBr0reHgw8nSbIGISj/ps/Vuew46dKlR5ZblN80dj5Z1iyj0rV7ywivbe9jt5WjW4gYMkgHQgiqpNexfGbwctr4dsdWj0jS9Bjs2+zQ2UcimeSMknLbflJB5wu77xJPWvGd1e9h63tIXPIq0+SVhSab70E55pCa3MwJpp4ozTSaTGfSX7L//ACK2r/8AX8P/AEWtez14x+y9/wAirq//AF/j/wBFrXs9fOYv+NI9vD/w0FFFFc5sFFFFABRRRQAUUUUAeLftR/8AIr6P/wBfx/8ARbV83A9q+kf2o/8AkV9G/wCv4/8Aotq+bK97L/4K+Z5OM/iEg5pQaYDTga7TkHg1Z0vTZda1az02F0jku5khDucKm44yfYdaqE4r0b4H+GbjW/ENxqQ0m01W1sI9slvcy7AxcEDGVIYgA8HHbms61Tkg5F0480kj3zQfCUUKW0OpaTZwzabFHDa31jM6PIijocYYdOVJYHP1rrs1ytj4PXT7i1u9IvdS0WMFWl00yLLAy55XYdwQ+8bAfWuozXzknfU9mOiFzWfrF6YLfy0bDycZ9B3/AMKv5FeU/Gjxk3hzwxd3EDbbu8P2S2/2cg5b8Bkj3xV0oOcrE1Z8qPDPit4xbxh4nkigkY6dYM0MC9mIPzSfiRx7AVzFvDgdKgto+5+tX0GK+hpQUVY8epK7JFGBUiK7uqIpZmICqoySfQVGDVrTNUudH1G31GzdUuLaQSRsyhgGHI4Nau9tDJa7nrOj6bbfB3Qo9e1WyF74qvkP2GxKFhajuz46e/fsO5ry3UpNW1fUJ9R1Bbm5u7ht8krocsfy6dgO2K6//hfPj7Of7Stf/ARP8Kd/wvrx5jnUbX/wET/CuGnCtFubSbfmdc5U2lFNpehe+Bt/4c0PXL/VPEV/b2M9vEsdp9obAyxbeQPUAAf8CNd74E0Lws/xAfXrDxumt6rOsrtDtALBhyevQDAx6AV89ahfXGq39zfXbh7i5kaWRgMAsxyeO3NXfDfibU/CWprqekypDdKjIGZA4wevBor4WU7yTs30FSxChaLWiPSvFGhW8PxYtj4W8VWqa1e3tw8jTIpWym7IRg5JyyjI61m+LdP+J9l4zt0vL7U9Q1AbPs1xZqywuOOgUBRg/eyPrxXnmoapd6pqlxqlzL/pdxMZ3kQbfnJzkY6c13Nj8ePHFjYC0+22dyVG1bi4t90oH1BAP1INJ0KkUrWeltRqrBt3utTrf2k2tDJoCN5R1DypTKB97y/lxn23bsf8CrxARxxElUANW9W1rUNcv5dR1W8lvLuX78snU+gAHAHsOK6bwl4J/tJE1HVP3dn99I+hlHqfRf1P61jiMbRyzDc+Ie34+SNaGFq46vyUVuVfCfg6fxE32q5LW+npyZOhk9Qv+NdB4u8T23hrTo7HTo1QAbbeJen+8fbP5mrHiXxTa6PZAIBHbp8scSYHmHsAOwrya9v59XvJLu4OXkPTso7AV8fhKeI4hxPt8SrUY7R7/wBdT6vEqjkdD2VJ3rS3fb+ugjyy3cryzOXdzlmJ5JpksAxwKnjTaKc4BFfoUYJRUVsfDym2+Z7s3Phb4vl8I+KYkmkb+zr5lguFz8qknCv/AMBJ/ImvrPa2r6BfaYk7QzzW8kCTDqm5SAw+ma+IrlMcjg19PfBbxk/iTwza3Fw+67sj9luf9rA+VvxXB+ua87G0vtI7cNU6GbeeHfFmm+Cm0i+0zR9G8O6VGJrw2Exkn1ER4Y7SQAgYqCzNyPpXqPg7xLH4p0Vb9II4SsrwMsc4mjLIcEpIOGX3rYO1lIYAqwwQeQRTYkigiWKGNIo1GFRFwoHsBXmSlzKzO+MeV6HK694UikFzHpmj2lxcamkkVze3s7M0UbDoM7mI5OFBUDHUV8k6vpsmi6ve6ZNIsslpM8JdDw+0kZH1xmvrq/8AB4v7i6u9XvtT1mElmh0wSLDAq9l2rt3ntmRiPpXz/wDG3wvPoevW+pf2RZ6TaX0W2O3tpQ4QoADnCgKSCvAz9a7sBUtLk7nJi4XXMeeE000Z4ppNevc84DSZoJpCaBn0n+y6c+FdY/6/x/6LWvaK8X/Zc/5FXWP+v8f+i1r2ivnMX/Gke1h/4aCiiiuc2CiiigAooooAKKKKAPFf2pP+RX0b/r+P/otq+bRX0j+1N/yK+jf9fx/9FtXzYD27V7uA/hI8rF/xGPpQc0zOKcK7jkFY8V7p8DvDNq3hYXWo+H7+5OoXTGG+t5FTy4wQmNyyLIuGVjwK8IduK+lPhroLp4d0WCz1LxbpdxLbCQsF82zJILEgSK6KDn2yT6muHHStBI6sLG8rnqunWS6dYxWkc1zMsYID3MpkkIyTyx5PXHNWetUNMt7vT7R11DUjfMGLCeSJYyFx0O3A9ecCp7W+tr6FZ7S4huIW6SROGU/iOK8c9K4t7J5Vs5HUjA/Gvln9oDWm1DxhBpQc+Vp0AyvYPJhif++dlfTuqv8AulXtkk18VeJNTfXPFOrajISftF3Iy57LuIUfgMD8K78DC8rnJipWVivAu0CpwaiThakDV7CPMeo8GjNMpc07k2H5ozTc0BhTCw7NGabketX9D0LU/El+tjpFjNeXB52xLkKPUnoB7mlKSSuxpN6IpZ96TPoMk9hXobfAPx2IfNFhak4z5f2ld3+H61Y0bwJN4Un365b7L8DKo4+WMeoPQn3HFeRmWc0MFRdV6voj1Msyitja6pR082UfCfglEVNQ1dBuHzR27dB7t/h+fpWtr/iCK2gkkeTZaxcsR/GfSl1LVN0bYfZCoyzE4yP8K8r8Sa82vXQjhytpEfkBGNx/vGvzzDUcTn+M56z9xb9kuy8z9ExDwuQYS1Ne+9u7fdkGr6xPr98Z5crGOI488IP8aSCLaBUUEO0VaXgV+pYfDwoU1TpqyR+X4nETr1HUqO7Y4cUhNITSE1uc6RDMuQa9B+AGtPYeMptKL4i1GBht7F4wWB/753/nXAuMipfDepvonijStRjYr9nu43bHddw3D8RkfjWNePNFo2pO0j7fs5PNtkJ6gYNTVR0uT92yjkcMD9au7q+ekrM9iL0INRs11CyltHmuIVkABe3lMcg5zww5HTtXh3xw8NWq+FWudO8P39udPulaW/uZRJ5kZJTAZpGkYFmU8jtXterW17eWwisdQNhJuBaVYlkO3B4AbgHpzg15j8SdElk8Paxb3up+LdUnitjID5Yis8gbgW2KiMBj3rahLlkmZ1leLR82K3FKTTFNKTXvnkW1AmjNJ0pKGxpH0r+y5/yKusf9f4/9FrXtNeLfst/8iprH/X+P/Ra17TXzuK/iyPZw/wDDQUUUVzmwUUUUAFFFFABRRRQB4p+1MceFtG/6/j/6LavmqvpT9qf/AJFfRf8Ar+P/AKLavmsGvcwH8I8vF/xBwIp1R04Gu45bDJTxxX1v4Dnjn03S7Sy8YyXTW9rEXshHAcIqqCvCBsdBnOa+R5GwDX1hpmmfERtPtHh8RaCsbQoUB05yQNoxzvrzsck0jqw11c6Xx1/Zr+D9YXWZpYNONpJ9okh++qY52+p9u/SuG8L+LD4N0qa+1Dwt4ht9JvJ/tMupTJAAm4KoYwxEGNcBf4fc9a6zV2bTPAeqv40lg1SFLeU3ItITEJIyPugFjhvfPXnivIL5p1tJrfUbDxrPo2lrDLqVhdazCY4YXIMYAVd0owM7dwxjBrhhG6aOqTs7nufiC5SLTbm5DAols8gIPGApNfEdvkncTkk5NfbGs20Go6RcW5lENvPashk6BEKkZ/AGvCI/hP4AXAX4jWJ/7bQ//FV1YOpGF7mGIi5HlQIxTuK9Z/4VV4C/6KJZf9/Yf/iqUfCvwH/0UWx/7+w//FV3/WYef3HJ7GR5N0ozmvWf+FV+A/8Aooll/wB/Yf8A4qj/AIVX4DHX4iWP/f2H/wCKo+sw8/uF7CR5Nmlr1ofCrwEw4+Itj/39h/8AiqzfB/wbPjfWL46ZqMkWg2khiGoTRhmuHHXYoIGPfP8APAHiqaV2x+wk3ZHnllaz6jf21jbIZJ7mVYY1H8TMcAfnX2H4G8G6b4F0OKwso1MxUNcXBHzTPjkk+noOwrxq6+G9l8MPiL4OkOoS3sF7dOhaSMIEkAAQcE9Sw/KvXvG8eo3/AIP1m10lyt9NZypDtOCWKngHsT0B7E15+Lq+15VF6HXhqfs7825F/wALh8DDWTop8SWX2wNsx83l7vTzMbM9vvda1fE+gWfivS3tLgAPjdFKOqN2P09q+E/s07XJtfJl8/fs8vad+7OMY65z2r7Z8CRajpvgzRbTVnLX0NpGku45YEL0J7kDAJ9RXJi8HT5OV6pnXhsVUjNTjo0fK/jzWLiPUbnQEDRi1laK5PdnU4K/QEfjXOW8IUA17VH8MLL4pfE3xlN/aEljBZ3Ma744g4eQqQw5I6FD+dZPi74MnwJqllJqeoyz6BdSCJ7+GLa1ux6b0yRj3z+vFdeXUsPg6aoU9P8AMxzHE4jG1HXqu55soxSlq9cPwq8BL/zUWx/7+w//ABVM/wCFV+Aj/wA1Fsf+/sP/AMVXofWYef3Hn+wkeS5zSV63/wAKr8B/9FEsf+/sP/xVIfhV4D/6KLY/9/Yf/iqPrMP6QexkeRsaqTA7sjgjkV7MfhV4CI/5KJY/9/Yf/iqif4T+AW4PxGsR/wBtof8A4qpliINf8AcaMj3zw9OJ9OtJx0lt43/MA1mah8UvBml6mdNvPEVjFdK2xl3Fljb0ZgNqn6kVoaDax2ml2lpDN58UVtHEsoP+sUKAG49cV53ceHdf+Hnh+XT4bvwzLorSNHHNd6fNLduZGOF2RkiV+cdOcc4FePypvU9FNpHrcUqTRpLG6yRuAyspyGB7gjqK4jxzPHb2WpWd74xe1a5tpTHZGOAbkYMAOULEds59aseHLCe3+Hek2PhPWYJDFAiw3t5bswdQfmzHkFT1GCcr07VRvtL+IgtbhpPEeglBG24DTnBIwc/8tKUI6lSbsfJkLbhzUmagh4UVLmvfWx5TWopNJSUhNAJH0v8Astf8irrH/X+P/Ra17VXin7LP/Iqax/1/j/0Wte118/iv4sj2KH8NBRRRXOahRRRQAUUUUAFFFFAHiX7VH/IraN/1/H/0W1fNQNfSn7VP/Iq6N/1/H/0W1fNANe3gP4R5mK/iEmaM00GlrtucoyU4r7a8G3IvPCOiXHUyWEDH6+Wua+I5ulfXvwY1Ean8M9Dl3AmOFoG9ijsv8gK4MctEzrwz1aOh8VGL/hGtU+0adJqcP2WTzLOP7067TlB7ntXjWlaBaa1Y213p3w112WyuAruy65GEvEBBUSgv8wXHAPTFe9U1EWNdqKFX0A4rz4ysjpcbsp6hD9osniCbPMiKFfTI6V8R+UbeWSE9Y2Kn6g19yzDcox2NfIXjzwtdaV8RNV0e0t5biSW5MsEcSFiyyfOoAHXAbH4V24Gdm0znxKukc6DS16p4b/Zz8U6tbpcapcWmkI/IikJklA9wvA/PPriukX9lxcAt4swfaxyP/Q665Yyina5zLDVGr2PB80pIIr3kfsuR558WNj/rx/8As66DQ/2cfCemSJLqFzf6rIpyUdhHEf8AgKjP/j1Q8fSRSwtRniXw7+G+rfEDVVit0e302Nh9pvCvyoPRc9WPp+dfXOi6RZaBpVtpenwiG1tkCRqPT1PqSckn1NPsLO00yzisrG2itbaFdscUShVUewFT5rzMRiJVnrsd9Giqa8zhfi54Pl8XeGnhtHEd9bSLc2khONsq9Oe2QSPxrJ8A/EeDxTamwvQbPXrMCO7tJTtYsBy6juD+n6n02ZBKhU9DXnfjP4TaN4nukvpoZIb2L7l1buY5Vx0+YenbPSlTmmuWQTg78yNz7BYC7+3fYrb7XjHn+UvmY/3sZrmvH3xGtvC1oLKzH2zXbseXaWcR3NuPRmA6KP17Vlf8Kz8QF/J/4TfxOLfpj7Su/H+/tzW/4M+Emi+F7t76GGWe9lyXurl/MlbPXk+vfHWtLwWrdyLSeiRb+EHg+fwh4bEV64l1C7la6u5M53St1574AA/P1rsda0iy1/S7nTNQhE1rcoUkQ+nqPQg8g+oqeJBEoUCn7q5pScpcx0RilGx8e/ET4bar8P8AVWinjefTZG/0a8C/K47K2Oje35VyWeK+6b6ztdTs5bK+t4rm2mXbJFKoZWHoQa8v1z9nLwnqcjzWFzf6VIxyFjYSRD/gLDP/AI9XpUcwVrVDgq4R3vA+Zc0le9n9lyLPy+LGx72P/wBnSN+y2uPl8WZPvY//AGddH16j3MfqtTseCnpUPlm4mSFesjBR+Jr1vxJ+zl4p0q3efS7i01ZU5MUZMcpHsG4P51xngTwtd6n8RNK0a7t5beSK5WSeOVCrKsfzsCD0yFx+IrT6xCUW4sSpSi7SR9a6VB9ltIYcYEcap+QxRrOjWOv2X2O/iZ4w6yKUdkeN1OVZWUgqR6g1ZiXC1JXiN63PSS0Kul6ZZ6Lp8Gn2EIhtoF2RoCTgfU8k98mqniu7+xeF9YuenlWU7g+4jOK1K4z4x6iNM+GmuzFgC8AhX3LsE/8AZqcU3JIJOyPkGI5qbNQRcCpc8V7y2PLe4E0maQ0E0DR9M/ssf8iprH/X+P8A0Wte114n+yuc+FNY/wCv8f8Aota9srwMV/FketQ/hoKKKK5zUKKKKACiiigAooooA8R/ar/5FXRv+v8AP/otq+ZxX0v+1X/yKui/9f5/9FtXzNXt4H+EeZif4g8GlzimZpQa7DnsJJX0L+zBrPnaBq+ju+Ta3K3CKT0V1wR9Mp+tfPTdK7f4H+J28NfESyR5NttqX+hzA9DuPyH67gv5mufEw5oM0ou0j65zRk03PpSFsDNeQd4OSxCJyzdKW10LTbbUX1RLOE6jJGInutvzlBztB7CnWADK0x6sdq/SuV+LPxFi+G/hdtQVEnv7lvJs4WPDPjlj/sqOT+A70rNvlRWiXMzo9f8AFOi+FrdbjW9UtLCN87TPIFL49B1P4VyL/tBfDaNip8R7iO62c5H57K+c9F8L6/8AFLUH1rXNQuJPPO0SsNzy89EHQKPyrv7b4A6akS77W4kP96S5wT/3zgV1rCwXxs8ivnNOEnGKbt21PSv+Ghfht/0MD/8AgFP/APEUn/DQ3w2/6GB//AKf/wCIrzz/AIULpP8Az4v/AOBRrL1n4L6Tpd7oStaOsd7qcVpIPtBJKsrkj2+71qalKlCLk3sKhm/tZqCi1fuj1j/hoX4bDr4gf/wCn/8AiKP+Ghvhr/0ML/8AgFP/APEV5d4h+Deg2fjrT9DsrOQQXGnzXLobhuWV1AOT9elXB8AdK/58ZMf9fRrLDexr0lVjdJ99zXF5k8NVdKUW35LQ9F/4aF+G3/QwP/4BT/8AxFIf2hvhqeP7ff8A8Ap//iK8n8M/C3wpe+JdetNRhmFvpzR28cK3BG5yoZnJ68ZAA6da7e0/Z78EXaCQafcIjDIL3jjI/OtZ0qUd7mlPHOotFqb/APw0D8NBz/bz/wDgFP8A/EUo/aG+Go/5j7/+AU//AMRWUP2dPAeP+PWX/wAC5P8AGqt3+z54HtUMh0+5dBySl5JwPfmp5aL6s2eIlFXaOi/4aF+G3/QwP/4BT/8AxFJ/w0P8Nf8AoYX/APAKf/4ivJvE/wALfCdj4k0C106CX7PqLyW0kLXDEhwu5GBznsQe3StZvgDpIP8Ax5Sf+BRrRYel1Zw1s2VN25W/Q9D/AOGhfhsf+Zgf/wAAp/8A4ik/4aG+G3/QwP8A+AU//wARXmGg/BvQLvx3faFd2cpgg06K6VRcMPmaRlzkewHFVtG+C+larf68i2rtFY6nLaRj7QRhVRCB7/e61ywnQliJYfW6V79DpqY2UMOsS1o+nU9Z/wCGhfhsf+Zhf/wCn/8AiKdH+0F8NnYKPERUnu1nOB+eyvOP+FC6V/z4v/4FGo5/gBpkkZ221xGf70dzkj88iuv6vS7nB/biv8D+4960DxTovimBrjRNUtb+NcbjDICUz0yOo/GpbnQ9NudSj1V7SH+0Y4zEl1tAcIeq57ivkLXPCuvfC3UE1rQ9QuEELbWlT5ZIuejjoVPHse4r6U+E3xFj+JHhhb90SHULZhDeQqeA+OGHsw5H4jnFYVaDp+9F6HqYXF08TG8DqVLKSjcMKdk0t9wqyjqpwfpUYbIzWaOhqw/NeK/tP60bfw9pOjo+Dd3JncDuka4x9MuD+Fe0ZNfJPx08TN4k+Il5Ekm6200CziA6Ary5+u4kfgPSt8NHmmjKq7ROHj6U8mmLSk17BwC5pCfSkooBH01+yr/yKesf9f4/9FrXtteJfsq/8inrP/X+P/Ra17bXgYr+LI9ah8CCiiiuc1CiiigAooooAKKKKAPEP2rP+RV0X/r/AD/6LavmXNfTP7V3/Iq6L/1/n/0W1fMle1gf4R5uJ+MeKWmA07NdiOcCcioZGeN1kjYo6kMrA4KkdCKmqOQZWh6gtGfZvw78Vp4y8HabrAYGaSPZOB/DKvDfqM/Qj1reuX2RE180fs8eOhoHiKTw5ePiz1Rh5JJ4jnHQf8CHH1Ar6SvTmFq8erT5ZWO6Erq5fsz/AKHDjugP5818x/tNapLqXxBstJdz5NpaoFXsGkYlj+OF/IV9KaTMJdPhIP3RtP4HFfOn7UGhT2Pi/TdfVCbe8tljD9hJGeR/3yyn8/SjD2VTUVe7puxr6PqR0CGOOy2J5cQiQkZ2gAcj34qw/iO8lJZryYk/7Zrh4dZW4toriNtySKGyOx7inf2p/tV6nJ1PzidKpdps7T+3bvr9sn/7+GqlxrU9xrfhtZZ5JAurwthmJ/hf/GuW/tQ/3qdYXn2jxFoIznbqMR/Rq5MwjbC1Gv5X+R25RRl9cpXfVHefEbUJF+Imj3EcjRldMmXKtg/6xaqt4hu8Y+2T/wDfw1mfFK88nxjpL5/5cJR/4+tc6NTPr+tebw03Uy2lKW9v1PS4qoy/tCai+xavmew8SyX0jsLXVNn78k4jnUY2k9twAP4V3OleI/ENhbrHDc/aIVGAso3bfx6/rXn41hfLeGWOOeGQYeKQZVhSadPPpx3aLq6woT/x6agWKL/uyLyB7GvblC6tY8unOej5rNfiepf8Jj4gx/qIM/7rf41n6r4h8QX8DRzXP2eIjBWIbd349f1rlf8AhL/FAXbjQ8f3/tgx/LNY+oz3GpMH1nWBMoOfsmn7lRv96Q8kfSoVJJ7GsqtWSs6n9fIsWZfUPEsd7E7Na6UWYzA8PORgKD32g5rrF8Q3YGDeT/8Afw1xp1hfKSGKOOCGMYSKMYVR/nvTBqZ9a15DhrKc2raJHoHw6v5H+IuqzyStITpcK5Y5P+tasmDWp7bXvEyxTyRhtXmYhWIH3Uqt8L73zfGepvnrp8Y/8iGsDUL0weJfEAz97UZG/Ra+Xwkm87r0+iiv0PrsdQf9h0n1udl/b92f+Xyf/v4acniK8jIZb2cEf7ZNcSNV96P7U96+o9mj4z2M+52GsaqdeheK+COHiMTkDG8EHr+dc5+zPqk2nfES80pHPkXdrIrrngtGwKn8Pm/M1Qn1lba2luJG2pGpJJ7+1av7MGhXF94z1HXyh+z2VsyF+3mSHgfkrf5NYYhJU2j6Xh+FRSk3sfS94f8ARJvZCfy5qvbvuiB9qTVJhFYTEn7w2/mcVFZnEIzXmJaH1Tepj/EHxVH4N8IalrLMolhi2wA87pW+VBj6nP0Br4uV3nkaaV2kkdizOxyWJ5JJr1n9ovx0Nb16LwxZPm00xi1wwPDzkYx/wEcfUn0ryeIYFenhafLG7OStK+hMDRmkpM113MAJzRmkzSZouB9O/sqf8inrP/X+P/Ra17dXiH7Kf/Ip6z/1/j/0Wte314GK/iyPVofAgooorA1CiiigAooooAKKKKAPDv2r/wDkVNF/6/z/AOi2r5kBr6b/AGr/APkU9F/6/wA/+i2r5h6V7OCf7o87E/GPpc0wGnV2XOew4GkbvSUuaBFeQtG6yIzI6nKspwVPqDX1f8JfiLH4/wDDKpcyKNXslEd0meX9JAPQ9/Q5r5VdcirnhnxLqHg3XbfWdNcLNCfmRvuyIeqsPQ//AF6wr0udG1OdtD7O0W8Frdy2MhwJDvjJ9e4pPHXg7T/H/hufQ79jGWPmQTgfNDIOjfTsR6E1zuk67YeNvD9trmlyfLKMsufmhcdUPoQfz6jiui0PXDe/6JdELdJ3/wCeg9R7150otao6FJbHydq+geKfhlqU1jqmnyeQG+V2UmCYf3kfp/nkU1fGmnsMy6bKrdwsgI/kK+zWkWWEwTxRzxHgxyqGU/gax5PBng2Zy8vg3w87nqxsIsn/AMdreOLaWqOKtllGq+Z7nyX/AMJlpX/QPuP++lpYfG+n2+oafdxWM4+yXSTsCw+ZQDwPfmvrH/hCPBP/AEJXh3/wXxf/ABNH/CEeCf8AoSvDn/gvh/8AiamriFUg6co6NWJo5VSpTVSD1Wp8u+KviPp3iXXLPUTp9zHFb27wmNmXJJYEH9KoHxnpX/QPuR/wJa+sf+EI8Ff9CX4c/wDBfF/8TR/whHgr/oSvDv8A4L4v/iaywkqeFpKjSjaK21NcZgY4uq61Z+8z5O/4TLSv+gfc/wDfS0HxnpX/AED7n/vpa+sT4I8Ej/mSvDn/AIL4f/iaT/hCfBP/AEJXhz/wXxf/ABNdP13yOX+xaB8nf8JlpP8A0D7n/vpaB4z0r/oH3P8A30tfWX/CEeCv+hK8O/8Agvi/+Jo/4QfwSP8AmSvDv/gvi/8AiaPrvkH9i0P6Z8nf8JnpP/QPuP8AvpaX/hNNKH/MPuP++lr6w/4QjwT/ANCV4d/8F8X/AMTR/wAIR4J/6Erw7/4L4v8A4mj66+wf2LQPlzwr8R9P8N67d6kdPuZI57ZYRGrLkEMTmqM3jfTrnUtRvJbC4P2u6adRuXKqQOD78V9Y/wDCEeCf+hK8Of8Agvi/+JpP+EH8E/8AQleHf/BfF/8AE1x04UYYiWKjF88lZ69DvqYdVMPHCyfuR1R8nf8ACZaV/wBA+4/76WkPjTTkGY9NmZuwaQAfyNfWX/CD+Cf+hK8Of+C+L/4mnJ4L8GRMHj8GeHkYdCNPi4/8drs+uP8AlOFZNQufJml6H4p+J2pQ2Ok6dI0O7llUiGEf3nfp/ngV9Y+BPB1h8P8Aw1Bodg3nMCZLi4I5mkPU+w7AdgB15rbRkghEFvDFbxDpHEgVR+ArF1zW/sf+i2xDXT9+0Y9frWE6kqrsehRpU6EbRDWbsXN5FZRciM75CPXsK5X4rfESH4e+GGMLq2rXYMVnFkZU95CPRQc+5wO+Rb1HWrDwXoFzrmqSYjgXdjPzSueir6kn/GvlLxZ4o1Dxt4guNZ1Jh5spwka/diQdEX2H6nJ71dKlzPyQ5StqZqvJPK80rtJI7Fmd2JLE8kknqferC8VGi4FPr04qxySd2OJpM0lJmgLC5pM0hNFK47H0/wDso/8AIpaz/wBhAf8Aota9vrxD9lH/AJFHWf8AsID/ANFrXt9eFif4sj06PwIKKKKwNQooooAKKKKACiiigDw/9q9c+D9Hb01D/wBptXzBnNfVn7U1qZvh7azAf6nUIz+asP618og17GCf7o4MSvfHUZxSbqAa7DmsPDZpaZS5pBYcahkTIqTNBpgjd+HnxB1D4e6x50W6fT5yBdWm7Acf3l9GHY/h3r6V03UdL8W6ZFrGhXazxnnK8PG391h1VhXyNLHnNanhHxprHgXU/t2lTfK2BNA+THMo7MP5HqK56lK+qNYvufY+l+IUm221+RDcDgOeFk/wNbPevMfCvi/Q/iLp32jT5Fju1X9/ZuR5kR+ndfQj/wCtXR2Os3mkEQ3KtcWw4HPzJ9D3+lcUqZopvqdXmsfWfEf9lXcFlBYT3txLG0uyJ0UKgIGSWI7kcCtC1vbe+i821mWVe4HUfUdqo6t4f03XHie+t2eSHIjkjleJ1B6gMhBwcDjOOK56sanI/Zu0ulzaLjdOWxRXxVqHVvDl2B/18Q//ABVa2m6zDq2kDUIFeMMHBR8bkZWKsDjjhlI4Pasn/hBtFP8ADqOP+wlc/wDxytW20+2sNPWwsolgt402Ii9FH+TWGFp4lN/WJJ9rJr9WVUlTf8NP5mD8PPEt94m+Hun63fyI97PHKzsihQSsjqOPoorivhx4z8Q+LY7Sa58YWBuriObOmLp2JFYBwp8zOOyt06cVueB/A/i3wna2Wkv4k0+fR7YOpgWzw7BizH58/wB5s1Y8CeDPFHg6Kx06XX9PudHtfMzAlntkbcWb75P95s/TivQ91XsYa6GLF8SteuPh/ZMjQr4puNV/slh5YIEokOTt6fdxn0yai1XxxrZ8Y6xpJ8Y6fo8VjPFFDFNp3nNKGjVidwIxyT+db1v8NvI+I7+KlvVFkXe4SxCHC3DoEaTPTkAn6mmS+CfFVr4k1jVtF8QafaQanMkzwz2fmsCqBeufaq90WpoeEfE2pat428W6RdyRtaaW1qLYKgUjejFsnvyBXQ+IdetvDWjXWrXayPBbKCVjGWYkhQB9SQK4y58D+KrPxTrWt6B4hsLNdWMJkjms/MI8tdo7+7H8a7a8sINT06Sw1CKO5gmj2TIw+V/Ws5JXHd2stzz9vjtpnbQ9S/77j/8Aiq6XwX8Q9P8AG0t1BbWtzazWyq7JNtO5WyAQQSOxqoPhN4OH/MJb/wACpv8A4utnQPCui+GBL/ZFilsZyPMbezs+OmSxJxyePc1c/Z291amNJYhS99qxt5oHNV7q8gsYvNupViXsD1b6DvXN32tXmrEwWqtb2x4P99/qew9qyjFs6HKxqar4gSDdbWJE1yeCw5WP/E1zuoX+meFNNl1jXLxYIV5LucvI3oo6lj6Vm+KPFuh/DvTftWpSh7lh+5tIyPNlPsOw9WPH48V82+MfG2sePNU+26pKBGmRBbR5EcCnsB+WT1NdFOlfbYzcurNH4jfEbUPiHqodt9vpluSLW0zkKP77erH9Og9+aiTA6UyOPHapwK7YRUVZGUpDh0pabmkJrS5A4kUmabmjNSAtGRTd1GaB2PqP9lEf8Udq7euof+00r26vG/2WbYxfD66mP/LbUJCPwRB/SvZK8LEO9WR6dJe4gooorE0CiiigAooooAKKKKAPPPj7o0ms/CzV1hUtJahLoAeiMCx/753V8X5r9C9RsYdU0+6sLhQ0N1C8MgPdWUgj8jXwJ4j0S58N67f6ReIUns5miYHvg8H6EYP416WAno4nJiY6pmeDS03NLmvQuco4GlBpmaUGmKw/NFMzS5oQrCkZqGSMGpc0UAiKwvr3Rr6K/wBPuZbW6hO5JYmKsp//AFcEdxXtXg79oG0u4Y7HxfAYZh8v2+BMo3u6DkH3GfoK8WZAarvD6VlOmmaJn1/axxXccep6NepLG/KT28gIP4j+Vatr4mubfEepW/nKP+WsfDfiOh/Svj3w54r1zwhcNPouoTWhYguinKP/ALyng/jXrXh79oq1ufLt/E2leSx+VruzyU+pjPIH0J+lc86TGvI99tta0y84hvY1f+5L8h/XrV4xyAZ2kg9xzXnGlat4a8VY/sfVrO7cjIjR8Sf98HB/StSK11DTf+PS6miX+6rHH5dKycOxXO+qOx6UmfeuXTxJrtvw5guAO0kf+GKmTxheD/W6Xbt/usV/xqeRj50dFmlya5//AITF/wDoEL/39P8AhTW8YXR/1WlwL7sxP9BRyPsHOjouvenCOQjO0ge/Fcq/iTXLjhPItx/0yj/xzVaa31HUhi7u55FPVSx2/l0p8jDnXQ6a51jTbLImvEZv7kXzn6cdKybvxPdXGY9NtvJH/PWTl/wHQfrXO6pqnhzwsM6zqtnZkDPlu+XI9lGSfyrzzxH+0RY2vmW3hjSzcsMqt1dgqn1CDkj6kfSqjT7aiu2eo3KR20cmpaxepHGoy81xJtVfxPSvM/GP7QFjZQy2PhGAzzn5ft86YjX3RDy344Hsa8e8R+Lde8X3Am1nUZrracpGTiOP/dUcCsyOGuiNK/xE3sWNR1C/1y/lv9Su5ru6lOXllYsT/gB0AHSkjjxSogFSAcV0KNiGwApaKQmmTYXNJmkoouOwZopCaQ0gFzQDSCtLw7o1x4j12w0izQvPeTLEoHueT9AMmk2krlLXQ+vvgDo8mj/C3SRKpWS633RB9HYlf/Hdpr0Sq2mWEOlada6fbrthtYUgjHoqqAP0FWa8CcuaTZ6cVZWCiiipGFFFFABRRRQAUUUUAFfNv7Ufw/aG6g8aWUf7uULb3oA+6w4Rz9R8v4D1r6SqnrOj2Wv6VdaXqEKzWt1GY5EYdQf6jqD61pRqOnJSRE48ysfntnFGc11nxM+Huo/DnxHLpt2rSWshL2lztws0f/xQ6Edvyrkule7GakuZHntNOzHCim5ozTJH5ozTaXNAC5pc03NAoAdTSuaXNGaYiJ4wahaGrVBANKxVyjsZGDKSCDkEdq6PTPiV4z0YKtn4hvgq8BJmEyj8HBFY5QGmGIGocEx3PSNP/aI8UW6ql7p+lXoHVzG0bn8mx+la8P7SJ/5ePDEZ/wCud0R/Na8eMPtTTD7VLpRHdHtX/DSFnj/kV5c/9fY/+IqGb9pHj9x4XQH/AKaXWf5LXjXk0vk0vZILo9Pv/wBovxLMhSx0vSbPPRyjyMPplgP0rktT+J/jTWAwuvEF4FbgpARCPyQCue8r2p4iqlTQXK7K8rl3YuzHJZjkk1IkNTBBTwoFWoiuMSLFSBQKXijNUSLmlzTcmkpXBIcTSZpM0ZoAWkyKQmii4C5pKTNFIYtfQP7LngBri9n8Z3qYigDW9kGX7znh3H0Hy/ifSvJ/hx8P9S+IviOHS7NWS3Uh7q5x8sEeeT9T0A7mvt/RNGsvD2k2uladCsNpaxiONFHYdz7k8k9ya4sZW5VyLdnRQp3fMy7RRRXlnYFFFFABRRRQAUUUUAFFFFABRRRQBz3jrwNpPxA0KTSdVi4PzQzL9+B/7yn+Y718a/EL4ba58OdWNnqcJe2kJ+z3iA+XOvsex9R1H06/ddUda0PTfEWnS6dq1lDeWkow0cq5H1Hofcc10UMRKm/IyqUlP1Pz3or334g/suX1rI974MuBdwHJNjcOFkT2Rujfjg/WvD9X0PU9Au3s9VsLmyuEOGSZCp/XrXq060J/CzjlTlHcpUtNzRmtCB31oFJmlzTAWikzRxQKwuaKTNHWgLC0YFJmjNAC4FJtozS0DE20bRS5pM0CDApcD1pOKUGkAcUZopKYWFzRTc0ZoCw6kpM0UDFzSUmaXNIAozSZq7pWi6lrt0lppdhc3tw5wscEZYn8qG0twSKddR4A+HOu/EXVlstKgKwIR9ou3B8qBfUnufQDk16n8Pv2XNQvJEvfGU/2K3GCLK3cNK/szdFH0yfpX0bomhaZ4c06LTdJsobO0iGFjiXH4k9Sfc81xVsYlpDc6KdBvWRk+AvAWk/D3Qo9K0tCSfmnuHHzzv8A3j/Qdq6SiivMbbd2daVtEFFFFIYUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAVU1LSNO1iAwalYWl7Cf8AlncRLIv5MDVuigDzXVv2dvh3qszTDSJLJ2OT9knZF/755A/AVzt1+yj4RlbNvqusQD+7vRh+q17ZRWqr1FsyHTi+h4LJ+yRopP7vxNqC/wC9Ah/qKhP7I2ndvFd3+Nov/wAVX0BRVfWavcXsodj59/4ZGsO3iy5/8A1/+Lo/4ZGsf+hsuf8AwDX/AOLr6Coo+tVe4exh2Pn3/hkax/6Gy5/8A1/+Lo/4ZGsf+hsuf/ANf/i6+gqKPrVXuHsYdj5+/wCGR7H/AKG25/8AANf/AIuj/hkax/6Gy5/8A1/+Lr6Bop/WqvcPYw7Hz9/wyPY/9DZc/wDgGv8A8XR/wyNY/wDQ2XP/AIBr/wDF19A0UfWqvcXsYdj5+/4ZGsf+hsuf/ANf/i6P+GRrH/obLn/wDX/4uvoGil9aq9x+xh2Pn3/hkax/6Gy5/wDANf8A4uj/AIZGsv8Aobbn/wAAl/8Ai6+gqKPrVXuHsYdj59/4ZGsv+htuf/AJf/i6P+GRrL/obbn/AMAl/wDi6+gqKf1qr3F7GHY+ff8AhkWx/wChtuf/AACX/wCLo/4ZFsf+hsuf/ANf/i6+gqKPrVXuP2MOx8+/8Mi2H/Q2XP8A4Br/APF0o/ZG07v4ruz9LRf/AIqvoGil9aq9w9jDseCR/skaMD+88Tag3+7Ag/qavW37KHhOJgZ9X1iYem6Nf5LXttFJ4io+oeyh2PM9J/Z0+HmlSrK2lTXrryPtU7Mv/fIwD+NegaZo2maLALfTNPtLGEf8s7aFY1/IAVcorOU5S3ZailsFFFFSMKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD/9k=');
+/*!40000 ALTER TABLE `business_config` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `cash_movements`
+--
+
+DROP TABLE IF EXISTS `cash_movements`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `cash_movements` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `register_session_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` enum('INCOME','EXPENSE','WITHDRAWAL','DEPOSIT','SALE','REFUND') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reference` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `cash_movements_register_session_id_fkey` (`register_session_id`),
+  KEY `cash_movements_user_id_fkey` (`user_id`),
+  CONSTRAINT `cash_movements_register_session_id_fkey` FOREIGN KEY (`register_session_id`) REFERENCES `register_sessions` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `cash_movements_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `cash_movements`
+--
+
+LOCK TABLES `cash_movements` WRITE;
+/*!40000 ALTER TABLE `cash_movements` DISABLE KEYS */;
+INSERT INTO `cash_movements` VALUES ('4c128dfb-6579-4db0-a9a2-f52ad3a30e5d','2af51850-6bbd-42f9-b3d6-38c49c52975a','86cb590d-3285-4881-8c8c-1e72f8c7d439','SALE',10.00,'Venta V-202607-000005','V-202607-000005','2026-07-14 20:52:46.197'),('74c2b136-1228-4aba-ac2e-5d81fb516290','03d387fb-cee4-4f9a-bd32-2ec32bc9e63d','a901f0c4-99e1-4548-baa9-fdd3a61c3533','SALE',60.00,'Venta V-202607-000002','V-202607-000002','2026-07-08 02:49:25.472'),('9a5b9699-f7cd-4fc6-8322-8beb4ff0d171','03d387fb-cee4-4f9a-bd32-2ec32bc9e63d','a901f0c4-99e1-4548-baa9-fdd3a61c3533','SALE',50.00,'Venta V-202607-000003','V-202607-000003','2026-07-08 02:54:09.283'),('9b36a54a-93a0-4452-bff8-578771112286','2af51850-6bbd-42f9-b3d6-38c49c52975a','a901f0c4-99e1-4548-baa9-fdd3a61c3533','SALE',19.75,'Venta V-202607-000006','V-202607-000006','2026-07-14 21:16:42.897'),('ebfb095f-113d-4e28-8165-f235478fc666','84d29537-1273-4c07-81fd-96dcb6d62c29','a901f0c4-99e1-4548-baa9-fdd3a61c3533','SALE',1000.00,'Venta V-202607-000004','V-202607-000004','2026-07-14 19:55:21.183');
+/*!40000 ALTER TABLE `cash_movements` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `categories`
+--
+
+DROP TABLE IF EXISTS `categories`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `categories` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `branch_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `parent_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sort_order` int NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `categories_branch_id_code_key` (`branch_id`,`code`),
+  KEY `categories_parent_id_fkey` (`parent_id`),
+  CONSTRAINT `categories_branch_id_fkey` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `categories_parent_id_fkey` FOREIGN KEY (`parent_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `categories`
+--
+
+LOCK TABLES `categories` WRITE;
+/*!40000 ALTER TABLE `categories` DISABLE KEYS */;
+INSERT INTO `categories` VALUES ('f820ce55-635b-4a66-8251-abf75a5707ab','a738fa70-0756-4511-9997-7704cb57965d',NULL,'GENERAL','General',NULL,0,1,'2026-07-01 03:15:43.159','2026-07-01 03:15:43.159');
+/*!40000 ALTER TABLE `categories` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `companies`
+--
+
+DROP TABLE IF EXISTS `companies`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `companies` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tax_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `address` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `companies_code_key` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `companies`
+--
+
+LOCK TABLES `companies` WRITE;
+/*!40000 ALTER TABLE `companies` DISABLE KEYS */;
+INSERT INTO `companies` VALUES ('2925244a-f553-43de-9dc8-44b4d4b9baf2','DEFAULT','Mi Empresa','XAXX010101000','contacto@miempresa.com',NULL,NULL,1,'2026-07-01 03:15:42.264','2026-07-01 03:15:42.264');
+/*!40000 ALTER TABLE `companies` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `customers`
+--
+
+DROP TABLE IF EXISTS `customers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `customers` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `branch_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tax_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `address` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `credit_limit` decimal(12,2) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `customers_branch_id_code_key` (`branch_id`,`code`),
+  KEY `customers_branch_id_name_idx` (`branch_id`,`name`),
+  CONSTRAINT `customers_branch_id_fkey` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `customers`
+--
+
+LOCK TABLES `customers` WRITE;
+/*!40000 ALTER TABLE `customers` DISABLE KEYS */;
+INSERT INTO `customers` VALUES ('27bb28d8-d5d6-444f-a2f7-7daac61cfe45','a738fa70-0756-4511-9997-7704cb57965d','PUBLICO','Público en General',NULL,NULL,NULL,NULL,NULL,1,'2026-07-01 03:15:43.148','2026-07-01 03:15:43.148');
+/*!40000 ALTER TABLE `customers` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `inventory_adjustment_items`
+--
+
+DROP TABLE IF EXISTS `inventory_adjustment_items`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `inventory_adjustment_items` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `adjustment_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `product_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `quantity` decimal(12,3) NOT NULL,
+  `previous_qty` decimal(12,3) NOT NULL,
+  `new_qty` decimal(12,3) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `inventory_adjustment_items_adjustment_id_fkey` (`adjustment_id`),
+  KEY `inventory_adjustment_items_product_id_fkey` (`product_id`),
+  CONSTRAINT `inventory_adjustment_items_adjustment_id_fkey` FOREIGN KEY (`adjustment_id`) REFERENCES `inventory_adjustments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `inventory_adjustment_items_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `inventory_adjustment_items`
+--
+
+LOCK TABLES `inventory_adjustment_items` WRITE;
+/*!40000 ALTER TABLE `inventory_adjustment_items` DISABLE KEYS */;
+/*!40000 ALTER TABLE `inventory_adjustment_items` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `inventory_adjustments`
+--
+
+DROP TABLE IF EXISTS `inventory_adjustments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `inventory_adjustments` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `branch_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` enum('INCREASE','DECREASE','SET') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('DRAFT','APPLIED','CANCELLED') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'DRAFT',
+  `reason` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reference` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applied_at` datetime(3) DEFAULT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `inventory_adjustments_branch_id_fkey` (`branch_id`),
+  KEY `inventory_adjustments_user_id_fkey` (`user_id`),
+  CONSTRAINT `inventory_adjustments_branch_id_fkey` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `inventory_adjustments_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `inventory_adjustments`
+--
+
+LOCK TABLES `inventory_adjustments` WRITE;
+/*!40000 ALTER TABLE `inventory_adjustments` DISABLE KEYS */;
+/*!40000 ALTER TABLE `inventory_adjustments` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `inventory_items`
+--
+
+DROP TABLE IF EXISTS `inventory_items`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `inventory_items` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `branch_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `product_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `quantity` decimal(12,3) NOT NULL DEFAULT '0.000',
+  `reserved` decimal(12,3) NOT NULL DEFAULT '0.000',
+  `version` int NOT NULL DEFAULT '0',
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `inventory_items_branch_id_product_id_key` (`branch_id`,`product_id`),
+  KEY `inventory_items_product_id_fkey` (`product_id`),
+  CONSTRAINT `inventory_items_branch_id_fkey` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `inventory_items_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `inventory_items`
+--
+
+LOCK TABLES `inventory_items` WRITE;
+/*!40000 ALTER TABLE `inventory_items` DISABLE KEYS */;
+INSERT INTO `inventory_items` VALUES ('93aca6c8-9856-4222-a754-6a5ff2d76a98','a738fa70-0756-4511-9997-7704cb57965d','06bc15bd-ee62-4aa0-8608-6e97c7aafa79',99.000,0.000,1,'2026-07-08 02:49:25.440'),('a72b5c9d-1ee1-4e54-beea-526a81700682','a738fa70-0756-4511-9997-7704cb57965d','32bcf753-556b-42a7-baf5-053d42680fd7',95.000,0.000,5,'2026-07-14 21:16:42.884'),('e0f29ec8-2b8d-43e8-b4b1-e8b97bc052c2','a738fa70-0756-4511-9997-7704cb57965d','78fe5ef9-d1ec-42df-91cb-09e648ddf5bf',100.000,0.000,0,'2026-07-01 03:15:43.205');
+/*!40000 ALTER TABLE `inventory_items` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `migration_logs`
+--
+
+DROP TABLE IF EXISTS `migration_logs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `migration_logs` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `migration_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `applied_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `duration_ms` int DEFAULT NULL,
+  `success` tinyint(1) NOT NULL DEFAULT '1',
+  `error_message` text COLLATE utf8mb4_unicode_ci,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `migration_logs`
+--
+
+LOCK TABLES `migration_logs` WRITE;
+/*!40000 ALTER TABLE `migration_logs` DISABLE KEYS */;
+INSERT INTO `migration_logs` VALUES ('00779eb4-afe7-4148-89a8-b8f30eacc487','prisma_migrate_deploy','2026-07-03 04:11:35.601',1368,1,NULL),('0170d293-59f6-4e7a-8bd2-51c14edc1a86','prisma_migrate_deploy','2026-07-14 21:40:37.617',2949,1,NULL),('0704a6bb-ab87-4765-af9d-390bb9178fde','prisma_migrate_deploy','2026-07-03 03:43:11.419',1388,1,NULL),('07999ba9-ba7d-4a2b-aa82-b7dd326cf647','prisma_migrate_deploy','2026-07-14 22:17:51.044',2127,1,NULL),('0b788672-1511-4dcc-84bc-70bca9b6b61b','prisma_migrate_deploy','2026-07-01 03:18:32.259',4357,1,NULL),('0ed23a0f-69b5-40b9-8ace-0e852081a454','prisma_migrate_deploy','2026-07-01 03:31:11.526',3898,1,NULL),('0f58aeb3-6f66-4ac5-b720-370df44c876d','prisma_migrate_deploy','2026-07-14 21:27:04.433',1829,1,NULL),('10a4abb7-b925-473f-8a54-370005d2d5f9','prisma_migrate_deploy','2026-07-14 21:07:48.393',1325,1,NULL),('13073516-764e-4518-8b84-cc6606766812','prisma_migrate_deploy','2026-07-01 03:18:31.765',3893,1,NULL),('14e2f79d-e914-43f6-89f7-7d2cafa3d47f','prisma_migrate_deploy','2026-07-01 03:43:49.367',2637,1,NULL),('16447f33-5c4b-46f9-ac06-8dac42fbf71d','prisma_migrate_deploy','2026-07-14 21:41:01.783',1563,1,NULL),('1aeab787-f4ed-4c6e-8ffb-370469eeb799','prisma_migrate_deploy','2026-07-01 03:24:20.842',4497,1,NULL),('1b642c9f-3788-4c52-a88a-4f480c9f0714','prisma_migrate_deploy','2026-07-14 19:51:26.252',1770,1,NULL),('1d2dad38-f765-4d33-9259-8db37b1a4cb6','prisma_migrate_deploy','2026-07-01 03:15:38.132',3043,1,NULL),('1dc920e1-380d-45e5-a8d5-87ff9557a933','prisma_migrate_deploy','2026-07-01 03:16:54.246',1316,1,NULL),('20b2811b-7889-451d-90d7-947f22f65b5c','prisma_migrate_deploy','2026-07-01 03:46:08.323',4538,1,NULL),('2571dd6e-5803-4197-9952-fc459e3fc523','prisma_migrate_deploy','2026-07-14 02:23:49.585',1162,1,NULL),('2810ccd9-5d86-4993-ad68-835f71f71d5e','prisma_migrate_deploy','2026-07-01 03:46:40.803',3269,1,NULL),('2a5a4af4-6ff4-4dc5-b54c-2ebc545e6119','prisma_migrate_deploy','2026-07-01 03:23:52.192',3213,1,NULL),('2cb4cc87-d6c5-4ebb-bb29-092ec9f09356','prisma_migrate_deploy','2026-07-08 02:41:55.991',2405,1,NULL),('30cf09a1-e04c-460d-9477-459c6c85ed7e','prisma_migrate_deploy','2026-07-03 03:58:43.110',1516,1,NULL),('30e287c7-2a91-4486-b1d7-d5b3b28dbd69','prisma_migrate_deploy','2026-07-01 03:23:51.745',3750,1,NULL),('3597c467-666b-49de-96c0-d9d321c50b5c','prisma_migrate_deploy','2026-07-14 20:51:26.866',1349,1,NULL),('36252e45-f9fc-4333-a17a-0b8d136e758e','prisma_migrate_deploy','2026-07-14 21:41:51.024',2000,1,NULL),('380e743f-730b-4ff7-aae4-719f8e20631f','prisma_migrate_deploy','2026-07-01 03:46:40.692',3330,1,NULL),('39e3e516-e8f9-487d-adf8-39df8dc5cd01','prisma_migrate_deploy','2026-07-01 03:23:51.815',3437,1,NULL),('39e5fc21-a858-4017-bf2d-09d7df4e8d54','prisma_migrate_deploy','2026-07-01 03:47:43.383',3963,1,NULL),('3d6f4b28-61b1-415a-893f-e092974080f7','prisma_migrate_deploy','2026-07-01 03:47:43.504',3942,1,NULL),('3fc00951-cd06-4dfa-9ce0-51ae8ca84a06','prisma_migrate_deploy','2026-07-14 21:31:35.493',1558,1,NULL),('41d28f03-db2c-43a8-90c9-15b8ad648a39','prisma_migrate_deploy','2026-07-03 04:15:38.164',1414,1,NULL),('42f7b4bd-a1ff-40c5-8a8b-f6be02d10961','prisma_migrate_deploy','2026-07-14 20:50:12.891',1429,1,NULL),('449a7c4d-7406-4a06-a9d1-9bab81aa7254','prisma_migrate_deploy','2026-07-14 21:27:54.760',1761,1,NULL),('4e17a696-76bd-4c2f-95c3-d9b4adb95421','prisma_migrate_deploy','2026-07-01 03:43:48.666',2917,1,NULL),('52a81a51-c254-43e9-a5b1-44bd433e6f22','prisma_migrate_deploy','2026-07-01 03:46:40.369',3061,1,NULL),('558df76d-9d1d-461b-9fcf-3e5cda2cf030','prisma_migrate_deploy','2026-07-01 03:29:17.302',3537,1,NULL),('5a92660c-2f75-45a3-82c0-f689fca96979','prisma_migrate_deploy','2026-07-14 21:40:42.057',2520,1,NULL),('6461ef3f-c948-492a-9687-543c8483183d','prisma_migrate_deploy','2026-07-14 20:42:18.575',1779,1,NULL),('64c5bd3e-0229-4e42-8b81-19eed356b6ec','prisma_migrate_deploy','2026-07-14 21:40:27.986',1894,1,NULL),('671b6d01-bf52-4359-bc07-8ada1a581f92','prisma_migrate_deploy','2026-07-01 03:29:17.003',3179,1,NULL),('67e0a55d-67f5-4463-89d1-90572cc6fcab','prisma_migrate_deploy','2026-07-01 03:31:12.067',4057,1,NULL),('69cf6248-7107-485d-b27d-c4a367c22d5d','prisma_migrate_deploy','2026-07-01 03:47:43.432',3994,1,NULL),('6c6a5ca7-bf0c-42db-a160-6a8f0c68b7c4','prisma_migrate_deploy','2026-07-03 03:23:23.677',1716,1,NULL),('6e152ae2-11f0-40de-9322-12a0d0657f21','prisma_migrate_deploy','2026-07-01 03:46:14.047',2914,1,NULL),('70ec7b14-0a9c-4a7e-b91c-d8fa14a977ba','prisma_migrate_deploy','2026-07-01 03:18:32.630',4613,1,NULL),('74b9200b-4197-4471-861d-139c07253d0c','prisma_migrate_deploy','2026-07-01 03:18:31.684',3998,1,NULL),('75e243dd-adfa-4c7a-a0cd-b2d089073959','prisma_migrate_deploy','2026-07-01 03:46:14.683',3136,1,NULL),('7dcde454-b7a8-4d2c-8256-b627e25b85c6','prisma_migrate_deploy','2026-07-01 03:43:48.922',2980,1,NULL),('7e3f1e35-8626-4412-a82b-a18f518bb199','prisma_migrate_deploy','2026-07-01 03:31:12.005',4281,1,NULL),('7fd50ebe-2ee6-4d2c-a70f-48f9fa19a6e1','prisma_migrate_deploy','2026-07-14 21:40:55.054',1879,1,NULL),('80021b7e-2310-45db-b080-1d3fc891536a','prisma_migrate_deploy','2026-07-03 03:58:06.523',2040,1,NULL),('8110d31b-0cbd-4895-97db-fe6af280d5dd','prisma_migrate_deploy','2026-07-01 03:29:17.463',3285,1,NULL),('82e18bac-1138-44a7-b33b-6c4125640d49','prisma_migrate_deploy','2026-07-01 03:29:16.880',3449,1,NULL),('84650a03-85b7-4310-91b1-eeac10417cd4','prisma_migrate_deploy','2026-07-01 03:24:21.549',4874,1,NULL),('8d6eda23-8d05-405c-8d77-399286532318','prisma_migrate_deploy','2026-07-03 03:42:53.325',2010,1,NULL),('91dbe1ad-f3ac-443b-b8f3-4ce47c767238','prisma_migrate_deploy','2026-07-02 04:06:45.716',1518,1,NULL),('94191654-9718-4968-9c8f-ea3df2f75e93','prisma_migrate_deploy','2026-07-01 03:46:08.749',4844,1,NULL),('955dcec9-a421-49a1-a607-8b22bf150ff8','prisma_migrate_deploy','2026-07-02 04:13:52.691',1722,1,NULL),('988e9e0e-1946-4a1c-8142-975a09df04ec','prisma_migrate_deploy','2026-07-01 03:46:14.505',3063,1,NULL),('9ab94c90-556a-41af-9be9-a8f169e16317','prisma_migrate_deploy','2026-07-02 04:06:50.253',1320,1,NULL),('9c75ee03-be42-4bdf-9002-df2d9ae764d6','prisma_migrate_deploy','2026-07-03 03:42:23.207',1581,1,NULL),('9d741ce1-4252-4c1a-ab18-660756c9974b','prisma_migrate_deploy','2026-07-14 21:17:58.104',2683,1,NULL),('9e0fc44f-6228-48ae-958c-f669b8b66f56','prisma_migrate_deploy','2026-07-01 03:46:07.996',4288,1,NULL),('a66bfac9-f23e-4ea6-879a-dbc484fbac40','prisma_migrate_deploy','2026-07-01 03:15:38.072',3110,1,NULL),('a7508a9d-9a74-4213-9821-4ae0f7e9db6c','prisma_migrate_deploy','2026-07-14 21:53:56.190',2222,1,NULL),('ab01b72e-4e38-46e1-b18a-b5a7a8443ad9','prisma_migrate_deploy','2026-07-14 22:07:14.148',1760,1,NULL),('af295cbf-353c-4728-ae23-74d4ebb96e37','prisma_migrate_deploy','2026-07-02 04:01:24.077',2861,1,NULL),('b135b153-e377-46e1-af59-44ac650a92be','prisma_migrate_deploy','2026-07-01 03:15:38.061',3090,1,NULL),('b583cf33-829f-4b89-a8e9-c21b997f80d1','prisma_migrate_deploy','2026-07-02 03:12:58.646',1510,1,NULL),('b6c9d363-d105-48ea-9fbe-4dd7c34f7e81','prisma_migrate_deploy','2026-07-01 03:46:27.799',5156,1,NULL),('b919a37f-74b0-4423-88eb-9f6dc3f70d0b','prisma_migrate_deploy','2026-07-14 21:15:55.260',1604,1,NULL),('b980c3d2-4b82-43e7-a1dc-413758dcc44e','prisma_migrate_deploy','2026-07-14 20:28:39.819',1284,1,NULL),('ba663425-af79-4f35-808d-103b8351150a','prisma_migrate_deploy','2026-07-14 21:26:59.490',1997,1,NULL),('c31d6c1b-f85c-4320-842c-e2c35f965f22','prisma_migrate_deploy','2026-07-02 04:02:05.660',1868,1,NULL),('c3d5708c-8f04-4831-911a-d7e2f75090f8','prisma_migrate_deploy','2026-07-03 03:58:51.980',1368,1,NULL),('c9300900-d644-43fa-8a9e-15f68a0a38f1','prisma_migrate_deploy','2026-07-01 03:31:11.592',3602,1,NULL),('d2c4849f-3f58-4d47-8938-c1e32eab1e39','prisma_migrate_deploy','2026-07-01 03:24:21.164',4806,1,NULL),('d35cb16e-d2c8-4597-8e81-277b5e79f09c','prisma_migrate_deploy','2026-07-03 03:44:28.526',1530,1,NULL),('d4e8609a-0873-401d-bccb-aa95760e2703','prisma_migrate_deploy','2026-07-03 04:13:45.866',1635,1,NULL),('d583d936-4d08-4ad3-a978-c2dadfa4fc53','prisma_migrate_deploy','2026-07-01 03:46:27.267',4689,1,NULL),('d635f3b6-a5e3-4139-b6cd-af75693c9e1e','prisma_migrate_deploy','2026-07-01 03:46:27.445',4828,1,NULL),('d986a013-73b5-438f-b4e2-60ed0a99a929','prisma_migrate_deploy','2026-07-03 03:42:58.232',1477,1,NULL),('db3e43b1-7d65-49b3-bdd8-f0d0acbcc4b4','prisma_migrate_deploy','2026-07-14 21:45:20.526',1679,1,NULL),('de2c14d0-99b5-4b7e-b731-a28b88233433','prisma_migrate_deploy','2026-07-01 03:43:48.729',2904,1,NULL),('e88b8581-b515-4a69-b39c-df2f67696d04','prisma_migrate_deploy','2026-07-14 20:42:13.259',1878,1,NULL),('e999a1c1-9d14-4990-8184-5e6f0de52bf8','prisma_migrate_deploy','2026-07-01 03:33:30.631',1517,1,NULL),('f1d9a590-6068-4cfd-b089-466a40704196','prisma_migrate_deploy','2026-07-02 04:07:18.872',1314,1,NULL),('f210fe49-5168-447e-b44d-e7e475296a58','prisma_migrate_deploy','2026-07-03 03:43:07.819',1407,1,NULL),('f23cce08-73d1-4c84-b99d-425b6064bbd0','prisma_migrate_deploy','2026-07-14 21:09:39.525',1555,1,NULL),('f4561955-806d-469b-a19c-618cbb7f4d2d','prisma_migrate_deploy','2026-07-08 02:59:45.404',2034,1,NULL),('f4bb0aee-7952-46ec-bc51-733cc63a2133','prisma_migrate_deploy','2026-07-01 03:23:51.838',3740,1,NULL),('f5756329-e50d-46b6-9a97-9a2131b434e5','prisma_migrate_deploy','2026-07-14 00:27:24.762',1276,1,NULL),('f8640bda-a8e3-4310-b73c-facdae5893c8','prisma_migrate_deploy','2026-07-01 03:46:40.394',3105,1,NULL),('fa0fbae1-62a4-4e49-8728-da3c0b38b1c1','prisma_migrate_deploy','2026-07-01 03:46:27.515',4865,1,NULL),('fb884f87-aebd-4c99-b852-61f7fa7fe2cf','prisma_migrate_deploy','2026-07-01 03:46:14.622',3023,1,NULL),('fd22f738-4d01-4db3-bd1b-2f8a9fe9184e','prisma_migrate_deploy','2026-07-01 03:24:20.961',4631,1,NULL),('ff6d0d56-bc64-4b8c-82ea-a79ed44bbd00','prisma_migrate_deploy','2026-07-08 03:02:50.124',1937,1,NULL);
+/*!40000 ALTER TABLE `migration_logs` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `payment_types`
+--
+
+DROP TABLE IF EXISTS `payment_types`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `payment_types` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `affects_cash` tinyint(1) NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `sort_order` int NOT NULL DEFAULT '0',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `payment_types_code_key` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `payment_types`
+--
+
+LOCK TABLES `payment_types` WRITE;
+/*!40000 ALTER TABLE `payment_types` DISABLE KEYS */;
+INSERT INTO `payment_types` VALUES ('00000000-0000-4000-8000-000000000001','CASH','Efectivo',1,1,1,'2026-07-14 15:42:12.941','2026-07-15 02:42:12.740'),('00000000-0000-4000-8000-000000000002','CARD','Tarjeta',0,1,2,'2026-07-14 15:42:12.941','2026-07-15 02:42:12.746'),('00000000-0000-4000-8000-000000000003','TRANSFER','Transferencia',0,1,3,'2026-07-14 15:42:12.941','2026-07-15 02:42:12.752');
+/*!40000 ALTER TABLE `payment_types` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `permissions`
+--
+
+DROP TABLE IF EXISTS `permissions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `permissions` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `module` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `action` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `permissions_code_key` (`code`),
+  UNIQUE KEY `permissions_module_action_key` (`module`,`action`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `permissions`
+--
+
+LOCK TABLES `permissions` WRITE;
+/*!40000 ALTER TABLE `permissions` DISABLE KEYS */;
+INSERT INTO `permissions` VALUES ('00f9719c-1c3f-4f60-86af-ea27ef3f1019','customers','update','customers.update','Modificar clientes','Permite editar clientes',1,'2026-07-01 03:15:42.358','2026-07-28 02:48:39.172'),('0844df1e-dabd-44cd-8018-d26c06eb4f47','sales','refund','sales.refund','Realizar devoluciones','Permite procesar devoluciones',1,'2026-07-01 03:15:42.423','2026-07-28 02:48:39.251'),('08e7aa8e-082a-455e-aea6-fdc962da7945','payment_types','update','payment_types.update','Modificar tipos de pago','Permite editar tipos de pago',1,'2026-07-14 20:51:28.204','2026-07-28 02:48:39.306'),('0972d89b-7c0a-433d-80dd-db7a8f59fade','sales','view','sales.view','Ver ventas','Permite ver ventas',1,'2026-07-01 03:15:42.405','2026-07-28 02:48:39.231'),('116ada9c-eeb5-4dbe-9b9b-d05a78c4fca2','registers','cash_movement','registers.cash_movement','Movimientos de caja','Permite registrar retiros e ingresos de efectivo',1,'2026-07-14 20:51:28.171','2026-07-28 02:48:39.289'),('15490cfd-3820-498d-bfea-f6ebe42f97a9','unit_types','delete','unit_types.delete','Eliminar tipos de unidad','Permite desactivar tipos de unidad',1,'2026-07-14 21:32:31.085','2026-07-28 02:48:39.127'),('17abd989-c6ab-4ac1-9a67-af14de1365eb','product_import_types','delete','product_import_types.delete','Eliminar tipos de importe','Permite desactivar plantillas de importación',1,'2026-07-14 21:45:06.650','2026-07-28 02:48:39.149'),('1b1dcc0f-b06f-4068-a5c3-ca5662a6bc32','inventory','adjust','inventory.adjust','Modificar inventario','Permite ajustar inventario',1,'2026-07-01 03:15:42.431','2026-07-28 02:48:39.260'),('1ddaea00-3091-43b3-813f-c17959e14bdb','users','delete','users.delete','Eliminar usuarios','Permite eliminar usuarios',1,'2026-07-01 03:15:42.479','2026-07-28 02:48:39.364'),('25a02edc-9b31-4139-b9c0-c77ca0e9414f','purchases','update','purchases.update','Modificar compras','Permite editar compras',1,'2026-07-01 03:15:42.395','2026-07-28 02:48:39.219'),('2612cadc-e22e-46f4-b392-1e5e949fb2ed','payment_types','create','payment_types.create','Crear tipos de pago','Permite crear tipos de pago',1,'2026-07-14 20:51:28.197','2026-07-28 02:48:39.299'),('264cd618-47d9-44a4-85c2-5e8c620f7005','config','view','config.view','Ver configuración','Permite ver configuración',1,'2026-07-01 03:15:42.507','2026-07-28 02:48:39.398'),('26ee0dc4-e725-4539-9735-0e551a24ba95','categories','delete','categories.delete','Eliminar categorías','Permite eliminar categorías',1,'2026-07-01 03:15:42.345','2026-07-28 02:48:39.102'),('27bf66d0-6d02-42ae-ae3d-1a0ee3070f6f','products','view_costs','products.view_costs','Ver costos','Permite ver precios de costo',1,'2026-07-01 03:15:42.317','2026-07-28 02:48:39.072'),('2e0abf74-b6b0-482a-83d8-24a413396009','product_import_types','create','product_import_types.create','Crear tipos de importe','Permite crear plantillas de importación Excel',1,'2026-07-14 21:45:06.638','2026-07-28 02:48:39.138'),('31f0666d-0171-414b-a35b-06e1f562ecec','purchases','delete','purchases.delete','Eliminar compras','Permite eliminar compras',1,'2026-07-01 03:15:42.400','2026-07-28 02:48:39.225'),('3442320e-8212-48c1-af62-60d5d74a9c32','unit_types','create','unit_types.create','Crear tipos de unidad','Permite crear tipos de unidad',1,'2026-07-14 21:32:31.073','2026-07-28 02:48:39.114'),('36347b4f-29cc-405e-9621-2f4197cc1520','reports','view','reports.view','Acceder a reportes','Permite ver reportes',1,'2026-07-01 03:15:42.456','2026-07-28 02:48:39.336'),('378a8bb9-a462-495e-a4c4-c16dd7806b1c','purchases','view','purchases.view','Ver compras','Permite ver compras',1,'2026-07-01 03:15:42.384','2026-07-28 02:48:39.209'),('3856de28-46c2-4dba-8811-47bfa5da97a1','products','import','products.import','Importar productos','Permite importar productos desde Excel',1,'2026-07-14 21:45:06.656','2026-07-28 02:48:39.154'),('43d9188f-b570-432f-b12c-79b6ffa9a967','purchases','create','purchases.create','Crear compras','Permite registrar compras',1,'2026-07-01 03:15:42.391','2026-07-28 02:48:39.214'),('4b22abac-f6ba-44b5-bfd9-20a906e520ad','products','update','products.update','Modificar productos','Permite editar productos existentes',1,'2026-07-01 03:15:42.305','2026-07-28 02:48:39.060'),('50116055-d3ee-4a20-9c5e-bdd0ac52ad1d','product_import_types','update','product_import_types.update','Modificar tipos de importe','Permite editar plantillas de importación',1,'2026-07-14 21:45:06.644','2026-07-28 02:48:39.144'),('586cc7ce-7c2d-4949-9f9c-82a4a090de79','bank_accounts','view','bank_accounts.view','Ver cuentas bancarias','Permite ver cuentas bancarias',1,'2026-07-28 02:43:45.883','2026-07-28 02:48:39.316'),('5e082a7e-3bf1-41d5-bcb6-5f6582a33312','categories','view','categories.view','Ver categorías','Permite ver categorías',1,'2026-07-01 03:15:42.330','2026-07-28 02:48:39.084'),('5f87e535-d2ef-4c4a-b48d-fc4967810317','products','view','products.view','Ver productos','Permite ver el catálogo de productos',1,'2026-07-01 03:15:42.292','2026-07-28 02:48:39.045'),('645fe3ca-df2e-4397-a9aa-1942054dfbf4','audit','view','audit.view','Ver auditoría','Permite ver logs de auditoría',1,'2026-07-01 03:15:42.518','2026-07-28 02:48:39.410'),('64a17001-b4af-4224-bea0-0b9d81420bde','suppliers','update','suppliers.update','Modificar proveedores','Permite editar proveedores',1,'2026-07-01 03:15:42.376','2026-07-28 02:48:39.196'),('6b51bb27-8763-429c-9362-36439a75cc4b','sales','delete','sales.delete','Eliminar ventas','Permite eliminar ventas (incluye completadas, con reversión de stock y caja)',1,'2026-07-01 03:15:42.419','2026-07-28 02:48:39.245'),('6e3f4548-e68d-486c-a56c-8d74476b0e00','unit_types','view','unit_types.view','Ver tipos de unidad','Permite ver tipos de unidad de producto',1,'2026-07-14 21:32:31.067','2026-07-28 02:48:39.108'),('6e4928ac-480f-4187-b6d9-043ae2ae089e','registers','view','registers.view','Ver cajas','Permite ver cajas registradoras',1,'2026-07-01 03:15:42.436','2026-07-28 02:48:39.265'),('7006782a-de1f-4f88-85d6-20ac4f4eb7f4','users','update','users.update','Modificar usuarios','Permite editar usuarios',1,'2026-07-01 03:15:42.475','2026-07-28 02:48:39.358'),('708e421f-c571-4f5a-8634-9f9c8a84380d','suppliers','view','suppliers.view','Ver proveedores','Permite ver proveedores',1,'2026-07-01 03:15:42.366','2026-07-28 02:48:39.184'),('7a989870-a2b4-4ea1-8bed-f4e1c340e904','payment_types','view','payment_types.view','Ver tipos de pago','Permite ver tipos de pago',1,'2026-07-14 20:51:28.190','2026-07-28 02:48:39.294'),('7d0f799a-feaa-4646-b9c0-433035b2f374','sales','void','sales.void','Anular facturas','Permite anular ventas completadas',1,'2026-07-01 03:15:42.414','2026-07-28 02:48:39.241'),('7d13bc2a-9a9a-4181-a2b9-a884f7f64414','roles','update','roles.update','Modificar roles','Permite editar roles y permisos',1,'2026-07-01 03:15:42.498','2026-07-28 02:48:39.387'),('7e506b76-fc06-41fd-84bd-aa2ac97979ee','promotions','create','promotions.create','Crear promociones','Permite crear promociones',1,'2026-07-01 03:15:42.528','2026-07-28 02:48:39.420'),('7f52a85a-a1dc-4e17-8e62-9964f7aae425','customers','create','customers.create','Crear clientes','Permite crear clientes',1,'2026-07-01 03:15:42.354','2026-07-28 02:48:39.166'),('85c1c4f2-76f7-42a9-bd90-7fbb7b1d4d3c','categories','create','categories.create','Crear categorías','Permite crear categorías',1,'2026-07-01 03:15:42.336','2026-07-28 02:48:39.090'),('8b0c6894-9d8b-4ced-ac4a-36ebfd4df820','categories','update','categories.update','Modificar categorías','Permite editar categorías',1,'2026-07-01 03:15:42.340','2026-07-28 02:48:39.096'),('95e4139b-9414-4aec-a0c1-330afbd8dfcc','roles','view','roles.view','Ver roles','Permite ver roles',1,'2026-07-01 03:15:42.489','2026-07-28 02:48:39.375'),('9e17acfa-36d0-4677-9b7d-6c3e03622806','reports','export','reports.export','Exportar reportes','Permite exportar reportes',1,'2026-07-01 03:15:42.461','2026-07-28 02:48:39.341'),('9f1416ba-ef31-4612-ad49-3d5ccf9b3b16','suppliers','create','suppliers.create','Crear proveedores','Permite crear proveedores',1,'2026-07-01 03:15:42.372','2026-07-28 02:48:39.189'),('a1b4c505-5213-4860-a305-ba192e108727','product_import_types','view','product_import_types.view','Ver tipos de importe','Permite ver plantillas de importación de productos',1,'2026-07-14 21:45:06.621','2026-07-28 02:48:39.132'),('a415da91-0108-437f-ad4e-100a0ed45c73','registers','admin','registers.admin','Administrar cajas','Permite configurar cajas',1,'2026-07-01 03:15:42.441','2026-07-28 02:48:39.270'),('a5b7278a-4de2-476f-bc73-2d985d864296','inventory','view','inventory.view','Ver inventario','Permite ver existencias',1,'2026-07-01 03:15:42.427','2026-07-28 02:48:39.255'),('a7667acc-6070-4b1b-807e-4c62cdd922be','promotions','view','promotions.view','Ver promociones','Permite ver promociones',1,'2026-07-01 03:15:42.523','2026-07-28 02:48:39.415'),('a8105005-fbda-4a7a-9c72-b03e1e84d784','bank_accounts','delete','bank_accounts.delete','Eliminar cuentas bancarias','Permite desactivar cuentas bancarias',1,'2026-07-28 02:43:45.901','2026-07-28 02:48:39.331'),('b0241bc6-c32e-4156-83dc-efa1ffb3305e','roles','create','roles.create','Crear roles','Permite crear roles',1,'2026-07-01 03:15:42.493','2026-07-28 02:48:39.381'),('bc6c1975-a278-4863-a22f-87deb995b88d','users','create','users.create','Crear usuarios','Permite crear usuarios',1,'2026-07-01 03:15:42.470','2026-07-28 02:48:39.351'),('bf9e532b-9734-414b-8ad6-240835a39e40','products','delete','products.delete','Eliminar productos','Permite eliminar productos',1,'2026-07-01 03:15:42.311','2026-07-28 02:48:39.065'),('c1cd3d9f-3da1-4ff1-baff-7b29286171d0','unit_types','update','unit_types.update','Modificar tipos de unidad','Permite editar tipos de unidad',1,'2026-07-14 21:32:31.079','2026-07-28 02:48:39.120'),('c3abd81c-80da-4d7e-a028-d48e78a75452','config','update','config.update','Administrar configuración','Permite modificar configuración',1,'2026-07-01 03:15:42.514','2026-07-28 02:48:39.403'),('c71dcc35-9c51-4813-8d72-614d300faa43','users','view','users.view','Ver usuarios','Permite ver usuarios',1,'2026-07-01 03:15:42.465','2026-07-28 02:48:39.347'),('c84192ae-e95a-42b3-8c0c-6c2f6d598133','registers','close','registers.close','Cerrar caja','Permite cerrar sesión de caja',1,'2026-07-01 03:15:42.451','2026-07-28 02:48:39.283'),('ce8856d0-7756-417c-91a9-9bdc22cada6d','roles','delete','roles.delete','Eliminar roles','Permite eliminar roles',1,'2026-07-01 03:15:42.503','2026-07-28 02:48:39.393'),('ced294b8-d18f-4f01-82f4-86a7916328f0','bank_accounts','update','bank_accounts.update','Modificar cuentas bancarias','Permite editar cuentas bancarias',1,'2026-07-28 02:43:45.895','2026-07-28 02:48:39.327'),('d7ef0deb-52a1-4459-a29a-83b23966ea84','registers','open','registers.open','Abrir caja','Permite abrir sesión de caja',1,'2026-07-01 03:15:42.445','2026-07-28 02:48:39.277'),('d862458b-6bb3-4b55-9a78-5462a0abf1f2','products','create','products.create','Crear productos','Permite crear nuevos productos',1,'2026-07-01 03:15:42.300','2026-07-28 02:48:39.052'),('d8796ab2-47af-439a-862d-03c5a53e3b9f','users','admin','users.admin','Administrar usuarios','Acceso completo a usuarios',1,'2026-07-01 03:15:42.484','2026-07-28 02:48:39.369'),('e3dfb46c-289a-4dfa-b091-177f8a72fa66','suppliers','delete','suppliers.delete','Eliminar proveedores','Permite eliminar proveedores',1,'2026-07-01 03:15:42.380','2026-07-28 02:48:39.202'),('e515d5f3-5b97-45a2-997a-ee26a00c399a','customers','delete','customers.delete','Eliminar clientes','Permite eliminar clientes',1,'2026-07-01 03:15:42.362','2026-07-28 02:48:39.179'),('e5ac63a7-8dda-44a6-bfa7-3352f7f20b9b','promotions','update','promotions.update','Modificar promociones','Permite editar promociones',1,'2026-07-01 03:15:42.532','2026-07-28 02:48:39.426'),('e7cb997e-7db2-4dcd-ad49-ce11ca9e9aca','customers','view','customers.view','Ver clientes','Permite ver clientes',1,'2026-07-01 03:15:42.349','2026-07-28 02:48:39.161'),('ed117f02-0d12-466e-9edd-501d25653a81','bank_accounts','create','bank_accounts.create','Crear cuentas bancarias','Permite crear cuentas bancarias',1,'2026-07-28 02:43:45.890','2026-07-28 02:48:39.321'),('edbf7109-3716-4008-9179-ae77ab25b058','sales','create','sales.create','Realizar ventas','Permite realizar ventas en POS',1,'2026-07-01 03:15:42.410','2026-07-28 02:48:39.235'),('eeb0b336-2ff6-4667-87ec-f06956cf3f1e','promotions','delete','promotions.delete','Eliminar promociones','Permite eliminar promociones',1,'2026-07-01 03:15:42.537','2026-07-28 02:48:39.433'),('f9c3364a-b866-4404-958f-e2a5a2726031','products','modify_prices','products.modify_prices','Modificar precios','Permite cambiar precios de venta',1,'2026-07-01 03:15:42.324','2026-07-28 02:48:39.078'),('faf25f01-28d4-4186-a507-d6e75d337773','payment_types','delete','payment_types.delete','Eliminar tipos de pago','Permite desactivar tipos de pago',1,'2026-07-14 20:51:28.211','2026-07-28 02:48:39.311');
+/*!40000 ALTER TABLE `permissions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `product_barcodes`
+--
+
+DROP TABLE IF EXISTS `product_barcodes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `product_barcodes` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `product_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `barcode` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `is_primary` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `product_barcodes_barcode_key` (`barcode`),
+  KEY `product_barcodes_product_id_idx` (`product_id`),
+  CONSTRAINT `product_barcodes_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `product_barcodes`
+--
+
+LOCK TABLES `product_barcodes` WRITE;
+/*!40000 ALTER TABLE `product_barcodes` DISABLE KEYS */;
+INSERT INTO `product_barcodes` VALUES ('88de625b-a690-4950-878e-66fc8a223c6d','06bc15bd-ee62-4aa0-8608-6e97c7aafa79','7501000000002',1,'2026-07-01 03:15:43.196'),('bcd3e7dd-ec0d-456f-a629-131714409764','32bcf753-556b-42a7-baf5-053d42680fd7','7501000000001',1,'2026-07-01 03:15:43.178'),('de36f556-6270-47fa-b423-a0bbab13307d','78fe5ef9-d1ec-42df-91cb-09e648ddf5bf','7501000000003',1,'2026-07-01 03:15:43.212');
+/*!40000 ALTER TABLE `product_barcodes` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `product_import_types`
+--
+
+DROP TABLE IF EXISTS `product_import_types`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `product_import_types` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `branch_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sample_headers` json DEFAULT NULL,
+  `mappings` json NOT NULL,
+  `header_row` int NOT NULL DEFAULT '1',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `sort_order` int NOT NULL DEFAULT '0',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `product_import_types_branch_id_code_key` (`branch_id`,`code`),
+  KEY `product_import_types_branch_id_is_active_idx` (`branch_id`,`is_active`),
+  CONSTRAINT `product_import_types_branch_id_fkey` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `product_import_types`
+--
+
+LOCK TABLES `product_import_types` WRITE;
+/*!40000 ALTER TABLE `product_import_types` DISABLE KEYS */;
+/*!40000 ALTER TABLE `product_import_types` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `product_units`
+--
+
+DROP TABLE IF EXISTS `product_units`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `product_units` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `product_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `unit_type_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `stock_factor` decimal(12,4) NOT NULL DEFAULT '1.0000',
+  `is_base` tinyint(1) NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `product_units_product_id_unit_type_id_key` (`product_id`,`unit_type_id`),
+  KEY `product_units_unit_type_id_idx` (`unit_type_id`),
+  CONSTRAINT `product_units_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `product_units_unit_type_id_fkey` FOREIGN KEY (`unit_type_id`) REFERENCES `unit_types` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `product_units`
+--
+
+LOCK TABLES `product_units` WRITE;
+/*!40000 ALTER TABLE `product_units` DISABLE KEYS */;
+INSERT INTO `product_units` VALUES ('bf1ea3aa-7fca-11f1-8dfd-940853866d11','06bc15bd-ee62-4aa0-8608-6e97c7aafa79','10000000-0000-4000-8000-000000000002',1.0000,1,1,'2026-07-14 16:26:59.174','2026-07-14 16:26:59.174'),('bf1ea6e6-7fca-11f1-8dfd-940853866d11','32bcf753-556b-42a7-baf5-053d42680fd7','10000000-0000-4000-8000-000000000002',1.0000,1,1,'2026-07-14 16:26:59.174','2026-07-14 16:26:59.174'),('bf1ea75e-7fca-11f1-8dfd-940853866d11','78fe5ef9-d1ec-42df-91cb-09e648ddf5bf','10000000-0000-4000-8000-000000000002',1.0000,1,1,'2026-07-14 16:26:59.174','2026-07-14 16:26:59.174');
+/*!40000 ALTER TABLE `product_units` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `products`
+--
+
+DROP TABLE IF EXISTS `products`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `products` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `branch_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `category_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sku` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `barcode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` enum('SIMPLE','VARIABLE','COMBO','SERVICE') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'SIMPLE',
+  `cost_price` decimal(12,4) NOT NULL DEFAULT '0.0000',
+  `sale_price` decimal(12,2) NOT NULL,
+  `tax_rate` decimal(5,2) DEFAULT NULL,
+  `unit` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'PZA',
+  `min_stock` decimal(12,3) NOT NULL DEFAULT '0.000',
+  `max_stock` decimal(12,3) DEFAULT NULL,
+  `track_inventory` tinyint(1) NOT NULL DEFAULT '1',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `image_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `products_branch_id_sku_key` (`branch_id`,`sku`),
+  KEY `products_branch_id_barcode_idx` (`branch_id`,`barcode`),
+  KEY `products_branch_id_name_idx` (`branch_id`,`name`),
+  KEY `products_category_id_fkey` (`category_id`),
+  CONSTRAINT `products_branch_id_fkey` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `products_category_id_fkey` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `products`
+--
+
+LOCK TABLES `products` WRITE;
+/*!40000 ALTER TABLE `products` DISABLE KEYS */;
+INSERT INTO `products` VALUES ('06bc15bd-ee62-4aa0-8608-6e97c7aafa79','a738fa70-0756-4511-9997-7704cb57965d','f820ce55-635b-4a66-8251-abf75a5707ab','PROD002','7501000000002','Producto de Ejemplo 2',NULL,'SIMPLE',30.0000,50.00,16.00,'PZA',0.000,NULL,1,1,NULL,'2026-07-01 03:15:43.183','2026-07-01 03:15:43.183'),('32bcf753-556b-42a7-baf5-053d42680fd7','a738fa70-0756-4511-9997-7704cb57965d','f820ce55-635b-4a66-8251-abf75a5707ab','PROD001','7501000000001','Producto de Ejemplo 1',NULL,'SIMPLE',15.0000,25.00,19.00,'PZA',0.000,NULL,1,1,NULL,'2026-07-01 03:15:43.165','2026-07-08 02:52:29.093'),('78fe5ef9-d1ec-42df-91cb-09e648ddf5bf','a738fa70-0756-4511-9997-7704cb57965d','f820ce55-635b-4a66-8251-abf75a5707ab','PROD003','7501000000003','Producto de Ejemplo 3',NULL,'SIMPLE',60.0000,100.00,16.00,'PZA',0.000,NULL,1,1,NULL,'2026-07-01 03:15:43.200','2026-07-01 03:15:43.200');
+/*!40000 ALTER TABLE `products` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `purchase_items`
+--
+
+DROP TABLE IF EXISTS `purchase_items`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `purchase_items` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `purchase_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `product_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `quantity` decimal(12,3) NOT NULL,
+  `unit_cost` decimal(12,4) NOT NULL,
+  `tax_rate` decimal(5,2) NOT NULL DEFAULT '0.00',
+  `subtotal` decimal(12,2) NOT NULL,
+  `tax_amount` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `total` decimal(12,2) NOT NULL,
+  `unit_type_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `stock_factor` decimal(12,4) NOT NULL DEFAULT '1.0000',
+  PRIMARY KEY (`id`),
+  KEY `purchase_items_purchase_id_fkey` (`purchase_id`),
+  KEY `purchase_items_product_id_fkey` (`product_id`),
+  KEY `purchase_items_unit_type_id_fkey` (`unit_type_id`),
+  CONSTRAINT `purchase_items_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `purchase_items_purchase_id_fkey` FOREIGN KEY (`purchase_id`) REFERENCES `purchases` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchase_items_unit_type_id_fkey` FOREIGN KEY (`unit_type_id`) REFERENCES `unit_types` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `purchase_items`
+--
+
+LOCK TABLES `purchase_items` WRITE;
+/*!40000 ALTER TABLE `purchase_items` DISABLE KEYS */;
+/*!40000 ALTER TABLE `purchase_items` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `purchases`
+--
+
+DROP TABLE IF EXISTS `purchases`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `purchases` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `branch_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `supplier_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `document_number` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('DRAFT','RECEIVED','CANCELLED') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'DRAFT',
+  `subtotal` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `tax_amount` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `total` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `notes` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `received_at` datetime(3) DEFAULT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  `payment_term` enum('CASH','CREDIT') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'CASH',
+  `fund_source` enum('REGISTER','BANK_ACCOUNT') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bank_account_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `register_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reduce_cash` tinyint(1) NOT NULL DEFAULT '1',
+  `purchase_date` date NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `purchases_branch_id_document_number_key` (`branch_id`,`document_number`),
+  KEY `purchases_supplier_id_fkey` (`supplier_id`),
+  KEY `purchases_user_id_fkey` (`user_id`),
+  KEY `purchases_bank_account_id_fkey` (`bank_account_id`),
+  KEY `purchases_register_id_fkey` (`register_id`),
+  CONSTRAINT `purchases_bank_account_id_fkey` FOREIGN KEY (`bank_account_id`) REFERENCES `bank_accounts` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `purchases_branch_id_fkey` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `purchases_register_id_fkey` FOREIGN KEY (`register_id`) REFERENCES `registers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `purchases_supplier_id_fkey` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `purchases_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `purchases`
+--
+
+LOCK TABLES `purchases` WRITE;
+/*!40000 ALTER TABLE `purchases` DISABLE KEYS */;
+/*!40000 ALTER TABLE `purchases` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `refresh_tokens`
+--
+
+DROP TABLE IF EXISTS `refresh_tokens`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `refresh_tokens` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expires_at` datetime(3) NOT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `revoked_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `refresh_tokens_token_key` (`token`),
+  KEY `refresh_tokens_user_id_fkey` (`user_id`),
+  CONSTRAINT `refresh_tokens_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `refresh_tokens`
+--
+
+LOCK TABLES `refresh_tokens` WRITE;
+/*!40000 ALTER TABLE `refresh_tokens` DISABLE KEYS */;
+INSERT INTO `refresh_tokens` VALUES ('0bdad819-0145-4b59-9c39-22fa23b3aad7','a901f0c4-99e1-4548-baa9-fdd3a61c3533','d6059477-315c-430b-942f-d6886b2568a5','2026-07-21 21:52:39.253','2026-07-14 21:52:39.254',NULL),('0bf5430a-bb32-426a-ae45-18f4e768e7f7','a901f0c4-99e1-4548-baa9-fdd3a61c3533','de08e41e-bd68-40f0-af34-ca5e07212a09','2026-07-09 03:58:43.868','2026-07-02 03:58:43.869','2026-07-02 04:12:22.680'),('0c1f56ee-b079-45bf-abe5-0b0ce676761a','86cb590d-3285-4881-8c8c-1e72f8c7d439','48dd9019-174f-48b1-9cc3-c553182e2701','2026-07-21 20:05:54.636','2026-07-14 20:05:54.637','2026-07-14 20:55:26.433'),('23820a99-d606-47ae-9854-b804c791d382','a901f0c4-99e1-4548-baa9-fdd3a61c3533','8eca6d23-0ec0-4955-bde3-64180cef7b19','2026-07-21 02:30:26.061','2026-07-14 02:30:26.062','2026-07-14 02:30:45.859'),('2a5c48d4-6df6-455a-aa1e-3dc43d6af5c1','a901f0c4-99e1-4548-baa9-fdd3a61c3533','df16e21f-190d-4892-aace-bf92783fd3d5','2026-07-09 03:20:14.973','2026-07-02 03:20:14.973','2026-07-02 03:58:35.879'),('508a181f-eb30-4b13-9756-44303b65c62c','a901f0c4-99e1-4548-baa9-fdd3a61c3533','83182660-365e-416e-9418-c219ab59803a','2026-07-08 03:34:46.492','2026-07-01 03:34:46.493','2026-07-01 03:55:57.706'),('51d73893-b8ce-4d69-83bd-e34ffd4a1f67','a901f0c4-99e1-4548-baa9-fdd3a61c3533','125ea1a3-5733-4fe0-bc09-3de18bf0cdc1','2026-07-21 19:53:59.790','2026-07-14 19:53:59.791','2026-07-14 20:02:17.678'),('6436f7a9-6268-47bf-8d63-3c53c1a59e3a','a901f0c4-99e1-4548-baa9-fdd3a61c3533','fac03fbf-c7b4-4642-bc78-b1d87c40d873','2026-07-21 20:55:28.774','2026-07-14 20:55:28.775','2026-07-14 21:52:37.221'),('6c7b80ec-a602-4383-9171-4f86c1fd39e1','86cb590d-3285-4881-8c8c-1e72f8c7d439','f84b4fa0-81fa-410f-931b-d1df7705b11c','2026-07-21 02:30:55.785','2026-07-14 02:30:55.786',NULL),('831311d3-4698-4539-98a4-70ea9ea59693','a901f0c4-99e1-4548-baa9-fdd3a61c3533','fed6f6bd-b453-4387-9355-8b1559c53331','2026-07-09 03:13:28.804','2026-07-02 03:13:28.805','2026-07-02 03:14:23.511'),('8b27d5cc-965e-4dde-ab23-f006de86d526','86cb590d-3285-4881-8c8c-1e72f8c7d439','a5c4a030-0c7b-44a8-bf0e-b9da20f9ee6a','2026-07-21 20:02:34.257','2026-07-14 20:02:34.258','2026-07-14 20:05:19.459'),('8c065595-a3b0-49af-b5a1-65ec32e57e8f','a901f0c4-99e1-4548-baa9-fdd3a61c3533','b59df207-5017-436e-9eb6-9c1c9453a813','2026-07-15 02:42:09.699','2026-07-08 02:42:09.700',NULL),('b9d21e8b-fd20-4fb4-b6f0-94d2bb9f3362','a901f0c4-99e1-4548-baa9-fdd3a61c3533','2aa7a627-c9a2-44bf-a1db-71ec11e0d740','2026-07-10 03:23:49.649','2026-07-03 03:23:49.651',NULL),('dfb5762e-9060-40f5-bc1b-a53de6ec7b96','a901f0c4-99e1-4548-baa9-fdd3a61c3533','87525095-ee5f-4c6e-8616-3c2525855629','2026-07-21 20:05:21.724','2026-07-14 20:05:21.725','2026-07-14 20:05:42.088'),('e0249e7e-b5e9-402f-83a9-8d51dcfa9750','a901f0c4-99e1-4548-baa9-fdd3a61c3533','994bdaee-06c1-402d-884c-047d4dafd093','2026-08-04 02:44:04.316','2026-07-28 02:44:04.317',NULL),('e78ec281-321a-4b5a-bdc0-528efbe82133','a901f0c4-99e1-4548-baa9-fdd3a61c3533','d1b7a5d7-213e-44e0-9895-e7bc2346fa7c','2026-07-09 03:14:32.717','2026-07-02 03:14:32.717','2026-07-02 03:15:36.473'),('e9e72b13-b7db-4cf0-98db-86fc60fe0cca','a901f0c4-99e1-4548-baa9-fdd3a61c3533','0335c259-332b-420a-8cfb-6d6ae5f90f71','2026-07-08 03:22:58.225','2026-07-01 03:22:58.226',NULL),('ed711957-93ff-47ad-9393-79adf6bf9ae5','a901f0c4-99e1-4548-baa9-fdd3a61c3533','30e6371d-b5ab-4e79-8de9-7212f0ade9f8','2026-07-08 03:25:35.378','2026-07-01 03:25:35.379','2026-07-01 03:34:39.444'),('f2b4b16c-5e3f-4a9c-b091-79aef26adac4','a901f0c4-99e1-4548-baa9-fdd3a61c3533','f2bf4722-f199-40b3-81e9-1db3e174922c','2026-07-21 02:24:10.525','2026-07-14 02:24:10.527','2026-07-14 02:29:29.315'),('f7b33de6-fd5a-43f0-a819-e178a1a66176','a901f0c4-99e1-4548-baa9-fdd3a61c3533','f34c59e9-7a67-4da1-9673-2f3201d16e92','2026-07-09 04:12:31.150','2026-07-02 04:12:31.151','2026-07-02 04:21:32.547');
+/*!40000 ALTER TABLE `refresh_tokens` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `register_sessions`
+--
+
+DROP TABLE IF EXISTS `register_sessions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `register_sessions` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `register_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('OPEN','CLOSED') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'OPEN',
+  `opening_amount` decimal(12,2) NOT NULL,
+  `closing_amount` decimal(12,2) DEFAULT NULL,
+  `expected_amount` decimal(12,2) DEFAULT NULL,
+  `difference` decimal(12,2) DEFAULT NULL,
+  `opened_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `closed_at` datetime(3) DEFAULT NULL,
+  `opening_notes` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `closing_notes` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `register_sessions_register_id_fkey` (`register_id`),
+  KEY `register_sessions_user_id_fkey` (`user_id`),
+  CONSTRAINT `register_sessions_register_id_fkey` FOREIGN KEY (`register_id`) REFERENCES `registers` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `register_sessions_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `register_sessions`
+--
+
+LOCK TABLES `register_sessions` WRITE;
+/*!40000 ALTER TABLE `register_sessions` DISABLE KEYS */;
+INSERT INTO `register_sessions` VALUES ('03d387fb-cee4-4f9a-bd32-2ec32bc9e63d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b','a901f0c4-99e1-4548-baa9-fdd3a61c3533','CLOSED',100000.00,100110.00,100110.00,0.00,'2026-07-03 03:24:40.807','2026-07-14 02:31:23.970',NULL,NULL,'2026-07-03 03:24:40.807','2026-07-14 02:31:23.971'),('1c347202-9275-42a4-b812-b90be1cea76e','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b','a901f0c4-99e1-4548-baa9-fdd3a61c3533','CLOSED',1000000.00,900000.00,1000000.00,-100000.00,'2026-07-02 04:16:43.544','2026-07-02 04:21:24.943',NULL,NULL,'2026-07-02 04:16:43.544','2026-07-02 04:21:24.944'),('2af51850-6bbd-42f9-b3d6-38c49c52975a','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b','86cb590d-3285-4881-8c8c-1e72f8c7d439','OPEN',120000.00,NULL,NULL,NULL,'2026-07-14 20:06:06.390',NULL,NULL,NULL,'2026-07-14 20:06:06.390','2026-07-14 20:06:06.390'),('84d29537-1273-4c07-81fd-96dcb6d62c29','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b','a901f0c4-99e1-4548-baa9-fdd3a61c3533','CLOSED',0.00,900.00,1000.00,-100.00,'2026-07-14 19:54:14.662','2026-07-14 20:03:15.272',NULL,NULL,'2026-07-14 19:54:14.662','2026-07-14 20:03:15.273');
+/*!40000 ALTER TABLE `register_sessions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `registers`
+--
+
+DROP TABLE IF EXISTS `registers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `registers` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `branch_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `registers_branch_id_code_key` (`branch_id`,`code`),
+  CONSTRAINT `registers_branch_id_fkey` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `registers`
+--
+
+LOCK TABLES `registers` WRITE;
+/*!40000 ALTER TABLE `registers` DISABLE KEYS */;
+INSERT INTO `registers` VALUES ('e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b','a738fa70-0756-4511-9997-7704cb57965d','CAJA01','Caja Principal',NULL,1,'2026-07-01 03:15:42.284','2026-07-14 20:05:39.344');
+/*!40000 ALTER TABLE `registers` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `role_permissions`
+--
+
+DROP TABLE IF EXISTS `role_permissions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `role_permissions` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `permission_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `granted` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `role_permissions_role_id_permission_id_key` (`role_id`,`permission_id`),
+  KEY `role_permissions_permission_id_fkey` (`permission_id`),
+  CONSTRAINT `role_permissions_permission_id_fkey` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `role_permissions_role_id_fkey` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `role_permissions`
+--
+
+LOCK TABLES `role_permissions` WRITE;
+/*!40000 ALTER TABLE `role_permissions` DISABLE KEYS */;
+INSERT INTO `role_permissions` VALUES ('0045cda3-e59d-437c-81ff-6fe36ede453b','ccb57484-5954-4708-9d3e-f7d7ad7450c4','c71dcc35-9c51-4813-8d72-614d300faa43',1,'2026-07-01 03:15:42.749'),('0294b837-b509-4480-b545-f31bcc6fc28c','ccb57484-5954-4708-9d3e-f7d7ad7450c4','15490cfd-3820-498d-bfea-f6ebe42f97a9',1,'2026-07-14 21:32:31.111'),('06eecbcd-7138-4d16-afbf-5404c51f0b81','2cc0af24-87d1-4fd0-a148-e05a476d3bc1','116ada9c-eeb5-4dbe-9b9b-d05a78c4fca2',1,'2026-07-14 20:51:28.288'),('099588e8-66f4-4505-8e7c-964285d11aa2','ccb57484-5954-4708-9d3e-f7d7ad7450c4','c84192ae-e95a-42b3-8c0c-6c2f6d598133',1,'2026-07-01 03:15:42.754'),('09b5edc2-7d81-4422-8b3a-d087abc4a6ff','ccb57484-5954-4708-9d3e-f7d7ad7450c4','7f52a85a-a1dc-4e17-8e62-9964f7aae425',1,'2026-07-01 03:15:42.682'),('0d57e2d4-9438-4e57-ba3c-4a80eacfbfa2','ccb57484-5954-4708-9d3e-f7d7ad7450c4','e3dfb46c-289a-4dfa-b091-177f8a72fa66',1,'2026-07-01 03:15:42.780'),('13542156-440e-4cdc-916b-b8fab7e8a472','ccb57484-5954-4708-9d3e-f7d7ad7450c4','64a17001-b4af-4224-bea0-0b9d81420bde',1,'2026-07-01 03:15:42.640'),('19bf92ed-8d0b-4498-98a9-71ac92d03d99','ccb57484-5954-4708-9d3e-f7d7ad7450c4','264cd618-47d9-44a4-85c2-5e8c620f7005',1,'2026-07-01 03:15:42.584'),('1ed5d621-8a1b-4a0a-8cb1-8679326dedec','ccb57484-5954-4708-9d3e-f7d7ad7450c4','bc6c1975-a278-4863-a22f-87deb995b88d',1,'2026-07-01 03:15:42.734'),('23654f50-398a-4e41-b6c3-65e0289c9314','ccb57484-5954-4708-9d3e-f7d7ad7450c4','7a989870-a2b4-4ea1-8bed-f4e1c340e904',1,'2026-07-14 20:51:28.269'),('2705546a-9af3-4b8b-9df1-71f5184702b4','ccb57484-5954-4708-9d3e-f7d7ad7450c4','6b51bb27-8763-429c-9362-36439a75cc4b',1,'2026-07-01 03:15:42.645'),('273dc2d0-0378-44d1-82e4-c2096787eb0a','ccb57484-5954-4708-9d3e-f7d7ad7450c4','faf25f01-28d4-4186-a507-d6e75d337773',1,'2026-07-14 20:51:28.255'),('27c449d7-a85e-4b17-bf3d-2f9cffa8b9c8','ccb57484-5954-4708-9d3e-f7d7ad7450c4','36347b4f-29cc-405e-9621-2f4197cc1520',1,'2026-07-01 03:15:42.606'),('291359e0-f600-40a9-adc8-3cd545e238fe','2cc0af24-87d1-4fd0-a148-e05a476d3bc1','edbf7109-3716-4008-9179-ae77ab25b058',1,'2026-07-01 03:15:42.858'),('2cd1b1bc-7807-4dc0-9467-80eb33798c32','ccb57484-5954-4708-9d3e-f7d7ad7450c4','3442320e-8212-48c1-af62-60d5d74a9c32',1,'2026-07-14 21:32:31.100'),('306d5697-b6f6-4c82-842e-dbfe5a2ae898','ccb57484-5954-4708-9d3e-f7d7ad7450c4','8b0c6894-9d8b-4ced-ac4a-36ebfd4df820',1,'2026-07-01 03:15:42.693'),('31196437-171c-43ea-967d-23a256e6183f','ccb57484-5954-4708-9d3e-f7d7ad7450c4','0972d89b-7c0a-433d-80dd-db7a8f59fade',1,'2026-07-01 03:15:42.565'),('31242d42-7cda-4e76-acf2-cb7d1b6ffd77','ccb57484-5954-4708-9d3e-f7d7ad7450c4','f9c3364a-b866-4404-958f-e2a5a2726031',1,'2026-07-01 03:15:42.810'),('328ab61d-023f-47af-8e25-d695f95c5dab','ccb57484-5954-4708-9d3e-f7d7ad7450c4','e515d5f3-5b97-45a2-997a-ee26a00c399a',1,'2026-07-01 03:15:42.785'),('3383cdd8-e847-4870-89fd-2acf59cf30d0','ccb57484-5954-4708-9d3e-f7d7ad7450c4','43d9188f-b570-432f-b12c-79b6ffa9a967',1,'2026-07-01 03:15:42.615'),('365d6fb7-8d74-4390-9913-bc844bd09e70','ccb57484-5954-4708-9d3e-f7d7ad7450c4','7d13bc2a-9a9a-4181-a2b9-a884f7f64414',1,'2026-07-01 03:15:42.672'),('36ec8e3d-73ae-40bf-8578-ac132e1bdb24','ccb57484-5954-4708-9d3e-f7d7ad7450c4','a8105005-fbda-4a7a-9c72-b03e1e84d784',1,'2026-07-28 02:43:46.121'),('3b70da2a-8f23-4c79-bc3e-4e2ef535df2a','ccb57484-5954-4708-9d3e-f7d7ad7450c4','a7667acc-6070-4b1b-807e-4c62cdd922be',1,'2026-07-01 03:15:42.724'),('3c5eb958-4c0d-499b-a5ed-07b0bf992028','ccb57484-5954-4708-9d3e-f7d7ad7450c4','5e082a7e-3bf1-41d5-bcb6-5f6582a33312',1,'2026-07-01 03:15:42.625'),('3e81e8af-8e78-4d68-a42c-7d921b731f33','ccb57484-5954-4708-9d3e-f7d7ad7450c4','c3abd81c-80da-4d7e-a028-d48e78a75452',1,'2026-07-01 03:15:42.744'),('3ef1ad89-5a32-4632-84e7-c77fbdcc903b','ccb57484-5954-4708-9d3e-f7d7ad7450c4','a5b7278a-4de2-476f-bc73-2d985d864296',1,'2026-07-01 03:15:42.719'),('41383e68-ee5d-435a-8528-f43d7a620938','ccb57484-5954-4708-9d3e-f7d7ad7450c4','9f1416ba-ef31-4612-ad49-3d5ccf9b3b16',1,'2026-07-01 03:15:42.708'),('449f6959-54ef-4e90-aaad-d3277adce2dd','ccb57484-5954-4708-9d3e-f7d7ad7450c4','116ada9c-eeb5-4dbe-9b9b-d05a78c4fca2',1,'2026-07-14 20:51:28.283'),('464bd3df-f9c4-4668-8f43-af015c0fbacd','ccb57484-5954-4708-9d3e-f7d7ad7450c4','a415da91-0108-437f-ad4e-100a0ed45c73',1,'2026-07-01 03:15:42.712'),('46cc578b-3f0b-4603-910a-74670377887e','ccb57484-5954-4708-9d3e-f7d7ad7450c4','ed117f02-0d12-466e-9edd-501d25653a81',1,'2026-07-28 02:43:46.176'),('48e8d9bf-2684-4ed1-9446-c510e6ff46f7','2cc0af24-87d1-4fd0-a148-e05a476d3bc1','6e4928ac-480f-4187-b6d9-043ae2ae089e',1,'2026-07-01 03:15:42.825'),('4bbe06ce-46b3-4096-a1cc-47b09dbe8d56','ccb57484-5954-4708-9d3e-f7d7ad7450c4','95e4139b-9414-4aec-a0c1-330afbd8dfcc',1,'2026-07-01 03:15:42.697'),('501e206c-1ffb-4886-aae1-75aefcda18fc','ccb57484-5954-4708-9d3e-f7d7ad7450c4','00f9719c-1c3f-4f60-86af-ea27ef3f1019',1,'2026-07-01 03:15:42.553'),('50c8cbb5-fe6e-4d68-86a0-77c63a7c02e5','ccb57484-5954-4708-9d3e-f7d7ad7450c4','6e4928ac-480f-4187-b6d9-043ae2ae089e',1,'2026-07-01 03:15:42.651'),('52441708-0e09-4d5a-b72c-cf86c5090c0a','2cc0af24-87d1-4fd0-a148-e05a476d3bc1','c84192ae-e95a-42b3-8c0c-6c2f6d598133',1,'2026-07-01 03:15:42.834'),('52d52e0d-a16b-497f-87f8-f5bf6c7bf902','ccb57484-5954-4708-9d3e-f7d7ad7450c4','ced294b8-d18f-4f01-82f4-86a7916328f0',1,'2026-07-28 02:43:46.159'),('59baf373-cc68-4c7c-b0a2-383dd39e5dbf','ccb57484-5954-4708-9d3e-f7d7ad7450c4','85c1c4f2-76f7-42a9-bd90-7fbb7b1d4d3c',1,'2026-07-01 03:15:42.687'),('64f43775-7b41-4f97-8258-e68eabd4cff8','ccb57484-5954-4708-9d3e-f7d7ad7450c4','9e17acfa-36d0-4677-9b7d-6c3e03622806',1,'2026-07-01 03:15:42.703'),('6589adb1-b4f4-4ad0-8ef8-b5f9d3f9224d','2cc0af24-87d1-4fd0-a148-e05a476d3bc1','d7ef0deb-52a1-4459-a29a-83b23966ea84',1,'2026-07-01 03:15:42.840'),('6bf60b27-b1a0-4b10-b564-62597277965d','ccb57484-5954-4708-9d3e-f7d7ad7450c4','7006782a-de1f-4f88-85d6-20ac4f4eb7f4',1,'2026-07-01 03:15:42.657'),('6c812fbd-a5fb-480e-a554-239036ebe971','2cc0af24-87d1-4fd0-a148-e05a476d3bc1','5f87e535-d2ef-4c4a-b48d-fc4967810317',1,'2026-07-01 03:15:42.820'),('6f78b200-47a2-4cda-8d4c-5c0605dab4b8','ccb57484-5954-4708-9d3e-f7d7ad7450c4','27bf66d0-6d02-42ae-ae3d-1a0ee3070f6f',1,'2026-07-01 03:15:42.595'),('6f99f7a2-5615-42de-a3a4-d1b837daf752','ccb57484-5954-4708-9d3e-f7d7ad7450c4','e7cb997e-7db2-4dcd-ad49-ce11ca9e9aca',1,'2026-07-01 03:15:42.795'),('7b35541b-1832-4e56-9e79-1d35e3e76e08','ccb57484-5954-4708-9d3e-f7d7ad7450c4','2e0abf74-b6b0-482a-83d8-24a413396009',1,'2026-07-14 21:45:06.673'),('7c722118-69b1-443e-b569-0339f83c28c6','ccb57484-5954-4708-9d3e-f7d7ad7450c4','0844df1e-dabd-44cd-8018-d26c06eb4f47',1,'2026-07-01 03:15:42.559'),('85cd83eb-9afd-45d1-9ffc-deac5c24b521','ccb57484-5954-4708-9d3e-f7d7ad7450c4','d8796ab2-47af-439a-862d-03c5a53e3b9f',1,'2026-07-01 03:15:42.773'),('8645d2bf-8cef-470e-b428-8386a9fe22f9','ccb57484-5954-4708-9d3e-f7d7ad7450c4','7e506b76-fc06-41fd-84bd-aa2ac97979ee',1,'2026-07-01 03:15:42.677'),('8841ce27-7405-4d3c-b6fc-78db5092fad7','ccb57484-5954-4708-9d3e-f7d7ad7450c4','4b22abac-f6ba-44b5-bfd9-20a906e520ad',1,'2026-07-01 03:15:42.620'),('886c263a-129c-482d-b4fc-362f94e707c2','ccb57484-5954-4708-9d3e-f7d7ad7450c4','08e7aa8e-082a-455e-aea6-fdc962da7945',1,'2026-07-14 20:51:28.262'),('89176c02-7d39-4918-b632-d045820fb644','ccb57484-5954-4708-9d3e-f7d7ad7450c4','378a8bb9-a462-495e-a4c4-c16dd7806b1c',1,'2026-07-01 03:15:42.611'),('8caeae36-ccf7-4fa9-9a9c-50c8119a8b9e','2cc0af24-87d1-4fd0-a148-e05a476d3bc1','e7cb997e-7db2-4dcd-ad49-ce11ca9e9aca',1,'2026-07-01 03:15:42.852'),('8d7f7157-7feb-4f0f-84f2-f81142fa03ce','ccb57484-5954-4708-9d3e-f7d7ad7450c4','17abd989-c6ab-4ac1-9a67-af14de1365eb',1,'2026-07-14 21:45:06.688'),('a0e5b03e-519f-4ea5-af94-10d35e952d96','ccb57484-5954-4708-9d3e-f7d7ad7450c4','708e421f-c571-4f5a-8634-9f9c8a84380d',1,'2026-07-01 03:15:42.662'),('a43ba340-94f2-493a-9b3e-978037802d44','2cc0af24-87d1-4fd0-a148-e05a476d3bc1','7a989870-a2b4-4ea1-8bed-f4e1c340e904',1,'2026-07-14 20:51:28.275'),('a5414bb1-07df-45cd-96bc-275860860fa5','ccb57484-5954-4708-9d3e-f7d7ad7450c4','bf9e532b-9734-414b-8ad6-240835a39e40',1,'2026-07-01 03:15:42.739'),('a591b4f8-d950-47ad-b74c-a058b1a35564','ccb57484-5954-4708-9d3e-f7d7ad7450c4','586cc7ce-7c2d-4949-9f9c-82a4a090de79',1,'2026-07-28 02:43:46.073'),('af5bf530-be5e-4565-a9c9-97cdb7a5a0eb','ccb57484-5954-4708-9d3e-f7d7ad7450c4','e5ac63a7-8dda-44a6-bfa7-3352f7f20b9b',1,'2026-07-01 03:15:42.790'),('b1088466-fdc9-409c-a54b-1469a4fff5e5','ccb57484-5954-4708-9d3e-f7d7ad7450c4','50116055-d3ee-4a20-9c5e-bdd0ac52ad1d',1,'2026-07-14 21:45:06.681'),('b32e21a5-ec3e-4fdc-905f-4aecf45886e8','ccb57484-5954-4708-9d3e-f7d7ad7450c4','645fe3ca-df2e-4397-a9aa-1942054dfbf4',1,'2026-07-01 03:15:42.635'),('be1c7547-9892-40b8-829a-7185f7c4bc0d','ccb57484-5954-4708-9d3e-f7d7ad7450c4','b0241bc6-c32e-4156-83dc-efa1ffb3305e',1,'2026-07-01 03:15:42.729'),('c0516f31-8704-4a64-b2c2-890e6ee805ba','ccb57484-5954-4708-9d3e-f7d7ad7450c4','25a02edc-9b31-4139-b9c0-c77ca0e9414f',1,'2026-07-01 03:15:42.579'),('c106a5bf-b54f-4b31-871c-02d6e58b571e','2cc0af24-87d1-4fd0-a148-e05a476d3bc1','0972d89b-7c0a-433d-80dd-db7a8f59fade',1,'2026-07-01 03:15:42.815'),('c5004e76-6712-4598-ab2d-7f229b79624b','ccb57484-5954-4708-9d3e-f7d7ad7450c4','a1b4c505-5213-4860-a305-ba192e108727',1,'2026-07-14 21:45:06.666'),('c6e7eeb6-1d2a-4a6d-a6e3-ba5936d29770','ccb57484-5954-4708-9d3e-f7d7ad7450c4','c1cd3d9f-3da1-4ff1-baff-7b29286171d0',1,'2026-07-14 21:32:31.105'),('c70e9ea8-eaa9-49d1-9b08-312e24694309','ccb57484-5954-4708-9d3e-f7d7ad7450c4','1b1dcc0f-b06f-4068-a5c3-ca5662a6bc32',1,'2026-07-01 03:15:42.570'),('c73c60c1-69ff-4a86-9b1c-80f1d9b9ec23','ccb57484-5954-4708-9d3e-f7d7ad7450c4','5f87e535-d2ef-4c4a-b48d-fc4967810317',1,'2026-07-01 03:15:42.630'),('c803a382-a0ed-49e6-af39-a0e8f97faef1','ccb57484-5954-4708-9d3e-f7d7ad7450c4','26ee0dc4-e725-4539-9735-0e551a24ba95',1,'2026-07-01 03:15:42.590'),('c993ef44-1ffe-49cf-b7df-c6d650afe116','ccb57484-5954-4708-9d3e-f7d7ad7450c4','edbf7109-3716-4008-9179-ae77ab25b058',1,'2026-07-01 03:15:42.799'),('d0511cb1-088d-418f-89cd-0c99750d3279','ccb57484-5954-4708-9d3e-f7d7ad7450c4','3856de28-46c2-4dba-8811-47bfa5da97a1',1,'2026-07-14 21:45:06.694'),('d156ffb9-3eb1-4350-be1e-2d764fcecc0f','2cc0af24-87d1-4fd0-a148-e05a476d3bc1','7f52a85a-a1dc-4e17-8e62-9964f7aae425',1,'2026-07-01 03:15:42.830'),('d2065e85-5218-48af-a0a6-95abee1ca0ce','ccb57484-5954-4708-9d3e-f7d7ad7450c4','6e3f4548-e68d-486c-a56c-8d74476b0e00',1,'2026-07-14 21:32:31.093'),('d62640d1-aa17-4ad8-bcaa-1c693707779e','ccb57484-5954-4708-9d3e-f7d7ad7450c4','7d0f799a-feaa-4646-b9c0-433035b2f374',1,'2026-07-01 03:15:42.667'),('e0cf0c0e-f39c-4382-a774-5b2767cf2a50','ccb57484-5954-4708-9d3e-f7d7ad7450c4','2612cadc-e22e-46f4-b392-1e5e949fb2ed',1,'2026-07-14 20:51:28.245'),('ed8e393b-bf61-4d37-913c-39fa84afdaeb','ccb57484-5954-4708-9d3e-f7d7ad7450c4','eeb0b336-2ff6-4667-87ec-f06956cf3f1e',1,'2026-07-01 03:15:42.805'),('ee091d54-4fbc-4b64-9d22-ba88f429bdf5','ccb57484-5954-4708-9d3e-f7d7ad7450c4','ce8856d0-7756-417c-91a9-9bdc22cada6d',1,'2026-07-01 03:15:42.758'),('eecb11a9-52d5-42e3-9279-1ccd55f75f72','ccb57484-5954-4708-9d3e-f7d7ad7450c4','d862458b-6bb3-4b55-9a78-5462a0abf1f2',1,'2026-07-01 03:15:42.768'),('f187c906-094a-4215-9d66-d4db14754af8','ccb57484-5954-4708-9d3e-f7d7ad7450c4','31f0666d-0171-414b-a35b-06e1f562ecec',1,'2026-07-01 03:15:42.600'),('f40cf87f-1ffd-4326-a054-0ec3a9de3165','ccb57484-5954-4708-9d3e-f7d7ad7450c4','1ddaea00-3091-43b3-813f-c17959e14bdb',1,'2026-07-01 03:15:42.574'),('f8a44d7d-99c1-40d2-b3ff-03f3a887ffc4','2cc0af24-87d1-4fd0-a148-e05a476d3bc1','d862458b-6bb3-4b55-9a78-5462a0abf1f2',1,'2026-07-01 03:15:42.846'),('fd02f984-0fca-420a-aa48-668020bf2173','ccb57484-5954-4708-9d3e-f7d7ad7450c4','d7ef0deb-52a1-4459-a29a-83b23966ea84',1,'2026-07-01 03:15:42.763');
+/*!40000 ALTER TABLE `role_permissions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `roles`
+--
+
+DROP TABLE IF EXISTS `roles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `roles` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_system` tinyint(1) NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `roles_code_key` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `roles`
+--
+
+LOCK TABLES `roles` WRITE;
+/*!40000 ALTER TABLE `roles` DISABLE KEYS */;
+INSERT INTO `roles` VALUES ('2cc0af24-87d1-4fd0-a148-e05a476d3bc1','CASHIER','Cajero','Operaciones de venta y caja',1,1,'2026-07-01 03:15:42.546','2026-07-01 03:15:42.546'),('ccb57484-5954-4708-9d3e-f7d7ad7450c4','ADMIN','Administrador','Acceso completo al sistema',1,1,'2026-07-01 03:15:42.541','2026-07-01 03:15:42.541');
+/*!40000 ALTER TABLE `roles` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `sale_items`
+--
+
+DROP TABLE IF EXISTS `sale_items`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sale_items` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sale_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `product_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `quantity` decimal(12,3) NOT NULL,
+  `unit_price` decimal(12,2) NOT NULL,
+  `cost_price` decimal(12,4) NOT NULL,
+  `discount_amount` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `discount_percent` decimal(5,2) NOT NULL DEFAULT '0.00',
+  `tax_rate` decimal(5,2) NOT NULL DEFAULT '0.00',
+  `tax_amount` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `subtotal` decimal(12,2) NOT NULL,
+  `total` decimal(12,2) NOT NULL,
+  `notes` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `unit_type_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `stock_factor` decimal(12,4) NOT NULL DEFAULT '1.0000',
+  PRIMARY KEY (`id`),
+  KEY `sale_items_sale_id_fkey` (`sale_id`),
+  KEY `sale_items_product_id_fkey` (`product_id`),
+  KEY `sale_items_unit_type_id_fkey` (`unit_type_id`),
+  CONSTRAINT `sale_items_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `sale_items_sale_id_fkey` FOREIGN KEY (`sale_id`) REFERENCES `sales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `sale_items_unit_type_id_fkey` FOREIGN KEY (`unit_type_id`) REFERENCES `unit_types` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `sale_items`
+--
+
+LOCK TABLES `sale_items` WRITE;
+/*!40000 ALTER TABLE `sale_items` DISABLE KEYS */;
+INSERT INTO `sale_items` VALUES ('53ce2db5-d6f1-44df-8d8c-10335e4e83a7','26afa9c2-a4ac-4fca-b576-adf6175f74bb','32bcf753-556b-42a7-baf5-053d42680fd7',1.000,25.00,0.0000,0.00,0.00,19.00,4.75,25.00,29.75,NULL,NULL,1.0000),('6a5e0320-57ff-4c49-b08a-e899de25250c','e592d98c-9d1b-4d0d-a38f-f23337a12574','06bc15bd-ee62-4aa0-8608-6e97c7aafa79',1.000,50.00,0.0000,0.00,0.00,16.00,8.00,50.00,58.00,NULL,NULL,1.0000),('7d781608-3a3f-4d59-b12f-90d2e7dc4841','99275ba9-655d-4a19-af7b-0b18ef8895b0','32bcf753-556b-42a7-baf5-053d42680fd7',1.000,25.00,0.0000,0.00,0.00,19.00,4.75,25.00,29.75,NULL,NULL,1.0000),('9f171649-a199-4629-9a48-dbae580db61a','22ea0713-9bb4-4069-b0f7-b581e496fe31','32bcf753-556b-42a7-baf5-053d42680fd7',1.000,25.00,0.0000,0.00,0.00,19.00,4.75,25.00,29.75,NULL,NULL,1.0000),('b141b7ca-fcf8-46ba-ab82-2033ce3720b2','328e82c5-bfd7-4697-8253-6ae4c3d7b3c8','32bcf753-556b-42a7-baf5-053d42680fd7',1.000,25.00,0.0000,0.00,0.00,0.00,0.00,25.00,25.00,NULL,NULL,1.0000),('b369e464-7cd6-45b5-8b57-6a9a91607711','746739cd-9897-411c-9967-918a5c764ea5','06bc15bd-ee62-4aa0-8608-6e97c7aafa79',1.000,50.00,0.0000,0.00,0.00,16.00,8.00,50.00,58.00,NULL,NULL,1.0000),('b4531979-d6eb-4dde-9131-964b025d58df','45f26d1d-c1c3-415d-964c-41cb61b5e9de','32bcf753-556b-42a7-baf5-053d42680fd7',2.000,25.00,0.0000,0.00,0.00,16.00,8.00,50.00,58.00,NULL,NULL,1.0000),('d71b088e-a7df-4306-a53a-9f7630927d5c','1ab15549-d27d-4244-8dfe-a9e69c9c03a6','06bc15bd-ee62-4aa0-8608-6e97c7aafa79',1.000,50.00,0.0000,0.00,0.00,16.00,8.00,50.00,58.00,NULL,NULL,1.0000),('fa2b99f5-bd4a-4688-8275-45d6b563dfd4','9b1ee426-5df9-4e78-b4bf-7814d816ea08','32bcf753-556b-42a7-baf5-053d42680fd7',1.000,25.00,0.0000,0.00,0.00,16.00,4.00,25.00,29.00,NULL,NULL,1.0000),('fb51244f-d063-47af-8059-f0af7646fc69','1ab15549-d27d-4244-8dfe-a9e69c9c03a6','32bcf753-556b-42a7-baf5-053d42680fd7',1.000,25.00,0.0000,0.00,0.00,19.00,4.75,25.00,29.75,NULL,NULL,1.0000);
+/*!40000 ALTER TABLE `sale_items` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `sale_payments`
+--
+
+DROP TABLE IF EXISTS `sale_payments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sale_payments` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sale_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `reference` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `payment_type_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `sale_payments_sale_id_fkey` (`sale_id`),
+  KEY `sale_payments_payment_type_id_idx` (`payment_type_id`),
+  CONSTRAINT `sale_payments_payment_type_id_fkey` FOREIGN KEY (`payment_type_id`) REFERENCES `payment_types` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `sale_payments_sale_id_fkey` FOREIGN KEY (`sale_id`) REFERENCES `sales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `sale_payments`
+--
+
+LOCK TABLES `sale_payments` WRITE;
+/*!40000 ALTER TABLE `sale_payments` DISABLE KEYS */;
+INSERT INTO `sale_payments` VALUES ('3930fa94-e785-4a9a-a601-e1f062f5901f','22ea0713-9bb4-4069-b0f7-b581e496fe31',10.00,NULL,'2026-07-14 20:52:46.184','00000000-0000-4000-8000-000000000001'),('726f5a3d-50c8-4a4f-9c8b-f44e837ec8d2','22ea0713-9bb4-4069-b0f7-b581e496fe31',19.75,NULL,'2026-07-14 20:52:46.184','00000000-0000-4000-8000-000000000002'),('7a65578f-6fcd-4e43-a16a-74d5766a4f05','328e82c5-bfd7-4697-8253-6ae4c3d7b3c8',50.00,NULL,'2026-07-08 02:54:09.271','00000000-0000-4000-8000-000000000001'),('88c2e0b4-579c-4ebd-86a3-5d4f9f04685d','9b1ee426-5df9-4e78-b4bf-7814d816ea08',29.00,NULL,'2026-07-01 03:44:29.060','00000000-0000-4000-8000-000000000001'),('8bf4b14e-1e5f-4e2f-8d27-97a916dccca7','e592d98c-9d1b-4d0d-a38f-f23337a12574',60.00,NULL,'2026-07-08 02:49:25.446','00000000-0000-4000-8000-000000000001'),('8cd8f82d-d5f1-426c-97eb-e5dc2d4cd95f','26afa9c2-a4ac-4fca-b576-adf6175f74bb',10.00,NULL,'2026-07-14 21:16:42.890','00000000-0000-4000-8000-000000000002'),('c6e8942f-78bc-4ad7-9243-ac111afea404','99275ba9-655d-4a19-af7b-0b18ef8895b0',1000.00,NULL,'2026-07-14 19:55:21.173','00000000-0000-4000-8000-000000000001'),('f6a8822f-7e18-4c01-813f-7bc7357f654e','26afa9c2-a4ac-4fca-b576-adf6175f74bb',20.00,NULL,'2026-07-14 21:16:42.890','00000000-0000-4000-8000-000000000001');
+/*!40000 ALTER TABLE `sale_payments` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `sales`
+--
+
+DROP TABLE IF EXISTS `sales`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sales` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `branch_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `register_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `register_session_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `customer_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tab_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tab_order` int NOT NULL DEFAULT '0',
+  `document_number` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('DRAFT','ACTIVE','SUSPENDED','COMPLETED','CANCELLED','VOIDED') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'DRAFT',
+  `subtotal` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `discount_amount` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `discount_percent` decimal(5,2) NOT NULL DEFAULT '0.00',
+  `tax_amount` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `total` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `amount_paid` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `change_amount` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `notes` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `version` int NOT NULL DEFAULT '0',
+  `completed_at` datetime(3) DEFAULT NULL,
+  `suspended_at` datetime(3) DEFAULT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `sales_branch_id_status_idx` (`branch_id`,`status`),
+  KEY `sales_register_id_status_idx` (`register_id`,`status`),
+  KEY `sales_tab_id_idx` (`tab_id`),
+  KEY `sales_register_session_id_fkey` (`register_session_id`),
+  KEY `sales_user_id_fkey` (`user_id`),
+  KEY `sales_customer_id_fkey` (`customer_id`),
+  CONSTRAINT `sales_branch_id_fkey` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `sales_customer_id_fkey` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `sales_register_id_fkey` FOREIGN KEY (`register_id`) REFERENCES `registers` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `sales_register_session_id_fkey` FOREIGN KEY (`register_session_id`) REFERENCES `register_sessions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `sales_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `sales`
+--
+
+LOCK TABLES `sales` WRITE;
+/*!40000 ALTER TABLE `sales` DISABLE KEYS */;
+INSERT INTO `sales` VALUES ('12153f2d-f84d-4e91-bca4-85587b6e821a','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b',NULL,'a901f0c4-99e1-4548-baa9-fdd3a61c3533','27bb28d8-d5d6-444f-a2f7-7daac61cfe45','35368fba-a3de-47a0-94e4-e72a1984b12c',0,NULL,'ACTIVE',0.00,0.00,0.00,0.00,0.00,0.00,0.00,NULL,0,NULL,NULL,'2026-07-14 21:16:57.533','2026-07-14 21:16:57.533'),('1ab15549-d27d-4244-8dfe-a9e69c9c03a6','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b',NULL,'a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,'2cc0b94d-529e-4c88-bde8-96a9de6528a5',0,NULL,'SUSPENDED',75.00,0.00,0.00,12.75,87.75,0.00,0.00,NULL,2,NULL,'2026-07-14 20:25:51.936','2026-07-14 19:55:46.191','2026-07-14 20:25:51.937'),('1dd8be85-ee2d-4a88-aa26-ae93362ef1da','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b',NULL,'a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,'e3dcdda3-dbb5-4ba5-bdac-89b9d0ae569b',1,NULL,'SUSPENDED',0.00,0.00,0.00,0.00,0.00,0.00,0.00,NULL,0,NULL,'2026-07-02 04:20:44.167','2026-07-02 04:20:42.294','2026-07-02 04:20:44.168'),('22ea0713-9bb4-4069-b0f7-b581e496fe31','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b','2af51850-6bbd-42f9-b3d6-38c49c52975a','86cb590d-3285-4881-8c8c-1e72f8c7d439',NULL,'33975cc4-ba9c-44a0-b0d2-d5d585c299cc',1,'V-202607-000005','COMPLETED',25.00,0.00,0.00,4.75,29.75,29.75,0.00,NULL,2,'2026-07-14 20:52:46.186',NULL,'2026-07-14 20:26:22.030','2026-07-14 20:52:46.187'),('24d82ba8-7395-451f-93fc-934397cc3675','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b',NULL,'a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,'3073eabc-cdb9-4d9d-9320-1a80d39d8afc',1,NULL,'SUSPENDED',0.00,0.00,0.00,0.00,0.00,0.00,0.00,NULL,0,NULL,'2026-07-02 03:20:27.745','2026-07-02 03:20:22.951','2026-07-02 03:20:27.746'),('26afa9c2-a4ac-4fca-b576-adf6175f74bb','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b','2af51850-6bbd-42f9-b3d6-38c49c52975a','86cb590d-3285-4881-8c8c-1e72f8c7d439',NULL,'3ef5ba7a-983f-4a7f-92a1-5e39fd7738c0',0,'V-202607-000006','COMPLETED',25.00,0.00,0.00,4.75,29.75,30.00,0.25,NULL,2,'2026-07-14 21:16:42.891',NULL,'2026-07-14 20:55:16.615','2026-07-14 21:16:42.892'),('328e82c5-bfd7-4697-8253-6ae4c3d7b3c8','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b','03d387fb-cee4-4f9a-bd32-2ec32bc9e63d','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,'1020ae80-606a-4d15-b581-3475b8e5a986',0,'V-202607-000003','COMPLETED',25.00,0.00,0.00,0.00,25.00,50.00,25.00,NULL,2,'2026-07-08 02:54:09.272',NULL,'2026-07-08 02:49:51.528','2026-07-08 02:54:09.273'),('33527071-4385-4691-99ea-14f960f81120','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b',NULL,'a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,'0e348cca-0134-47f9-8b11-eaee9ab4d1e5',1,NULL,'SUSPENDED',0.00,0.00,0.00,0.00,0.00,0.00,0.00,NULL,2,NULL,'2026-07-03 03:35:39.976','2026-07-02 04:20:49.163','2026-07-03 03:35:39.977'),('45f26d1d-c1c3-415d-964c-41cb61b5e9de','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b',NULL,'a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,'ddf60ad7-e3c1-4526-ab0c-226fc175af7b',0,NULL,'SUSPENDED',50.00,0.00,0.00,8.00,58.00,0.00,0.00,NULL,2,NULL,'2026-07-01 03:55:46.202','2026-07-01 03:46:28.451','2026-07-01 03:55:46.203'),('63992670-c0a8-48a2-b2ad-e28fff38c28e','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b',NULL,'a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,'ab1b5dbe-3523-4d25-903a-c9aedfc4d749',2,NULL,'SUSPENDED',0.00,0.00,0.00,0.00,0.00,0.00,0.00,NULL,0,NULL,'2026-07-01 03:25:39.103','2026-07-01 03:22:58.307','2026-07-01 03:25:39.103'),('746739cd-9897-411c-9967-918a5c764ea5','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b',NULL,'a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,'894661ad-d914-4814-90f6-7967d458ee11',0,NULL,'SUSPENDED',50.00,0.00,0.00,8.00,58.00,0.00,0.00,NULL,11,NULL,'2026-07-01 03:38:59.258','2026-07-01 03:22:58.275','2026-07-01 03:38:59.259'),('8a1875d6-e0f9-4e5a-af38-164cc50cecac','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b',NULL,'a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,'a6565be9-6444-4c8d-a64b-63b48eb0d08e',1,NULL,'SUSPENDED',0.00,0.00,0.00,0.00,0.00,0.00,0.00,NULL,0,NULL,'2026-07-01 03:25:39.969','2026-07-01 03:22:58.291','2026-07-01 03:25:39.970'),('99275ba9-655d-4a19-af7b-0b18ef8895b0','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b','84d29537-1273-4c07-81fd-96dcb6d62c29','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,'31e21faa-2a8c-490b-853a-4eb375e68aba',1,'V-202607-000004','COMPLETED',25.00,0.00,0.00,4.75,29.75,1000.00,970.25,NULL,2,'2026-07-14 19:55:21.175',NULL,'2026-07-14 19:54:52.434','2026-07-14 19:55:21.176'),('9b1ee426-5df9-4e78-b4bf-7814d816ea08','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b',NULL,'a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,'33e83b63-277e-400f-9668-5759ed03fbdf',0,'V-202606-000001','COMPLETED',25.00,0.00,0.00,4.00,29.00,29.00,0.00,NULL,2,'2026-07-01 03:44:29.061',NULL,'2026-07-01 03:38:59.310','2026-07-01 03:44:29.064'),('b4191c16-ba22-457f-b91a-ceb55c9e5e85','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b',NULL,'a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,'009f4ceb-35a8-4b0a-b0c0-1b1e20fa679e',2,NULL,'SUSPENDED',0.00,0.00,0.00,0.00,0.00,0.00,0.00,NULL,0,NULL,'2026-07-02 03:20:27.015','2026-07-02 03:20:23.748','2026-07-02 03:20:27.015'),('bd463639-d8ef-4fef-943b-b93072e45870','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b',NULL,'a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,'77dab2f5-163b-4dc4-b2e1-2dde5a3639e6',1,NULL,'SUSPENDED',0.00,0.00,0.00,0.00,0.00,0.00,0.00,NULL,0,NULL,'2026-07-14 20:26:24.672','2026-07-14 19:58:00.200','2026-07-14 20:26:24.673'),('e592d98c-9d1b-4d0d-a38f-f23337a12574','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b','03d387fb-cee4-4f9a-bd32-2ec32bc9e63d','a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,'d967889d-7477-4d69-bca6-9a1d82a80761',0,'V-202607-000002','COMPLETED',50.00,0.00,0.00,8.00,58.00,60.00,2.00,NULL,15,'2026-07-08 02:49:25.458',NULL,'2026-07-01 03:55:46.278','2026-07-08 02:49:25.460'),('efec1c96-1492-456f-85c1-2b2faa5e139e','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b',NULL,'a901f0c4-99e1-4548-baa9-fdd3a61c3533',NULL,'3bda0269-cc52-4d58-87a5-6d4f93466088',0,NULL,'SUSPENDED',0.00,0.00,0.00,0.00,0.00,0.00,0.00,NULL,0,NULL,'2026-07-14 19:54:54.425','2026-07-14 02:24:10.684','2026-07-14 19:54:54.426');
+/*!40000 ALTER TABLE `sales` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `suppliers`
+--
+
+DROP TABLE IF EXISTS `suppliers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `suppliers` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `branch_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tax_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `address` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  `city` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `suppliers_branch_id_code_key` (`branch_id`,`code`),
+  CONSTRAINT `suppliers_branch_id_fkey` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `suppliers`
+--
+
+LOCK TABLES `suppliers` WRITE;
+/*!40000 ALTER TABLE `suppliers` DISABLE KEYS */;
+/*!40000 ALTER TABLE `suppliers` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `terminals`
+--
+
+DROP TABLE IF EXISTS `terminals`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `terminals` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `branch_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `register_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `device_id` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ip_address` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `last_seen_at` datetime(3) DEFAULT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  `last_scan_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `terminals_device_id_key` (`device_id`),
+  KEY `terminals_branch_id_fkey` (`branch_id`),
+  KEY `terminals_register_id_fkey` (`register_id`),
+  CONSTRAINT `terminals_branch_id_fkey` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `terminals_register_id_fkey` FOREIGN KEY (`register_id`) REFERENCES `registers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `terminals`
+--
+
+LOCK TABLES `terminals` WRITE;
+/*!40000 ALTER TABLE `terminals` DISABLE KEYS */;
+INSERT INTO `terminals` VALUES ('491fddbb-e147-489a-b4b6-405a2a44f2a1','a738fa70-0756-4511-9997-7704cb57965d','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b','8f99daeb-e10b-4d4b-bf51-5c554ea71abf','Equipo 127.0.0.1','127.0.0.1',1,'2026-07-28 02:47:10.563','2026-07-03 04:15:40.086','2026-07-28 02:47:10.564',NULL);
+/*!40000 ALTER TABLE `terminals` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `unit_types`
+--
+
+DROP TABLE IF EXISTS `unit_types`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `unit_types` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `sort_order` int NOT NULL DEFAULT '0',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unit_types_code_key` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `unit_types`
+--
+
+LOCK TABLES `unit_types` WRITE;
+/*!40000 ALTER TABLE `unit_types` DISABLE KEYS */;
+INSERT INTO `unit_types` VALUES ('10000000-0000-4000-8000-000000000001','UND','Unidad','Unidad base de inventario',1,1,'2026-07-14 16:26:58.995','2026-07-14 16:26:58.995'),('10000000-0000-4000-8000-000000000002','PZA','Pieza','Pieza individual',1,2,'2026-07-14 16:26:58.995','2026-07-14 16:26:58.995'),('10000000-0000-4000-8000-000000000003','CAJA','Caja','Caja / empaque. Configure el factor de stock por producto',1,3,'2026-07-14 16:26:58.995','2026-07-14 16:26:58.995'),('10000000-0000-4000-8000-000000000004','PK','Paquete','Paquete. Configure el factor de stock por producto',1,4,'2026-07-14 16:26:58.995','2026-07-14 16:26:58.995'),('10000000-0000-4000-8000-000000000005','KG','Kilogramo','Peso en kilogramos',1,5,'2026-07-14 16:26:58.995','2026-07-14 16:26:58.995');
+/*!40000 ALTER TABLE `unit_types` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_registers`
+--
+
+DROP TABLE IF EXISTS `user_registers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user_registers` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `register_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_registers_user_id_register_id_key` (`user_id`,`register_id`),
+  KEY `user_registers_register_id_fkey` (`register_id`),
+  CONSTRAINT `user_registers_register_id_fkey` FOREIGN KEY (`register_id`) REFERENCES `registers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_registers_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_registers`
+--
+
+LOCK TABLES `user_registers` WRITE;
+/*!40000 ALTER TABLE `user_registers` DISABLE KEYS */;
+INSERT INTO `user_registers` VALUES ('eaef700a-f572-40ae-9abc-1422c7a19cfc','86cb590d-3285-4881-8c8c-1e72f8c7d439','e2001be5-3a63-45ca-8b6b-0b50cf4dbb4b','2026-07-14 20:05:39.394');
+/*!40000 ALTER TABLE `user_registers` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_roles`
+--
+
+DROP TABLE IF EXISTS `user_roles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user_roles` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_roles_user_id_role_id_key` (`user_id`,`role_id`),
+  KEY `user_roles_role_id_fkey` (`role_id`),
+  CONSTRAINT `user_roles_role_id_fkey` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_roles_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_roles`
+--
+
+LOCK TABLES `user_roles` WRITE;
+/*!40000 ALTER TABLE `user_roles` DISABLE KEYS */;
+INSERT INTO `user_roles` VALUES ('1a8e4b02-ae7b-42b8-919d-d3f98ef7dfcb','86cb590d-3285-4881-8c8c-1e72f8c7d439','2cc0af24-87d1-4fd0-a148-e05a476d3bc1','2026-07-14 02:30:43.904'),('cf000bf2-7fe0-4f27-9d90-ac019244c1e1','a901f0c4-99e1-4548-baa9-fdd3a61c3533','ccb57484-5954-4708-9d3e-f7d7ad7450c4','2026-07-01 03:15:43.143');
+/*!40000 ALTER TABLE `user_roles` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `users` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `company_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `username` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `password_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `first_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `pin` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `last_login_at` datetime(3) DEFAULT NULL,
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_username_key` (`username`),
+  UNIQUE KEY `users_email_key` (`email`),
+  KEY `users_company_id_fkey` (`company_id`),
+  CONSTRAINT `users_company_id_fkey` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `users`
+--
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES ('86cb590d-3285-4881-8c8c-1e72f8c7d439','2925244a-f553-43de-9dc8-44b4d4b9baf2','cajero1','cajero1@ovalu.com','$2b$10$D1wwPKHVhvhbCnNq4RRNgOld/CUaBofcHv/X6atYQROTlt0xNI5oW','cajero1','cajero1','$2b$10$RSjn0lKzJB0yxtXpk6xy0ueTMnq9wJl9eMq6nbT5148.YZFgoi5NW',1,'2026-07-14 20:05:54.653','2026-07-14 02:28:40.268','2026-07-14 20:05:54.653'),('a901f0c4-99e1-4548-baa9-fdd3a61c3533','2925244a-f553-43de-9dc8-44b4d4b9baf2','admin','admin@puntoventa.local','$2b$12$yWHb7/KG6fc/jaaYdvBSnulznkK6Zirvoi8aFtGi.OM5VwjV2NRpS','Administrador','Sistema',NULL,1,'2026-07-28 02:44:04.324','2026-07-01 03:15:43.137','2026-07-28 02:44:04.324');
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping routines for database 'puntoventa'
+--
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-07-27 21:52:21

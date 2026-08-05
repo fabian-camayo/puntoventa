@@ -28,6 +28,8 @@ import {
   CreateCategoryPayload,
   UpdateCategoryPayload,
 } from '@core/services/category.service';
+import { FieldErrorComponent } from '@shared/components/field-error/field-error.component';
+import { isControlInvalid, notifyInvalidForm } from '@shared/utils/form-validation';
 
 addIcons({ closeOutline, checkmarkOutline, folderOutline });
 
@@ -52,6 +54,7 @@ addIcons({ closeOutline, checkmarkOutline, folderOutline });
     IonIcon,
     IonSpinner,
     TranslateModule,
+    FieldErrorComponent,
   ],
 })
 export class CategoryFormModal implements OnInit {
@@ -67,6 +70,7 @@ export class CategoryFormModal implements OnInit {
   saving = signal(false);
   isEdit = false;
   private codeManuallyEdited = false;
+  readonly isInvalid = isControlInvalid;
 
   form = this.fb.nonNullable.group({
     code: ['', [Validators.required, Validators.maxLength(30)]],
@@ -113,10 +117,7 @@ export class CategoryFormModal implements OnInit {
   }
 
   async save(): Promise<void> {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (await notifyInvalidForm(this.form, this.toast)) return;
 
     const raw = this.form.getRawValue();
     this.saving.set(true);

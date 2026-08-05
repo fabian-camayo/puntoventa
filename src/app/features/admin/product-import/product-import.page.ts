@@ -14,6 +14,7 @@ import {
   ToastController,
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
+import { AdminBackButton } from '@shared/components/admin-back-button/admin-back-button.component';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
 import {
@@ -46,6 +47,7 @@ addIcons({ cloudUploadOutline, settingsOutline, documentOutline });
     IonRefresher,
     IonRefresherContent,
     TranslateModule,
+    AdminBackButton,
   ],
 })
 export class ProductImportPage implements OnInit {

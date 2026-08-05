@@ -6,6 +6,7 @@ export class BackendManager {
   private process: ChildProcess | null = null;
   private running = false;
   private port = 3000;
+  private lastOutput = '';
 
   async start(runtimeEnv: Record<string, string>): Promise<void> {
     if (this.running) return;
@@ -18,15 +19,18 @@ export class BackendManager {
     }
 
     this.port = Number(runtimeEnv['API_PORT']) || 3000;
+    this.lastOutput = '';
 
     const isPackaged = app.isPackaged;
+    // __dirname = apps/desktop/dist/backend
     const apiPath = isPackaged
       ? path.join(process.resourcesPath, 'api', 'main.js')
-      : path.join(__dirname, '../../../../api/dist/main.js');
+      : path.join(__dirname, '../../../api/dist/main.js');
 
+    // Packaged: resources/api (incluye prisma/). Dev: raíz del monorepo (prisma/)
     const cwd = isPackaged
       ? path.join(process.resourcesPath, 'api')
-      : path.join(__dirname, '../../../../api');
+      : path.join(__dirname, '../../../../');
 
     const { binary, args, extraEnv } = this.resolveNodeSpawn(apiPath);
 
@@ -46,11 +50,15 @@ export class BackendManager {
       detached: false,
     });
 
-    this.process.stdout?.on('data', (data: Buffer) => {
-      console.log(`[API] ${data.toString().trim()}`);
-    });
+    const appendOut = (data: Buffer) => {
+      const text = data.toString();
+      this.lastOutput = (this.lastOutput + text).slice(-8000);
+      console.log(`[API] ${text.trim()}`);
+    };
 
+    this.process.stdout?.on('data', appendOut);
     this.process.stderr?.on('data', (data: Buffer) => {
+      appendOut(data);
       console.error(`[API ERROR] ${data.toString().trim()}`);
     });
 
@@ -63,6 +71,10 @@ export class BackendManager {
     await this.waitForReady();
     this.running = true;
     console.log(`[BackendManager] API NestJS iniciada en puerto ${this.port}`);
+  }
+
+  getLastOutput(): string {
+    return this.lastOutput;
   }
 
   async stop(): Promise<void> {
@@ -127,8 +139,13 @@ export class BackendManager {
     return { binary: 'node', args: [apiPath], extraEnv: {} };
   }
 
-  private async waitForReady(maxAttempts = 40): Promise<void> {
+  private async waitForReady(maxAttempts = 45): Promise<void> {
     for (let i = 0; i < maxAttempts; i++) {
+      if (!this.process && i > 2) {
+        throw new Error(
+          `La API se cerró antes de estar lista. Revise MySQL (host/usuario/clave). Detalle:\n${this.lastOutput.slice(-2000)}`,
+        );
+      }
       try {
         const response = await fetch(`http://localhost:${this.port}/api/v1/health`);
         if (response.ok) return;
@@ -137,6 +154,8 @@ export class BackendManager {
       }
       await new Promise((r) => setTimeout(r, 1000));
     }
-    throw new Error('Timeout esperando que la API esté lista');
+    throw new Error(
+      `Timeout esperando la API en el puerto ${this.port}. ¿MySQL accesible?\n${this.lastOutput.slice(-2000)}`,
+    );
   }
 }

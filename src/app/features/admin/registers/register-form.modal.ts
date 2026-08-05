@@ -26,6 +26,8 @@ import { firstValueFrom } from 'rxjs';
 import { RegisterDto } from '@puntoventa/shared';
 import { RegisterService, SaveRegisterPayload } from '@core/services/register.service';
 import { UserDto, UserService } from '@core/services/user.service';
+import { FieldErrorComponent } from '@shared/components/field-error/field-error.component';
+import { isControlInvalid, notifyInvalidForm } from '@shared/utils/form-validation';
 
 addIcons({ closeOutline, checkmarkOutline, cashOutline, peopleOutline });
 
@@ -51,6 +53,7 @@ addIcons({ closeOutline, checkmarkOutline, cashOutline, peopleOutline });
     IonSearchbar,
     IonLabel,
     TranslateModule,
+    FieldErrorComponent,
   ],
 })
 export class RegisterFormModal implements OnInit {
@@ -69,6 +72,7 @@ export class RegisterFormModal implements OnInit {
   filteredUsers = signal<UserDto[]>([]);
   selectedUserIds = signal<Set<string>>(new Set());
   loadingUsers = signal(false);
+  readonly isInvalid = isControlInvalid;
 
   form = this.fb.nonNullable.group({
     code: ['', [Validators.required, Validators.maxLength(20)]],
@@ -142,10 +146,7 @@ export class RegisterFormModal implements OnInit {
   }
 
   async save(): Promise<void> {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (await notifyInvalidForm(this.form, this.toast)) return;
 
     const raw = this.form.getRawValue();
     const userIds = Array.from(this.selectedUserIds());

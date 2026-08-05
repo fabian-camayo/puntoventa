@@ -1,0 +1,116 @@
+.summary-content {
+  --background: var(--pv-bg-app);
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 16px;
+  color: var(--pv-text-secondary);
+  text-align: center;
+
+  ion-icon {
+    font-size: 2rem;
+  }
+}
+
+.cash-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 16px;
+  padding: 16px 18px;
+  border-radius: var(--pv-radius-md, 10px);
+  background: color-mix(in srgb, var(--ion-color-success) 12%, var(--pv-bg-primary));
+  border: 1px solid color-mix(in srgb, var(--ion-color-success) 35%, var(--pv-border));
+
+  ion-icon {
+    font-size: 2rem;
+    color: var(--ion-color-success);
+  }
+
+  .cash-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--pv-text-secondary);
+  }
+
+  .cash-amount {
+    display: block;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--pv-text-primary);
+    letter-spacing: -0.02em;
+  }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 16px 12px;
+}
+
+.stat-card {
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--pv-bg-secondary);
+  border: 1px solid var(--pv-border);
+
+  .stat-label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--pv-text-secondary);
+    margin-bottom: 4px;
+  }
+
+  strong {
+    display: block;
+    font-size: 1.05rem;
+  }
+
+  small {
+    display: block;
+    margin-top: 2px;
+    color: var(--pv-text-secondary);
+    font-size: 0.75rem;
+  }
+}
+
+.session-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 16px 12px;
+  font-size: 0.85rem;
+  color: var(--pv-text-secondary);
+}
+
+ion-segment {
+  margin: 0 16px 8px;
+}
+
+.summary-list {
+  background: transparent;
+  padding-bottom: 24px;
+}
+
+.amount-in {
+  color: var(--ion-color-success);
+  font-weight: 700;
+}
+
+.amount-out {
+  color: var(--ion-color-danger);
+  font-weight: 700;
+}

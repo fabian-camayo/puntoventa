@@ -88,14 +88,40 @@
   --background: var(--pv-bg-secondary);
   --border-radius: var(--pv-radius-md);
   --padding-start: 12px;
-  --inner-padding-end: 12px;
+  --inner-padding-end: 4px;
   border: 1px solid var(--pv-border);
   border-radius: var(--pv-radius-md);
 
-  ion-icon {
+  > ion-icon[slot='start'] {
     color: var(--pv-accent);
     font-size: 1.2rem;
     margin-right: 4px;
+  }
+}
+
+.password-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--pv-radius-sm);
+  background: transparent;
+  color: var(--pv-text-secondary);
+  cursor: pointer;
+
+  ion-icon {
+    font-size: 1.25rem;
+    margin: 0;
+    color: inherit;
+  }
+
+  &:hover {
+    color: var(--pv-accent);
+    background: var(--pv-bg-hover, rgba(0, 0, 0, 0.04));
   }
 }
 

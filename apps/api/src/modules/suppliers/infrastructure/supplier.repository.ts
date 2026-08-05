@@ -53,6 +53,7 @@ export class SupplierRepository {
         { name: { contains: search } },
         { email: { contains: search } },
         { phone: { contains: search } },
+        { city: { contains: search } },
       ],
     };
   }

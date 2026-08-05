@@ -21,6 +21,8 @@ import { closeOutline, checkmarkOutline, cardOutline } from 'ionicons/icons';
 import { firstValueFrom } from 'rxjs';
 import { PaymentTypeDto } from '@puntoventa/shared';
 import { PaymentTypeService } from '@core/services/payment-type.service';
+import { FieldErrorComponent } from '@shared/components/field-error/field-error.component';
+import { isControlInvalid, notifyInvalidForm } from '@shared/utils/form-validation';
 
 addIcons({ closeOutline, checkmarkOutline, cardOutline });
 
@@ -42,6 +44,7 @@ addIcons({ closeOutline, checkmarkOutline, cardOutline });
     IonIcon,
     IonSpinner,
     TranslateModule,
+    FieldErrorComponent,
   ],
 })
 export class PaymentTypeFormModal implements OnInit {
@@ -55,6 +58,7 @@ export class PaymentTypeFormModal implements OnInit {
   saving = signal(false);
   isEdit = false;
   private codeManuallyEdited = false;
+  readonly isInvalid = isControlInvalid;
 
   form = this.fb.nonNullable.group({
     code: ['', [Validators.required, Validators.maxLength(30)]],
@@ -94,10 +98,7 @@ export class PaymentTypeFormModal implements OnInit {
   }
 
   async save(): Promise<void> {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (await notifyInvalidForm(this.form, this.toast)) return;
 
     const raw = this.form.getRawValue();
     this.saving.set(true);

@@ -19,6 +19,7 @@ import {
   ToastController,
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
+import { AdminBackButton } from '@shared/components/admin-back-button/admin-back-button.component';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { addIcons } from 'ionicons';
@@ -69,6 +70,7 @@ addIcons({
     IonRefresher,
     IonRefresherContent,
     TranslateModule,
+    AdminBackButton,
     AppCurrencyPipe,
   ],
 })

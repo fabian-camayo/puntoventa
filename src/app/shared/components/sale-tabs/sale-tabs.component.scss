@@ -1,8 +1,26 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.sale-tabs-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 100%;
+}
+
 .sale-tabs-bar {
   display: flex;
   align-items: center;
+  flex: 1;
+  min-width: 0;
   gap: 4px;
   padding: 4px 6px;
+  height: 100%;
+  min-height: 40px;
+  box-sizing: border-box;
   background: var(--pv-bg-primary);
   border: 1px solid var(--pv-border);
   border-radius: var(--pv-radius-md);
@@ -32,8 +50,7 @@
   background: var(--pv-bg-secondary);
   cursor: pointer;
   white-space: nowrap;
-  min-width: 100px;
-  max-width: 180px;
+  min-width: 0;
   min-height: 32px;
   transition: all 0.15s ease;
 
@@ -49,16 +66,9 @@
   }
 }
 
-.tab-label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .tab-total {
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
   color: var(--pv-accent);
 }
 
@@ -86,14 +96,59 @@
 
 .new-tab-btn {
   flex-shrink: 0;
-  --border-radius: var(--pv-radius-sm);
-  --padding-start: 6px;
-  --padding-end: 6px;
-  height: 32px;
-  min-height: 32px;
-  border: 1px dashed var(--pv-border);
+  margin: 0;
+  min-height: 40px;
+  height: 40px;
+  font-weight: 600;
+  --background: var(--pv-accent-light);
+  --background-hover: color-mix(in srgb, var(--pv-accent) 18%, var(--pv-accent-light));
+  --background-activated: color-mix(in srgb, var(--pv-accent) 24%, var(--pv-accent-light));
+  --background-focused: color-mix(in srgb, var(--pv-accent) 18%, var(--pv-accent-light));
+  --color: var(--pv-accent-dark);
+  --color-hover: var(--pv-accent-dark);
+  --color-activated: var(--pv-accent-dark);
+  --border-radius: var(--pv-radius-lg);
+  --border-width: 1.5px;
+  --border-style: solid;
+  --border-color: var(--pv-accent-dark);
+  --padding-start: 14px;
+  --padding-end: 16px;
+  --box-shadow: none;
+  --opacity: 1;
+
+  &::part(native) {
+    border: 1.5px solid var(--pv-accent-dark);
+  }
 
   ion-icon {
     font-size: 18px;
+    color: var(--pv-accent-dark);
+  }
+
+  &.button-disabled,
+  &[disabled] {
+    --background: var(--pv-bg-secondary);
+    --color: var(--pv-text-secondary);
+    --border-color: var(--pv-border);
+    opacity: 0.65;
+
+    &::part(native) {
+      border-color: var(--pv-border);
+    }
+
+    ion-icon {
+      color: var(--pv-text-secondary);
+    }
+  }
+}
+
+@media (max-width: 560px) {
+  .new-tab-btn {
+    --padding-start: 10px;
+    --padding-end: 10px;
+
+    .new-tab-label {
+      display: none;
+    }
   }
 }

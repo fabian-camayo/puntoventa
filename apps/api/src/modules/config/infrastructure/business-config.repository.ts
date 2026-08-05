@@ -20,8 +20,12 @@ export class BusinessConfigRepository {
     currency?: string;
     currencySymbol?: string;
     taxRate?: number;
+    logoUrl?: string | null;
     ticketHeader?: string;
     ticketFooter?: string;
+    invoicePrefix?: string;
+    invoiceNumberPadding?: number;
+    invoiceNextNumber?: number;
     allowNegativeStock?: boolean;
     defaultCustomerId?: string;
   }) {

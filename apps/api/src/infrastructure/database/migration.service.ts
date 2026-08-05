@@ -1,15 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import * as path from 'path';
 import { PrismaService } from './prisma.service';
-
-const execAsync = promisify(exec);
+import { prepareDatabase } from './prepare-database';
 
 /**
- * Servicio de migraciones versionadas.
- * Ejecuta `prisma migrate deploy` al iniciar la aplicación.
- * Nunca modifica migraciones anteriores; solo aplica las pendientes.
+ * Aplica migraciones versionadas al iniciar.
+ * La lógica real vive en prepare-database (también se llama antes de Nest).
  */
 @Injectable()
 export class MigrationService {
@@ -19,22 +14,15 @@ export class MigrationService {
 
   async runPendingMigrations(): Promise<void> {
     const startTime = Date.now();
-    const rootPath = path.resolve(__dirname, '../../../../..');
+    const databaseUrl = process.env['DATABASE_URL'];
+    if (!databaseUrl) {
+      throw new Error('DATABASE_URL no configurada');
+    }
 
-    this.logger.log('Verificando migraciones pendientes...');
+    this.logger.log('Verificando migraciones pendientes…');
 
     try {
-      const { stdout, stderr } = await execAsync('npx prisma migrate deploy', {
-        cwd: rootPath,
-        env: { ...process.env },
-      });
-
-      if (stdout) {
-        this.logger.log(stdout.trim());
-      }
-      if (stderr && !stderr.includes('already applied')) {
-        this.logger.warn(stderr.trim());
-      }
+      await prepareDatabase(databaseUrl);
 
       await this.prisma.migrationLog.create({
         data: {
@@ -43,19 +31,19 @@ export class MigrationService {
           success: true,
         },
       });
-
-      this.logger.log('Migraciones aplicadas correctamente');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error desconocido';
 
-      await this.prisma.migrationLog.create({
-        data: {
-          migrationName: 'prisma_migrate_deploy',
-          durationMs: Date.now() - startTime,
-          success: false,
-          errorMessage: message,
-        },
-      }).catch(() => undefined);
+      await this.prisma.migrationLog
+        .create({
+          data: {
+            migrationName: 'prisma_migrate_deploy',
+            durationMs: Date.now() - startTime,
+            success: false,
+            errorMessage: message.slice(0, 2000),
+          },
+        })
+        .catch(() => undefined);
 
       this.logger.error(`Error al aplicar migraciones: ${message}`);
       throw error;

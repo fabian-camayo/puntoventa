@@ -6,6 +6,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "lib": ["ES2022"],
+    "importHelpers": false,
     "baseUrl": ".",
     "paths": {
       "@puntoventa/shared": ["../../libs/shared/dist/index"],

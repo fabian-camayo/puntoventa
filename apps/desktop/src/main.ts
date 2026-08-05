@@ -4,6 +4,7 @@ import {
   ipcMain,
   shell,
   nativeTheme,
+  dialog,
 } from 'electron';
 import * as path from 'path';
 import { BackendManager } from './backend/backend-manager';
@@ -53,6 +54,12 @@ async function createWindow(): Promise<void> {
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
     const indexPath = path.join(process.resourcesPath, 'www', 'index.html');
+    mainWindow.webContents.on('did-fail-load', (_event, code, desc, url) => {
+      console.error(`[Electron] Fallo al cargar UI (${code}): ${desc} — ${url}`);
+    });
+    mainWindow.webContents.on('render-process-gone', (_event, details) => {
+      console.error('[Electron] Renderer caído:', details);
+    });
     await mainWindow.loadFile(indexPath);
   }
 }
@@ -79,6 +86,11 @@ async function initializeBackend(): Promise<void> {
     }
   } catch (err) {
     console.error('[BackendManager] No se pudo iniciar la API:', err);
+    const detail = err instanceof Error ? err.message : String(err);
+    dialog.showErrorBox(
+      'No se pudo conectar a MySQL / API',
+      `${detail}\n\nRevise los datos de MySQL (contraseña del instalador o %APPDATA%\\PuntoVenta\\.env) y que el servicio MySQL esté en ejecución.`,
+    );
   }
 }
 
