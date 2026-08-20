@@ -11,6 +11,7 @@ import {
   IonItem,
   IonLabel,
   IonText,
+  IonSpinner,
   ModalController,
   AlertController,
   ToastController,
@@ -49,6 +50,7 @@ addIcons({ closeOutline, printOutline, createOutline, banOutline, trashOutline }
     IonItem,
     IonLabel,
     IonText,
+    IonSpinner,
     TranslateModule,
     AppCurrencyPipe,
   ],
@@ -72,7 +74,10 @@ export class SaleDetailModal {
   @Input() logoUrl?: string;
   @Input() ticketHeader?: string;
   @Input() ticketFooter?: string;
+  @Input() invoiceResolution?: string;
+  @Input() warrantyPolicy?: string;
   @Input() registerName?: string;
+  @Input() cashierName?: string;
 
   readonly SaleStatus = SaleStatus;
   busy = false;
@@ -93,22 +98,36 @@ export class SaleDetailModal {
     void this.modalCtrl.dismiss();
   }
 
-  print(): void {
-    if (this.sale.status !== SaleStatus.COMPLETED) return;
+  printing = false;
 
-    this.receiptPrint.printReceipt({
-      sale: this.sale,
-      businessName: this.businessName,
-      taxId: this.taxId,
-      address: this.address,
-      phone: this.phone,
-      email: this.email,
-      logoUrl: this.logoUrl,
-      ticketHeader: this.ticketHeader,
-      ticketFooter: this.ticketFooter,
-      registerName: this.registerName,
-      cashierName: undefined,
-    });
+  async print(): Promise<void> {
+    if (this.sale.status !== SaleStatus.COMPLETED || this.printing) return;
+
+    this.printing = true;
+    try {
+      await this.receiptPrint.printReceipt({
+        sale: this.sale,
+        businessName: this.businessName,
+        taxId: this.taxId,
+        address: this.address,
+        phone: this.phone,
+        email: this.email,
+        logoUrl: this.logoUrl,
+        ticketHeader: this.ticketHeader,
+        ticketFooter: this.ticketFooter,
+        invoiceResolution: this.invoiceResolution,
+        warrantyPolicy: this.warrantyPolicy,
+        registerName: this.registerName,
+        cashierName: this.cashierName,
+      });
+    } catch {
+      await this.showToast(
+        'No fue posible enviar la venta a impresión. Verifique la impresora y vuelva a intentarlo.',
+        'danger',
+      );
+    } finally {
+      this.printing = false;
+    }
   }
 
   async openEdit(): Promise<void> {

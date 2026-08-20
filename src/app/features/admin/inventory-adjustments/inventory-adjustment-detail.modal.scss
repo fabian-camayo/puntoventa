@@ -1,0 +1,91 @@
+.modal-content {
+  --background: var(--pv-bg-app);
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+
+.detail-layout {
+  padding: 20px;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  ion-icon {
+    font-size: 2rem;
+    color: var(--pv-accent);
+  }
+
+  h2 {
+    margin: 0 0 6px;
+    font-size: 1.2rem;
+  }
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: var(--pv-bg-primary);
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-md);
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--pv-text-secondary);
+  }
+
+  span {
+    color: var(--pv-text-primary);
+    font-weight: 600;
+  }
+}
+
+.diff-negative {
+  color: #dc2626 !important;
+}
+
+.notes-box {
+  padding: 12px;
+  background: var(--pv-bg-primary);
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-md);
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--pv-text-secondary);
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: var(--pv-text-primary);
+  }
+}
+
+@media (max-width: 600px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

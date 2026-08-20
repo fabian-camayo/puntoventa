@@ -10,6 +10,21 @@
         <ion-icon name="cash-outline"></ion-icon>
         {{ 'ADMIN.REGISTER_SESSIONS' | translate }}
       </h1>
+      @if (isRegisterAdmin && registers().length > 1) {
+        <ion-select
+          class="register-select"
+          interface="popover"
+          [value]="registerId()"
+          (ionChange)="selectRegister($event.detail.value)"
+          [selectedText]="registerName()"
+          [label]="'REGISTERS.SELECT_REGISTER' | translate"
+          labelPlacement="stacked"
+        >
+          @for (reg of registers(); track reg.id) {
+            <ion-select-option [value]="reg.id">{{ reg.name }}</ion-select-option>
+          }
+        </ion-select>
+      }
     </div>
 
     @if (activeSession(); as session) {
@@ -41,7 +56,7 @@
     } @else {
       <div class="closed-session-banner pv-card">
         <ion-icon name="lock-closed-outline"></ion-icon>
-        <span class="banner-text">{{ 'REGISTERS.SESSION_CLOSED' | translate }}</span>
+        <span class="banner-text">{{ registerName() }} · {{ 'REGISTERS.SESSION_CLOSED' | translate }}</span>
         @if (canOpen) {
           <ion-button
             fill="clear"

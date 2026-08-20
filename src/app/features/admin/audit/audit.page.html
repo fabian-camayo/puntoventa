@@ -1,0 +1,143 @@
+<ion-content class="page-content">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+    <app-admin-back></app-admin-back>
+    <div class="page-title-bar">
+      <h1>
+        <ion-icon name="shield-checkmark-outline"></ion-icon>
+        {{ 'ADMIN.AUDIT' | translate }}
+      </h1>
+    </div>
+
+    <div class="pv-toolbar-card">
+      <ion-searchbar
+        [value]="searchQuery()"
+        [placeholder]="'AUDIT.SEARCH_PLACEHOLDER' | translate"
+        [debounce]="0"
+        (ionInput)="onSearchInput($event)"
+      ></ion-searchbar>
+
+      <div class="filters-grid">
+        <div class="filter-field">
+          <label>{{ 'AUDIT.MODULE' | translate }}</label>
+          <ion-select
+            [value]="moduleFilter()"
+            (ionChange)="setModuleFilter($event.detail.value)"
+            interface="popover"
+          >
+            <ion-select-option value="ALL">{{ 'AUDIT.ALL' | translate }}</ion-select-option>
+            @for (m of modules; track m.value) {
+              <ion-select-option [value]="m.value">{{ m.label }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'AUDIT.ACTION' | translate }}</label>
+          <ion-select
+            [value]="actionFilter()"
+            (ionChange)="setActionFilter($event.detail.value)"
+            interface="popover"
+          >
+            <ion-select-option value="ALL">{{ 'AUDIT.ALL' | translate }}</ion-select-option>
+            @for (a of actions; track a.value) {
+              <ion-select-option [value]="a.value">{{ a.label }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'AUDIT.USER' | translate }}</label>
+          <ion-select
+            [value]="userFilter()"
+            (ionChange)="setUserFilter($event.detail.value)"
+            interface="popover"
+          >
+            <ion-select-option value="ALL">{{ 'AUDIT.ALL' | translate }}</ion-select-option>
+            @for (u of users(); track u.id) {
+              <ion-select-option [value]="u.id">{{ u.firstName }} {{ u.lastName }}</ion-select-option>
+            }
+          </ion-select>
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'AUDIT.DATE_FROM' | translate }}</label>
+          <ion-input
+            type="date"
+            [value]="dateFrom()"
+            (ionChange)="onDateFromChange($event.detail.value ?? '')"
+          ></ion-input>
+        </div>
+
+        <div class="filter-field">
+          <label>{{ 'AUDIT.DATE_TO' | translate }}</label>
+          <ion-input
+            type="date"
+            [value]="dateTo()"
+            (ionChange)="onDateToChange($event.detail.value ?? '')"
+          ></ion-input>
+        </div>
+      </div>
+
+      <div class="filter-chips">
+        <ion-chip outline="true">
+          <ion-label>{{ total() }} {{ 'AUDIT.RECORDS' | translate }}</ion-label>
+        </ion-chip>
+      </div>
+    </div>
+
+    <div class="pv-card list-card">
+      @if (loading()) {
+        <div class="loading-state">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>{{ 'COMMON.LOADING' | translate }}</p>
+        </div>
+      } @else if (logs().length === 0) {
+        <div class="empty-state">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+          <h2>{{ 'AUDIT.EMPTY_TITLE' | translate }}</h2>
+          <p>{{ 'AUDIT.EMPTY_HINT' | translate }}</p>
+        </div>
+      } @else {
+        <div class="table-header">
+          <span class="col-date">{{ 'AUDIT.DATE' | translate }}</span>
+          <span class="col-user">{{ 'AUDIT.USER' | translate }}</span>
+          <span class="col-module">{{ 'AUDIT.MODULE' | translate }}</span>
+          <span class="col-entity">{{ 'AUDIT.ENTITY' | translate }}</span>
+          <span class="col-action">{{ 'AUDIT.ACTION' | translate }}</span>
+        </div>
+
+        <ion-list lines="full">
+          @for (log of logs(); track log.id) {
+            <ion-item button [detail]="false" (click)="openDetail(log)">
+              <div class="log-grid">
+                <span class="col-date">{{ formatDate(log.createdAt) }}</span>
+                <span class="col-user">{{ log.userName ?? log.username ?? '—' }}</span>
+                <span class="col-module">{{ moduleLabel(log.module) }}</span>
+                <span class="col-entity">{{ log.entityType }}</span>
+                <span class="col-action">
+                  <ion-badge [color]="actionColor(log.action)">{{ actionLabel(log.action) }}</ion-badge>
+                </span>
+              </div>
+            </ion-item>
+          }
+        </ion-list>
+
+        <div class="pagination">
+          <ion-button fill="outline" [disabled]="page() <= 1" (click)="prevPage()">
+            <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+            {{ 'COMMON.BACK' | translate }}
+          </ion-button>
+          <span class="page-info">{{ page() }} / {{ totalPages() }}</span>
+          <ion-button fill="outline" [disabled]="page() >= totalPages()" (click)="nextPage()">
+            {{ 'COMMON.NEXT' | translate }}
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      }
+    </div>
+  </div>
+</ion-content>

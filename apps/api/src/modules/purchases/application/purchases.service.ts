@@ -14,6 +14,7 @@ import {
 import { PurchaseRepository } from '../infrastructure/purchase.repository';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
+import { diffAuditValues, snapshotAuditValue } from '../../audit/application/audit-diff.util';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { UpdatePurchaseDto } from './dto/update-purchase.dto';
 import { JwtPayload } from '@puntoventa/shared';
@@ -178,7 +179,11 @@ export class PurchasesService {
       module: 'purchases',
       entityType: 'Purchase',
       entityId: purchase.id,
-      newValues: { documentNumber: dto.documentNumber } as Prisma.InputJsonValue,
+      newValues: snapshotAuditValue({
+        documentNumber: dto.documentNumber,
+        supplierId: dto.supplierId,
+        total: purchase.total,
+      }) as Prisma.InputJsonValue,
     });
 
     return this.mapPurchaseToDto(purchase);
@@ -257,12 +262,29 @@ export class PurchasesService {
       });
     });
 
+    const { before, after } = diffAuditValues(
+      {
+        notes: existing.notes,
+        paymentTerm: existing.paymentTerm,
+        registerId: existing.registerId,
+        total: existing.total,
+      },
+      {
+        notes: purchase.notes,
+        paymentTerm: purchase.paymentTerm,
+        registerId: purchase.registerId,
+        total: purchase.total,
+      },
+    );
+
     await this.auditService.log({
       userId: actor.sub,
       action: 'UPDATE',
       module: 'purchases',
       entityType: 'Purchase',
       entityId: id,
+      oldValues: before as Prisma.InputJsonValue,
+      newValues: after as Prisma.InputJsonValue,
     });
 
     return this.mapPurchaseToDto(purchase);
@@ -397,6 +419,11 @@ export class PurchasesService {
       module: 'purchases',
       entityType: 'Purchase',
       entityId: id,
+      oldValues: snapshotAuditValue({
+        documentNumber: existing.documentNumber,
+        status: existing.status,
+        total: existing.total,
+      }) as Prisma.InputJsonValue,
     });
 
     return { success: true };

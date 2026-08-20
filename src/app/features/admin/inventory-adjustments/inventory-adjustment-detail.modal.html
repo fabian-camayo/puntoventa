@@ -1,0 +1,66 @@
+<ion-header class="modal-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="dismiss()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'INVENTORY.ADJUSTMENT_DETAIL_TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="modal-content">
+  @if (loading()) {
+    <div class="loading-state">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
+  } @else if (adjustment(); as adj) {
+    <div class="detail-layout">
+      @for (item of adj.items; track item.id) {
+        <div class="detail-header">
+          <ion-icon name="swap-vertical-outline"></ion-icon>
+          <div>
+            <h2>{{ item.productName }} ({{ item.sku }})</h2>
+            <ion-badge [color]="typeColor(adj.type)">{{ typeLabel(adj.type) }}</ion-badge>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>{{ 'INVENTORY.USER' | translate }}</label>
+            <span>{{ adj.userName ?? adj.username ?? '—' }}</span>
+          </div>
+          <div class="detail-item">
+            <label>{{ 'INVENTORY.DATE' | translate }}</label>
+            <span>{{ formatDate(adj.createdAt) }}</span>
+          </div>
+          <div class="detail-item">
+            <label>{{ 'INVENTORY.BEFORE' | translate }}</label>
+            <span>{{ item.previousQty }}</span>
+          </div>
+          <div class="detail-item">
+            <label>{{ 'INVENTORY.ADJUSTMENT' | translate }}</label>
+            <span>{{ item.newQty - item.previousQty >= 0 ? '+' : '' }}{{ item.newQty - item.previousQty }}</span>
+          </div>
+          <div class="detail-item">
+            <label>{{ 'INVENTORY.AFTER' | translate }}</label>
+            <span>{{ item.newQty }}</span>
+          </div>
+        </div>
+      }
+
+      @if (adj.reason) {
+        <div class="notes-box">
+          <label>{{ 'INVENTORY.REASON' | translate }}</label>
+          <p>{{ adj.reason }}</p>
+        </div>
+      }
+      @if (adj.notes) {
+        <div class="notes-box">
+          <label>{{ 'INVENTORY.NOTES' | translate }}</label>
+          <p>{{ adj.notes }}</p>
+        </div>
+      }
+    </div>
+  }
+</ion-content>

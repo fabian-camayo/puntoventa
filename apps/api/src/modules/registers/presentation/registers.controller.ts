@@ -43,32 +43,36 @@ export class RegistersController {
   @ApiOperation({ summary: 'Listar sesiones de caja' })
   listSessions(
     @Query('branchId') branchId: string,
+    @CurrentUser() user: JwtPayload,
     @Query('registerId') registerId?: string,
     @Query('status') status?: RegisterSessionStatus,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ) {
-    return this.registersService.listSessions({
-      branchId,
-      registerId,
-      status,
-      page,
-      limit,
-    });
+    return this.registersService.listSessions(
+      {
+        branchId,
+        registerId,
+        status,
+        page,
+        limit,
+      },
+      user,
+    );
   }
 
   @Get('sessions/:sessionId/movements')
   @RequirePermissions('registers.view', 'registers.cash_movement', 'registers.open', 'sales.create')
   @ApiOperation({ summary: 'Listar movimientos de efectivo de una sesión' })
-  listCashMovements(@Param('sessionId') sessionId: string) {
-    return this.registersService.listCashMovements(sessionId);
+  listCashMovements(@Param('sessionId') sessionId: string, @CurrentUser() user: JwtPayload) {
+    return this.registersService.listCashMovements(sessionId, user);
   }
 
   @Get('sessions/:sessionId/pos-summary')
   @RequirePermissions('registers.open', 'registers.view', 'sales.create', 'registers.cash_movement')
   @ApiOperation({ summary: 'Resumen de caja para el POS (efectivo y ventas del turno)' })
-  getPosSummary(@Param('sessionId') sessionId: string) {
-    return this.registersService.getPosSummary(sessionId);
+  getPosSummary(@Param('sessionId') sessionId: string, @CurrentUser() user: JwtPayload) {
+    return this.registersService.getPosSummary(sessionId, user);
   }
 
   @Post('sessions/:sessionId/movements')
@@ -85,8 +89,8 @@ export class RegistersController {
   @Get('sessions/:sessionId')
   @RequirePermissions('registers.view', 'registers.open', 'sales.create')
   @ApiOperation({ summary: 'Obtener detalle de sesión de caja' })
-  getSession(@Param('sessionId') sessionId: string) {
-    return this.registersService.getSessionById(sessionId);
+  getSession(@Param('sessionId') sessionId: string, @CurrentUser() user: JwtPayload) {
+    return this.registersService.getSessionById(sessionId, user);
   }
 
   @Get()
@@ -112,8 +116,8 @@ export class RegistersController {
   @Get(':id/session')
   @RequirePermissions('registers.view', 'registers.open', 'sales.create')
   @ApiOperation({ summary: 'Obtener sesión activa de una caja' })
-  getActiveSession(@Param('id') registerId: string) {
-    return this.registersService.getActiveSession(registerId);
+  getActiveSession(@Param('id') registerId: string, @CurrentUser() user: JwtPayload) {
+    return this.registersService.getActiveSession(registerId, user);
   }
 
   @Post()

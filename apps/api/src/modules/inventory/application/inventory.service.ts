@@ -2,13 +2,25 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { AdjustmentStatus, AdjustmentType, Prisma } from '@prisma/client';
 import { InventoryRepository } from '../infrastructure/inventory.repository';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
 import { CreateAdjustmentDto } from './dto/create-adjustment.dto';
+import { CreateManualAdjustmentDto } from './dto/create-manual-adjustment.dto';
+import { ListAdjustmentsQueryDto } from './dto/list-adjustments-query.dto';
 import { JwtPayload } from '@puntoventa/shared';
+
+/** Señal interna de conflicto de concurrencia optimista (version mismatch) para reintentar. */
+class ConcurrentStockUpdateError extends Error {}
+
+function isUniqueConstraintError(err: unknown): boolean {
+  return err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002';
+}
+
+const MAX_CONCURRENCY_RETRIES = 3;
 
 @Injectable()
 export class InventoryService {
@@ -98,8 +110,17 @@ export class InventoryService {
     };
   }
 
-  async findAdjustments(branchId: string, params?: { page?: number; limit?: number }) {
-    const result = await this.inventoryRepository.findAdjustmentsByBranch(branchId, params);
+  async findAdjustments(query: ListAdjustmentsQueryDto) {
+    const result = await this.inventoryRepository.findAdjustmentsByBranch(query.branchId, {
+      page: query.page,
+      limit: query.limit,
+      search: query.search,
+      productId: query.productId,
+      userId: query.userId,
+      type: query.type,
+      dateFrom: query.dateFrom,
+      dateTo: query.dateTo,
+    });
     return {
       ...result,
       items: result.items.map((adj) => this.mapAdjustmentToDto(adj)),
@@ -110,6 +131,206 @@ export class InventoryService {
     const adjustment = await this.inventoryRepository.findAdjustmentById(id);
     if (!adjustment) throw new NotFoundException('Ajuste no encontrado');
     return this.mapAdjustmentToDto(adjustment);
+  }
+
+  /**
+   * Ajuste manual de stock de UN producto, aplicado de inmediato dentro de una sola
+   * transacción (lee stock actual, valida, actualiza InventoryItem y crea el registro
+   * de auditoría InventoryAdjustment/Item de forma atómica). No pasa por el flujo
+   * DRAFT/apply usado por `createAdjustment` (pensado para ajustes por lote).
+   */
+  async createManualAdjustment(dto: CreateManualAdjustmentDto, actor: JwtPayload) {
+    const product = await this.prisma.product.findUnique({ where: { id: dto.productId } });
+    if (!product) throw new NotFoundException('Producto no encontrado');
+    if (product.branchId !== dto.branchId) {
+      throw new BadRequestException('El producto no pertenece a la sucursal indicada');
+    }
+    if (!product.trackInventory) {
+      throw new BadRequestException('Este producto no maneja inventario');
+    }
+
+    const reason = dto.reason.trim();
+    if (!reason) throw new BadRequestException('El motivo es obligatorio');
+    const notes = dto.notes?.trim() || undefined;
+
+    if (dto.mode === 'DELTA') {
+      if (!dto.quantity) {
+        throw new BadRequestException('La cantidad del ajuste debe ser distinta de cero');
+      }
+      return this.applyDeltaAdjustment(dto, actor, reason, notes);
+    }
+
+    if (dto.quantity < 0) {
+      throw new BadRequestException('El stock físico no puede ser negativo');
+    }
+    return this.applySetAdjustment(dto, actor, reason, notes);
+  }
+
+  private async applyDeltaAdjustment(
+    dto: CreateManualAdjustmentDto,
+    actor: JwtPayload,
+    reason: string,
+    notes: string | undefined,
+  ) {
+    const delta = new Prisma.Decimal(dto.quantity);
+    const type = delta.gt(0) ? AdjustmentType.INCREASE : AdjustmentType.DECREASE;
+    const key = { branchId_productId: { branchId: dto.branchId, productId: dto.productId } };
+
+    const adjustment = await this.prisma.executeInTransaction(async (tx) => {
+      const guardWhere: Prisma.InventoryItemWhereInput = {
+        branchId: dto.branchId,
+        productId: dto.productId,
+        ...(delta.lt(0) ? { quantity: { gte: delta.abs() } } : {}),
+      };
+
+      const updated = await tx.inventoryItem.updateMany({
+        where: guardWhere,
+        data: { quantity: { increment: delta }, version: { increment: 1 } },
+      });
+
+      let current: { quantity: Prisma.Decimal };
+
+      if (updated.count === 0) {
+        if (delta.lt(0)) {
+          const existing = await tx.inventoryItem.findUnique({ where: key });
+          const currentQty = existing ? Number(existing.quantity) : 0;
+          throw new BadRequestException(
+            `El stock resultante no puede ser negativo (stock actual: ${currentQty}, salida solicitada: ${delta.abs().toNumber()})`,
+          );
+        }
+
+        try {
+          current = await tx.inventoryItem.create({
+            data: { branchId: dto.branchId, productId: dto.productId, quantity: delta },
+          });
+        } catch (err) {
+          if (!isUniqueConstraintError(err)) throw err;
+          current = await tx.inventoryItem.update({
+            where: key,
+            data: { quantity: { increment: delta }, version: { increment: 1 } },
+          });
+        }
+      } else {
+        current = await tx.inventoryItem.findUniqueOrThrow({ where: key });
+      }
+
+      const newQty = Number(current.quantity);
+      const previousQty = Math.round((newQty - dto.quantity) * 1000) / 1000;
+
+      return tx.inventoryAdjustment.create({
+        data: {
+          branchId: dto.branchId,
+          userId: actor.sub,
+          type,
+          status: AdjustmentStatus.APPLIED,
+          reason,
+          notes,
+          appliedAt: new Date(),
+          items: {
+            create: [{ productId: dto.productId, quantity: delta.abs(), previousQty, newQty }],
+          },
+        },
+        include: {
+          items: { include: { product: { select: { id: true, name: true, sku: true } } } },
+          user: { select: { id: true, username: true, firstName: true, lastName: true } },
+        },
+      });
+    });
+
+    await this.logManualAdjustment(adjustment.id, actor, dto);
+    return this.mapAdjustmentToDto(adjustment);
+  }
+
+  private async applySetAdjustment(
+    dto: CreateManualAdjustmentDto,
+    actor: JwtPayload,
+    reason: string,
+    notes: string | undefined,
+  ) {
+    const target = new Prisma.Decimal(dto.quantity);
+    const key = { branchId_productId: { branchId: dto.branchId, productId: dto.productId } };
+
+    for (let attempt = 1; attempt <= MAX_CONCURRENCY_RETRIES; attempt++) {
+      try {
+        const adjustment = await this.prisma.executeInTransaction(async (tx) => {
+          const existing = await tx.inventoryItem.findUnique({ where: key });
+          const previousQty = existing ? Number(existing.quantity) : 0;
+
+          if (existing) {
+            const updated = await tx.inventoryItem.updateMany({
+              where: { id: existing.id, version: existing.version },
+              data: { quantity: target, version: { increment: 1 } },
+            });
+            if (updated.count === 0) throw new ConcurrentStockUpdateError();
+          } else {
+            try {
+              await tx.inventoryItem.create({
+                data: { branchId: dto.branchId, productId: dto.productId, quantity: target },
+              });
+            } catch (err) {
+              if (isUniqueConstraintError(err)) throw new ConcurrentStockUpdateError();
+              throw err;
+            }
+          }
+
+          return tx.inventoryAdjustment.create({
+            data: {
+              branchId: dto.branchId,
+              userId: actor.sub,
+              type: AdjustmentType.SET,
+              status: AdjustmentStatus.APPLIED,
+              reason,
+              notes,
+              appliedAt: new Date(),
+              items: {
+                create: [
+                  {
+                    productId: dto.productId,
+                    quantity: target,
+                    previousQty,
+                    newQty: Number(target),
+                  },
+                ],
+              },
+            },
+            include: {
+              items: { include: { product: { select: { id: true, name: true, sku: true } } } },
+              user: { select: { id: true, username: true, firstName: true, lastName: true } },
+            },
+          });
+        });
+
+        await this.logManualAdjustment(adjustment.id, actor, dto);
+        return this.mapAdjustmentToDto(adjustment);
+      } catch (err) {
+        if (err instanceof ConcurrentStockUpdateError) continue;
+        throw err;
+      }
+    }
+
+    throw new ConflictException(
+      'El stock fue modificado por otra operación al mismo tiempo. Recargue e intente de nuevo.',
+    );
+  }
+
+  private async logManualAdjustment(
+    adjustmentId: string,
+    actor: JwtPayload,
+    dto: CreateManualAdjustmentDto,
+  ): Promise<void> {
+    await this.auditService.log({
+      userId: actor.sub,
+      action: 'ADJUST_INVENTORY',
+      module: 'inventory',
+      entityType: 'InventoryAdjustment',
+      entityId: adjustmentId,
+      newValues: {
+        productId: dto.productId,
+        mode: dto.mode,
+        quantity: dto.quantity,
+        reason: dto.reason,
+      } as Prisma.InputJsonValue,
+    });
   }
 
   async createAdjustment(dto: CreateAdjustmentDto, actor: JwtPayload) {
@@ -242,6 +463,7 @@ export class InventoryService {
     type: AdjustmentType;
     status: AdjustmentStatus;
     reason: string | null;
+    notes?: string | null;
     reference: string | null;
     appliedAt: Date | null;
     createdAt: Date;
@@ -253,16 +475,21 @@ export class InventoryService {
       newQty: Prisma.Decimal;
       product?: { name: string; sku: string };
     }>;
-    user?: { username: string };
+    user?: { username: string; firstName?: string; lastName?: string };
   }) {
     return {
       id: adjustment.id,
       branchId: adjustment.branchId,
       userId: adjustment.userId,
       username: adjustment.user?.username,
+      userName: adjustment.user
+        ? `${adjustment.user.firstName ?? ''} ${adjustment.user.lastName ?? ''}`.trim() ||
+          adjustment.user.username
+        : undefined,
       type: adjustment.type,
       status: adjustment.status,
       reason: adjustment.reason ?? undefined,
+      notes: adjustment.notes ?? undefined,
       reference: adjustment.reference ?? undefined,
       appliedAt: adjustment.appliedAt?.toISOString(),
       createdAt: adjustment.createdAt.toISOString(),

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AdjustmentStatus, Prisma } from '@prisma/client';
+import { AdjustmentStatus, AdjustmentType, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { PaginationQuery } from '@puntoventa/shared';
 
@@ -90,18 +90,53 @@ export class InventoryRepository {
     return this.prisma.inventoryAdjustment.findUnique({
       where: { id },
       include: {
-        items: { include: { product: true } },
+        items: { include: { product: { select: { id: true, name: true, sku: true } } } },
         user: { select: { id: true, username: true, firstName: true, lastName: true } },
       },
     });
   }
 
-  findAdjustmentsByBranch(branchId: string, params?: PaginationQuery) {
+  findAdjustmentsByBranch(
+    branchId: string,
+    params?: PaginationQuery & {
+      search?: string;
+      productId?: string;
+      userId?: string;
+      type?: AdjustmentType;
+      dateFrom?: string;
+      dateTo?: string;
+    },
+  ) {
     const page = params?.page ?? 1;
     const limit = params?.limit ?? 20;
     const skip = (page - 1) * limit;
 
-    const where: Prisma.InventoryAdjustmentWhereInput = { branchId };
+    const where: Prisma.InventoryAdjustmentWhereInput = {
+      branchId,
+      ...(params?.userId ? { userId: params.userId } : {}),
+      ...(params?.type ? { type: params.type } : {}),
+      ...(params?.productId ? { items: { some: { productId: params.productId } } } : {}),
+      ...(params?.dateFrom || params?.dateTo
+        ? {
+            createdAt: {
+              ...(params?.dateFrom ? { gte: new Date(params.dateFrom) } : {}),
+              ...(params?.dateTo ? { lte: new Date(params.dateTo) } : {}),
+            },
+          }
+        : {}),
+      ...(params?.search
+        ? {
+            OR: [
+              { items: { some: { product: { name: { contains: params.search } } } } },
+              { items: { some: { product: { sku: { contains: params.search } } } } },
+              { user: { firstName: { contains: params.search } } },
+              { user: { lastName: { contains: params.search } } },
+              { user: { username: { contains: params.search } } },
+              { reason: { contains: params.search } },
+            ],
+          }
+        : {}),
+    };
 
     return Promise.all([
       this.prisma.inventoryAdjustment.findMany({
@@ -109,7 +144,10 @@ export class InventoryRepository {
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { items: true, user: { select: { username: true } } },
+        include: {
+          items: { include: { product: { select: { id: true, name: true, sku: true } } } },
+          user: { select: { id: true, username: true, firstName: true, lastName: true } },
+        },
       }),
       this.prisma.inventoryAdjustment.count({ where }),
     ]).then(([items, total]) => ({

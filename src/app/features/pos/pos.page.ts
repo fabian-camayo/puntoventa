@@ -148,6 +148,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   isCreatingTab = signal(false);
   posReady = signal(false);
   isSavingSale = signal(false);
+  isPrinting = signal(false);
 
   branchId = signal<string | null>(null);
   registerId = signal<string | null>(null);
@@ -160,6 +161,8 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   logoUrl = signal<string | undefined>(undefined);
   ticketHeader = signal<string | undefined>(undefined);
   ticketFooter = signal<string | undefined>(undefined);
+  invoiceResolution = signal<string | undefined>(undefined);
+  warrantyPolicy = signal<string | undefined>(undefined);
   defaultCustomerId = signal<string | null>(null);
   activeSession = signal<RegisterSessionDto | null>(null);
   availableRegisters = signal<RegisterDto[]>([]);
@@ -260,7 +263,10 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
       this.hasSufficientPayment(),
   );
   readonly canPrintReceipt = computed(
-    () => this.isSaleCompleted() && !!this.activeSale()?.documentNumber,
+    () =>
+      this.isSaleCompleted() &&
+      !!this.activeSale()?.documentNumber &&
+      !this.isPrinting(),
   );
 
   ngOnInit(): void {
@@ -304,12 +310,17 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   onPaymentAmountInput(key: string, event: CustomEvent): void {
-    const raw = (event.detail as { value?: string | null }).value?.trim() ?? '';
-    const parsed = raw ? Number.parseFloat(raw) : NaN;
-    const amount = Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+    const raw = (event.detail as { value?: string | null }).value ?? '';
+    const digitsOnly = raw.replace(/\D/g, '');
+    const amount = digitsOnly ? Number.parseInt(digitsOnly, 10) : null;
     this.paymentLines.update((lines) =>
       lines.map((line) => (line.key === key ? { ...line, amount } : line)),
     );
+  }
+
+  formatAmountInput(value: number | null): string {
+    if (value === null || value === undefined) return '';
+    return new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(value);
   }
 
   onPaymentTypeChange(key: string, paymentTypeId: string): void {
@@ -589,25 +600,24 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
         }),
       );
 
-      const completedSale: SaleDto & { tabLabel?: string } = {
+      const completedSale: ActiveSale = {
         ...completed,
         items: completed.items ?? [],
+        tabLabel: completed.customerName ?? current.tabLabel,
       };
 
-      // Imprime con los datos de la venta terminada antes de limpiar la pantalla
-      this.printSaleReceipt(completedSale);
-
+      // La venta queda guardada y visible en pantalla; el usuario decide
+      // cuándo imprimir (botón "Imprimir factura") y cuándo iniciar otra venta.
       this.tabs.update((tabs) => tabs.filter((tab) => tab.id !== current.id));
-      this.activeTabId.set(null);
-      this.activeSale.set(null);
+      this.activeSale.set(completedSale);
+      this.resetPaymentLines(completedSale);
       this.clearSearch();
       await this.loadActiveSession();
 
-      if (this.isRegisterOpen()) {
-        await this.createNewTab();
-      }
-
-      await this.showToast('Venta realizada. Nueva venta lista.', 'success');
+      const label = completedSale.documentNumber
+        ? `Venta ${completedSale.documentNumber} guardada correctamente`
+        : 'Venta guardada correctamente';
+      await this.showToast(label, 'success');
     } catch (err: unknown) {
       const message = (err as { error?: { message?: string } })?.error?.message;
       await this.showToast(message ?? 'Error al guardar la venta', 'danger');
@@ -619,30 +629,42 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
   onPrintReceipt(): void {
     const sale = this.activeSale();
     if (!sale || !this.canPrintReceipt()) return;
-    this.printSaleReceipt(sale);
+    void this.printSaleReceipt(sale);
   }
 
-  private printSaleReceipt(sale: SaleDto): void {
-    if (!sale.documentNumber) return;
+  private async printSaleReceipt(sale: SaleDto): Promise<void> {
+    if (!sale.documentNumber || this.isPrinting()) return;
 
     const user = this.getCurrentUser();
     const cashierName = user
       ? `${user.firstName} ${user.lastName}`.trim() || user.username
       : undefined;
 
-    this.receiptPrint.printReceipt({
-      sale,
-      businessName: this.businessName() || undefined,
-      taxId: this.taxId(),
-      address: this.businessAddress(),
-      phone: this.businessPhone(),
-      email: this.businessEmail(),
-      logoUrl: this.logoUrl(),
-      ticketHeader: this.ticketHeader(),
-      ticketFooter: this.ticketFooter(),
-      registerName: this.registerName() || undefined,
-      cashierName,
-    });
+    this.isPrinting.set(true);
+    try {
+      await this.receiptPrint.printReceipt({
+        sale,
+        businessName: this.businessName() || undefined,
+        taxId: this.taxId(),
+        address: this.businessAddress(),
+        phone: this.businessPhone(),
+        email: this.businessEmail(),
+        logoUrl: this.logoUrl(),
+        ticketHeader: this.ticketHeader(),
+        ticketFooter: this.ticketFooter(),
+        invoiceResolution: this.invoiceResolution(),
+        warrantyPolicy: this.warrantyPolicy(),
+        registerName: this.registerName() || undefined,
+        cashierName,
+      });
+    } catch {
+      await this.showToast(
+        'No fue posible enviar la venta a impresión. Verifique la impresora y vuelva a intentarlo.',
+        'danger',
+      );
+    } finally {
+      this.isPrinting.set(false);
+    }
   }
 
   async onSuspend(): Promise<void> {
@@ -830,6 +852,8 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     logoUrl?: string;
     ticketHeader?: string;
     ticketFooter?: string;
+    invoiceResolution?: string;
+    warrantyPolicy?: string;
   }): void {
     this.businessName.set(res.businessName ?? res.branchName);
     this.taxId.set(res.taxId);
@@ -839,6 +863,8 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     this.logoUrl.set(res.logoUrl);
     this.ticketHeader.set(res.ticketHeader);
     this.ticketFooter.set(res.ticketFooter);
+    this.invoiceResolution.set(res.invoiceResolution);
+    this.warrantyPolicy.set(res.warrantyPolicy);
   }
 
   private async loadAvailableRegisters(

@@ -13,8 +13,10 @@ import {
   getRegisterConnectionStatus,
 } from '@puntoventa/shared';
 import { RegisterRepository } from '../infrastructure/register.repository';
+import { RegisterAccessService } from './register-access.service';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
+import { diffAuditValues } from '../../audit/application/audit-diff.util';
 import { CreateRegisterDto } from './dto/create-register.dto';
 import { UpdateRegisterDto } from './dto/update-register.dto';
 import { OpenSessionDto } from './dto/open-session.dto';
@@ -36,6 +38,7 @@ function signedMovementAmount(type: string, amount: number): number {
 export class RegistersService {
   constructor(
     private readonly registerRepository: RegisterRepository,
+    private readonly registerAccess: RegisterAccessService,
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
   ) {}
@@ -117,12 +120,23 @@ export class RegistersService {
       await this.registerRepository.setAssignedUsers(id, dto.userIds);
     }
 
+    const { before, after } = diffAuditValues(
+      { name: existing.name, description: existing.description, isActive: existing.isActive },
+      {
+        name: dto.name ?? existing.name,
+        description: dto.description ?? existing.description,
+        isActive: dto.isActive ?? existing.isActive,
+      },
+    );
+
     await this.auditService.log({
       userId: actor.sub,
       action: 'UPDATE',
       module: 'registers',
       entityType: 'Register',
       entityId: id,
+      oldValues: before as Prisma.InputJsonValue,
+      newValues: after as Prisma.InputJsonValue,
     });
 
     return this.findById(id);
@@ -155,17 +169,12 @@ export class RegistersService {
     if (!register) throw new NotFoundException('Caja no encontrada');
     if (!register.isActive) throw new BadRequestException('La caja está inactiva');
 
-    const isAdmin = actor.permissions?.includes('registers.admin');
+    const isAdmin = this.registerAccess.isAdmin(actor);
+
+    // 1) La caja debe estar asignada al usuario (o el actor debe ser admin)
+    await this.registerAccess.assertCanAccessRegister(dto.registerId, actor);
 
     if (!isAdmin) {
-      // 1) La caja debe estar asignada al usuario
-      const assigned = await this.prisma.userRegister.findFirst({
-        where: { userId: actor.sub, registerId: dto.registerId },
-      });
-      if (!assigned) {
-        throw new ForbiddenException('No tiene esta caja asignada');
-      }
-
       // 2) La caja solo puede abrirse desde el equipo (PC) al que pertenece
       const boundTerminal = await this.prisma.terminal.findFirst({
         where: { registerId: dto.registerId, isActive: true },
@@ -210,6 +219,7 @@ export class RegistersService {
   async closeSession(dto: CloseSessionDto, actor: JwtPayload): Promise<RegisterSessionDto> {
     const session = await this.registerRepository.findSessionById(dto.sessionId);
     if (!session) throw new NotFoundException('Sesión no encontrada');
+    await this.registerAccess.assertCanAccessRegister(session.registerId, actor);
     if (session.status !== RegisterSessionStatus.OPEN) {
       throw new BadRequestException('La sesión ya está cerrada');
     }
@@ -237,15 +247,22 @@ export class RegistersService {
       module: 'registers',
       entityType: 'RegisterSession',
       entityId: dto.sessionId,
-      newValues: { closingAmount: dto.closingAmount } as Prisma.InputJsonValue,
+      newValues: {
+        registerId: session.registerId,
+        openingAmount: Number(session.openingAmount),
+        closingAmount: dto.closingAmount,
+        expectedAmount: cashTotal,
+        difference: dto.closingAmount - cashTotal,
+      } as Prisma.InputJsonValue,
     });
 
     return this.mapSessionToDto(updated);
   }
 
-  async listCashMovements(sessionId: string): Promise<CashMovementDto[]> {
+  async listCashMovements(sessionId: string, actor: JwtPayload): Promise<CashMovementDto[]> {
     const session = await this.registerRepository.findSessionById(sessionId);
     if (!session) throw new NotFoundException('Sesión no encontrada');
+    await this.registerAccess.assertCanAccessRegister(session.registerId, actor);
 
     const movements = await this.prisma.cashMovement.findMany({
       where: { registerSessionId: sessionId },
@@ -263,6 +280,7 @@ export class RegistersService {
   ): Promise<CashMovementDto> {
     const session = await this.registerRepository.findSessionById(sessionId);
     if (!session) throw new NotFoundException('Sesión no encontrada');
+    await this.registerAccess.assertCanAccessRegister(session.registerId, actor);
     if (session.status !== RegisterSessionStatus.OPEN) {
       throw new BadRequestException('La sesión de caja no está abierta');
     }
@@ -295,35 +313,54 @@ export class RegistersService {
     return this.mapCashMovementToDto(movement);
   }
 
-  async getActiveSession(registerId: string): Promise<RegisterSessionDto | null> {
+  async getActiveSession(registerId: string, actor: JwtPayload): Promise<RegisterSessionDto | null> {
+    await this.registerAccess.assertCanAccessRegister(registerId, actor);
     const session = await this.registerRepository.findOpenSession(registerId);
     return session ? this.mapSessionToDto(session) : null;
   }
 
-  async listSessions(params: {
-    branchId: string;
-    registerId?: string;
-    status?: RegisterSessionStatus;
-    page?: number;
-    limit?: number;
-  }) {
-    const result = await this.registerRepository.findSessions(params);
+  async listSessions(
+    params: {
+      branchId: string;
+      registerId?: string;
+      status?: RegisterSessionStatus;
+      page?: number;
+      limit?: number;
+    },
+    actor: JwtPayload,
+  ) {
+    const accessibleIds = await this.registerAccess.getAccessibleRegisterIds(actor);
+    if (accessibleIds) {
+      if (params.registerId && !accessibleIds.includes(params.registerId)) {
+        throw new ForbiddenException('No tiene acceso a esta caja');
+      }
+      if (!params.registerId && accessibleIds.length === 0) {
+        return { items: [], total: 0, page: params.page ?? 1, limit: params.limit ?? 20, totalPages: 1 };
+      }
+    }
+
+    const result = await this.registerRepository.findSessions({
+      ...params,
+      registerIds: !params.registerId && accessibleIds ? accessibleIds : undefined,
+    });
     return {
       ...result,
       items: result.items.map((s) => this.mapSessionToDto(s)),
     };
   }
 
-  async getSessionById(sessionId: string): Promise<RegisterSessionDto> {
+  async getSessionById(sessionId: string, actor: JwtPayload): Promise<RegisterSessionDto> {
     const session = await this.registerRepository.findSessionById(sessionId);
     if (!session) throw new NotFoundException('Sesión de caja no encontrada');
+    await this.registerAccess.assertCanAccessRegister(session.registerId, actor);
     return this.mapSessionToDto(session);
   }
 
   /** Resumen para el cajero: efectivo en caja, ventas y movimientos de la sesión. */
-  async getPosSummary(sessionId: string) {
+  async getPosSummary(sessionId: string, actor: JwtPayload) {
     const session = await this.registerRepository.findSessionById(sessionId);
     if (!session) throw new NotFoundException('Sesión de caja no encontrada');
+    await this.registerAccess.assertCanAccessRegister(session.registerId, actor);
 
     const [sales, movements] = await Promise.all([
       this.prisma.sale.findMany({

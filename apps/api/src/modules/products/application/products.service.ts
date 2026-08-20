@@ -9,6 +9,7 @@ import { ProductDto, ProductSearchResult, ProductUnitDto } from '@puntoventa/sha
 import { ProductRepository } from '../infrastructure/product.repository';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
+import { diffAuditValues, snapshotAuditValue } from '../../audit/application/audit-diff.util';
 import { CreateProductDto, ProductUnitInputDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { JwtPayload } from '@puntoventa/shared';
@@ -120,7 +121,14 @@ export class ProductsService {
       module: 'products',
       entityType: 'Product',
       entityId: product.id,
-      newValues: { sku: dto.sku, name: dto.name } as Prisma.InputJsonValue,
+      newValues: snapshotAuditValue({
+        sku: dto.sku,
+        name: dto.name,
+        salePrice: dto.salePrice,
+        costPrice: dto.costPrice,
+        minStock: dto.minStock,
+        trackInventory: dto.trackInventory,
+      }) as Prisma.InputJsonValue,
     });
 
     return this.mapToDto(product);
@@ -174,12 +182,43 @@ export class ProductsService {
       });
     });
 
+    const { before, after } = diffAuditValues(
+      {
+        name: existing.name,
+        barcode: existing.barcode,
+        salePrice: existing.salePrice,
+        costPrice: existing.costPrice,
+        taxRate: existing.taxRate,
+        unit: existing.unit,
+        categoryId: existing.categoryId,
+        minStock: existing.minStock,
+        maxStock: existing.maxStock,
+        trackInventory: existing.trackInventory,
+        isActive: existing.isActive,
+      },
+      {
+        name: product.name,
+        barcode: product.barcode,
+        salePrice: product.salePrice,
+        costPrice: product.costPrice,
+        taxRate: product.taxRate,
+        unit: product.unit,
+        categoryId: product.categoryId,
+        minStock: product.minStock,
+        maxStock: product.maxStock,
+        trackInventory: product.trackInventory,
+        isActive: product.isActive,
+      },
+    );
+
     await this.auditService.log({
       userId: actor.sub,
       action: 'UPDATE',
       module: 'products',
       entityType: 'Product',
       entityId: id,
+      oldValues: before as Prisma.InputJsonValue,
+      newValues: after as Prisma.InputJsonValue,
     });
 
     return this.mapToDto(product);
@@ -197,6 +236,13 @@ export class ProductsService {
       module: 'products',
       entityType: 'Product',
       entityId: id,
+      oldValues: snapshotAuditValue({
+        sku: existing.sku,
+        name: existing.name,
+        salePrice: existing.salePrice,
+        costPrice: existing.costPrice,
+        isActive: existing.isActive,
+      }) as Prisma.InputJsonValue,
     });
 
     return { success: true };

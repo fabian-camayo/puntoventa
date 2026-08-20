@@ -230,9 +230,8 @@
           </div>
         </div>
       </section>
-    </div>
 
-    <div class="pos-actions-bar" slot="fixed">
+      <div class="pos-actions-bar">
       <div class="checkout-panel" [class.checkout-panel--full]="canOperateSale() && total() > 0 || isSaleCompleted()">
         <div class="checkout-block checkout-block--total">
           <span class="checkout-label">{{ 'POS.TOTAL' | translate }}</span>
@@ -272,10 +271,9 @@
                   <div class="received-input-wrap payment-amount-wrap" [class.is-focused]="amountInputFocused()">
                     <span class="received-prefix">$</span>
                     <ion-input
-                      type="number"
+                      type="text"
                       inputmode="decimal"
-                      min="0"
-                      [value]="line.amount ?? ''"
+                      [value]="formatAmountInput(line.amount)"
                       (ionInput)="onPaymentAmountInput(line.key, $event)"
                       (ionFocus)="amountInputFocused.set(true)"
                       (ionBlur)="amountInputFocused.set(false)"
@@ -310,37 +308,49 @@
       </div>
 
       <div class="actions-section">
-        @if (canCashMovement && isRegisterOpen()) {
-          <ion-button fill="outline" (click)="openCashMovementModal()">
-            <ion-icon name="cash-outline" slot="start"></ion-icon>
-            {{ 'POS.CASH_MOVEMENT' | translate }}
+        <div class="actions-row">
+          @if (canCashMovement && isRegisterOpen()) {
+            <ion-button fill="outline" (click)="openCashMovementModal()">
+              <ion-icon name="cash-outline" slot="start"></ion-icon>
+              {{ 'POS.CASH_MOVEMENT' | translate }}
+            </ion-button>
+          }
+          <ion-button
+            fill="outline"
+            (click)="onSuspend()"
+            [disabled]="itemCount() === 0 || !canOperateSale()"
+          >
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            {{ 'POS.SUSPEND' | translate }}
+          </ion-button>
+        </div>
+        @if (!isSaleCompleted()) {
+          <ion-button
+            class="btn-save"
+            (click)="onSaveSale()"
+            [disabled]="!canSaveSale()"
+          >
+            <ion-icon name="save-outline" slot="start"></ion-icon>
+            {{ 'POS.SAVE_SALE' | translate }}
           </ion-button>
         }
-        <ion-button
-          fill="outline"
-          (click)="onSuspend()"
-          [disabled]="itemCount() === 0 || !canOperateSale()"
-        >
-          <ion-icon name="trash-outline" slot="start"></ion-icon>
-          {{ 'POS.SUSPEND' | translate }}
-        </ion-button>
-        <ion-button
-          class="btn-save"
-          (click)="onSaveSale()"
-          [disabled]="!canSaveSale()"
-        >
-          <ion-icon name="save-outline" slot="start"></ion-icon>
-          {{ 'POS.SAVE_SALE' | translate }}
-        </ion-button>
-        <ion-button
-          class="btn-print"
-          (click)="onPrintReceipt()"
-          [disabled]="!canPrintReceipt()"
-        >
-          <ion-icon name="print-outline" slot="start"></ion-icon>
-          {{ 'POS.PRINT_RECEIPT' | translate }}
-        </ion-button>
+        @if (isSaleCompleted() && activeSale()?.documentNumber) {
+          <ion-button
+            class="btn-print"
+            (click)="onPrintReceipt()"
+            [disabled]="!canPrintReceipt()"
+          >
+            @if (isPrinting()) {
+              <ion-spinner name="crescent" slot="start"></ion-spinner>
+              {{ 'POS.PRINTING' | translate }}
+            } @else {
+              <ion-icon name="print-outline" slot="start"></ion-icon>
+              {{ 'POS.PRINT_RECEIPT' | translate }}
+            }
+          </ion-button>
+        }
       </div>
+    </div>
     </div>
   </ion-content>
   }

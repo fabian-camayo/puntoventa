@@ -8,29 +8,12 @@ import { addIcons } from 'ionicons';
 import {
   cartOutline,
   gridOutline,
-  peopleOutline,
-  shieldOutline,
-  cubeOutline,
-  settingsOutline,
+  bagHandleOutline,
   logOutOutline,
-  receiptOutline,
   storefrontOutline,
   personCircleOutline,
   moonOutline,
   sunnyOutline,
-  folderOutline,
-  cashOutline,
-  albumsOutline,
-  desktopOutline,
-  cardOutline,
-  layersOutline,
-  businessOutline,
-  bagHandleOutline,
-  resizeOutline,
-  cloudUploadOutline,
-  documentOutline,
-  walletOutline,
-  barChartOutline,
 } from 'ionicons/icons';
 import { AuthService } from '@core/services/auth.service';
 import { ConfigService } from '@core/services/config.service';
@@ -40,29 +23,12 @@ import { firstValueFrom } from 'rxjs';
 addIcons({
   cartOutline,
   gridOutline,
-  peopleOutline,
-  shieldOutline,
-  cubeOutline,
-  settingsOutline,
+  bagHandleOutline,
   logOutOutline,
-  receiptOutline,
   storefrontOutline,
   personCircleOutline,
   moonOutline,
   sunnyOutline,
-  folderOutline,
-  cashOutline,
-  albumsOutline,
-  desktopOutline,
-  cardOutline,
-  layersOutline,
-  businessOutline,
-  bagHandleOutline,
-  resizeOutline,
-  cloudUploadOutline,
-  documentOutline,
-  walletOutline,
-  barChartOutline,
 });
 
 export interface NavItem {
@@ -72,26 +38,15 @@ export interface NavItem {
   permission?: string | string[];
 }
 
+/**
+ * Menú principal reducido a tres entradas (POS, Compras, Panel de Administración).
+ * El resto de módulos administrativos (Productos, Inventario, Clientes, Proveedores,
+ * Usuarios, Cajas, Auditoría, Configuración, Reportes, etc.) no se eliminaron: siguen
+ * disponibles con sus rutas y permisos intactos dentro de `AdminDashboardPage`
+ * (`/admin`), que ya actuaba como panel/contenedor de esos módulos.
+ */
 const NAV_ITEMS: NavItem[] = [
   { labelKey: 'MENU.POS', icon: 'cart-outline', route: '/pos' },
-  {
-    labelKey: 'ADMIN.DASHBOARD',
-    icon: 'grid-outline',
-    route: '/admin',
-    permission: 'admin.access',
-  },
-  {
-    labelKey: 'ADMIN.SALES',
-    icon: 'receipt-outline',
-    route: '/admin/sales',
-    permission: 'sales.view',
-  },
-  {
-    labelKey: 'ADMIN.REPORTS',
-    icon: 'bar-chart-outline',
-    route: '/admin/reports',
-    permission: 'reports.view',
-  },
   {
     labelKey: 'ADMIN.PURCHASES',
     icon: 'bag-handle-outline',
@@ -99,94 +54,10 @@ const NAV_ITEMS: NavItem[] = [
     permission: 'purchases.view',
   },
   {
-    labelKey: 'ADMIN.PRODUCTS',
-    icon: 'cube-outline',
-    route: '/admin/products',
-    permission: 'products.view',
-  },
-  {
-    labelKey: 'ADMIN.PRODUCT_IMPORT',
-    icon: 'cloud-upload-outline',
-    route: '/admin/product-import',
-    permission: 'products.import',
-  },
-  {
-    labelKey: 'ADMIN.PRODUCT_IMPORT_TYPES',
-    icon: 'document-outline',
-    route: '/admin/product-import-types',
-    permission: 'product_import_types.view',
-  },
-  {
-    labelKey: 'ADMIN.CATEGORIES',
-    icon: 'folder-outline',
-    route: '/admin/categories',
-    permission: 'categories.view',
-  },
-  {
-    labelKey: 'ADMIN.PAYMENT_TYPES',
-    icon: 'card-outline',
-    route: '/admin/payment-types',
-    permission: 'payment_types.view',
-  },
-  {
-    labelKey: 'ADMIN.UNIT_TYPES',
-    icon: 'resize-outline',
-    route: '/admin/unit-types',
-    permission: 'unit_types.view',
-  },
-  {
-    labelKey: 'ADMIN.SUPPLIERS',
-    icon: 'business-outline',
-    route: '/admin/suppliers',
-    permission: 'suppliers.view',
-  },
-  {
-    labelKey: 'ADMIN.CUSTOMERS',
-    icon: 'people-outline',
-    route: '/admin/customers',
-    permission: 'customers.view',
-  },
-  {
-    labelKey: 'ADMIN.INVENTORY',
-    icon: 'layers-outline',
-    route: '/admin/inventory',
-    permission: 'inventory.view',
-  },
-  {
-    labelKey: 'ADMIN.REGISTER_SESSIONS',
-    icon: 'cash-outline',
-    route: '/admin/register-sessions',
-    permission: 'registers.view',
-  },
-  {
-    labelKey: 'ADMIN.REGISTERS',
-    icon: 'albums-outline',
-    route: '/admin/registers',
-    permission: 'registers.admin',
-  },
-  {
-    labelKey: 'ADMIN.TERMINALS',
-    icon: 'desktop-outline',
-    route: '/admin/terminals',
-    permission: 'registers.view',
-  },
-  {
-    labelKey: 'ADMIN.USERS',
-    icon: 'people-outline',
-    route: '/admin/users',
-    permission: 'users.view',
-  },
-  {
-    labelKey: 'ADMIN.ROLES',
-    icon: 'shield-outline',
-    route: '/admin/roles',
-    permission: 'roles.view',
-  },
-  {
-    labelKey: 'ADMIN.CONFIG',
-    icon: 'settings-outline',
-    route: '/admin/config',
-    permission: 'config.view',
+    labelKey: 'ADMIN.DASHBOARD',
+    icon: 'grid-outline',
+    route: '/admin',
+    permission: 'admin.access',
   },
 ];
 

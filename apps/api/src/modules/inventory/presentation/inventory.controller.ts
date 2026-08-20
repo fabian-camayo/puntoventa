@@ -12,6 +12,8 @@ import {
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiProduces } from '@nestjs/swagger';
 import { InventoryService } from '../application/inventory.service';
 import { CreateAdjustmentDto } from '../application/dto/create-adjustment.dto';
+import { CreateManualAdjustmentDto } from '../application/dto/create-manual-adjustment.dto';
+import { ListAdjustmentsQueryDto } from '../application/dto/list-adjustments-query.dto';
 import { JwtAuthGuard } from '../../../presentation/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../../presentation/guards/permissions.guard';
 import { RequirePermissions } from '../../../presentation/decorators/permissions.decorator';
@@ -64,12 +66,8 @@ export class InventoryController {
   @Get('adjustments')
   @RequirePermissions('inventory.view')
   @ApiOperation({ summary: 'Listar ajustes de inventario' })
-  findAdjustments(
-    @Query('branchId') branchId: string,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-  ) {
-    return this.inventoryService.findAdjustments(branchId, { page, limit });
+  findAdjustments(@Query() query: ListAdjustmentsQueryDto) {
+    return this.inventoryService.findAdjustments(query);
   }
 
   @Get('adjustments/:id')
@@ -81,9 +79,19 @@ export class InventoryController {
 
   @Post('adjustments')
   @RequirePermissions('inventory.adjust')
-  @ApiOperation({ summary: 'Crear ajuste de inventario' })
+  @ApiOperation({ summary: 'Crear ajuste de inventario (por lote, flujo borrador)' })
   createAdjustment(@Body() dto: CreateAdjustmentDto, @CurrentUser() user: JwtPayload) {
     return this.inventoryService.createAdjustment(dto, user);
+  }
+
+  @Post('adjustments/manual')
+  @RequirePermissions('inventory.adjust')
+  @ApiOperation({ summary: 'Ajuste manual de stock de un producto (aplicado de inmediato)' })
+  createManualAdjustment(
+    @Body() dto: CreateManualAdjustmentDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.inventoryService.createManualAdjustment(dto, user);
   }
 
   @Post('adjustments/:id/apply')

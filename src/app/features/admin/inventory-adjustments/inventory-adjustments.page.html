@@ -1,0 +1,118 @@
+<ion-content class="page-content">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+    <app-admin-back></app-admin-back>
+    <div class="page-title-bar">
+      <h1>
+        <ion-icon name="time-outline"></ion-icon>
+        {{ 'INVENTORY.ADJUSTMENTS_HISTORY' | translate }}
+      </h1>
+    </div>
+
+    <div class="pv-toolbar-card">
+      <ion-searchbar
+        [value]="searchQuery()"
+        [placeholder]="'INVENTORY.ADJUSTMENTS_SEARCH_PLACEHOLDER' | translate"
+        [debounce]="0"
+        (ionInput)="onSearchInput($event)"
+      ></ion-searchbar>
+
+      <div class="date-filters">
+        <div class="date-field">
+          <label>{{ 'INVENTORY.DATE_FROM' | translate }}</label>
+          <ion-input
+            type="date"
+            [value]="dateFrom()"
+            (ionChange)="onDateFromChange($event.detail.value ?? '')"
+          ></ion-input>
+        </div>
+        <div class="date-field">
+          <label>{{ 'INVENTORY.DATE_TO' | translate }}</label>
+          <ion-input
+            type="date"
+            [value]="dateTo()"
+            (ionChange)="onDateToChange($event.detail.value ?? '')"
+          ></ion-input>
+        </div>
+      </div>
+
+      <div class="filter-chips">
+        <ion-chip [color]="typeFilter() === 'ALL' ? 'primary' : 'medium'" (click)="setTypeFilter('ALL')">
+          <ion-label>{{ 'INVENTORY.FILTER_ALL' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip [color]="typeFilter() === 'INCREASE' ? 'primary' : 'medium'" (click)="setTypeFilter('INCREASE')">
+          <ion-icon name="add-outline"></ion-icon>
+          <ion-label>{{ 'INVENTORY.ENTRY' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip [color]="typeFilter() === 'DECREASE' ? 'primary' : 'medium'" (click)="setTypeFilter('DECREASE')">
+          <ion-icon name="remove-outline"></ion-icon>
+          <ion-label>{{ 'INVENTORY.EXIT' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip [color]="typeFilter() === 'SET' ? 'primary' : 'medium'" (click)="setTypeFilter('SET')">
+          <ion-label>{{ 'INVENTORY.MODE_PHYSICAL' | translate }}</ion-label>
+        </ion-chip>
+        <ion-chip outline="true">
+          <ion-label>{{ total() }} {{ 'INVENTORY.RECORDS' | translate }}</ion-label>
+        </ion-chip>
+      </div>
+    </div>
+
+    <div class="pv-card list-card">
+      @if (loading()) {
+        <div class="loading-state">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>{{ 'COMMON.LOADING' | translate }}</p>
+        </div>
+      } @else if (adjustments().length === 0) {
+        <div class="empty-state">
+          <ion-icon name="time-outline"></ion-icon>
+          <h2>{{ 'INVENTORY.ADJUSTMENTS_EMPTY_TITLE' | translate }}</h2>
+          <p>{{ 'INVENTORY.ADJUSTMENTS_EMPTY_HINT' | translate }}</p>
+        </div>
+      } @else {
+        <div class="table-header">
+          <span class="col-date">{{ 'INVENTORY.DATE' | translate }}</span>
+          <span class="col-product">{{ 'INVENTORY.PRODUCT_NAME' | translate }}</span>
+          <span class="col-user">{{ 'INVENTORY.USER' | translate }}</span>
+          <span class="col-before">{{ 'INVENTORY.BEFORE' | translate }}</span>
+          <span class="col-delta">{{ 'INVENTORY.ADJUSTMENT' | translate }}</span>
+          <span class="col-after">{{ 'INVENTORY.AFTER' | translate }}</span>
+          <span class="col-type">{{ 'INVENTORY.TYPE' | translate }}</span>
+        </div>
+
+        <ion-list lines="full">
+          @for (adj of adjustments(); track adj.id) {
+            <ion-item button [detail]="false" (click)="openDetail(adj)">
+              <div class="adjustment-grid">
+                <span class="col-date">{{ formatDate(adj.createdAt) }}</span>
+                <span class="col-product">{{ itemsSummary(adj) }}</span>
+                <span class="col-user">{{ adj.userName ?? adj.username ?? '—' }}</span>
+                <span class="col-before">{{ adj.items?.[0]?.previousQty ?? '—' }}</span>
+                <span class="col-delta mono">{{ deltaSummary(adj) }}</span>
+                <span class="col-after">{{ adj.items?.[0]?.newQty ?? '—' }}</span>
+                <span class="col-type">
+                  <ion-badge [color]="typeColor(adj.type)">{{ typeLabel(adj.type) }}</ion-badge>
+                </span>
+              </div>
+            </ion-item>
+          }
+        </ion-list>
+
+        <div class="pagination">
+          <ion-button fill="outline" [disabled]="page() <= 1" (click)="prevPage()">
+            <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+            {{ 'COMMON.BACK' | translate }}
+          </ion-button>
+          <span class="page-info">{{ page() }} / {{ totalPages() }}</span>
+          <ion-button fill="outline" [disabled]="page() >= totalPages()" (click)="nextPage()">
+            {{ 'COMMON.NEXT' | translate }}
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      }
+    </div>
+  </div>
+</ion-content>

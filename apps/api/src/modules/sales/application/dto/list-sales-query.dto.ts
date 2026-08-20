@@ -13,6 +13,11 @@ export class ListSalesQueryDto {
   @IsString()
   search?: string;
 
+  @ApiPropertyOptional({ description: 'Filtrar por caja. Los usuarios no admin solo pueden usar una caja asignada.' })
+  @IsOptional()
+  @IsString()
+  registerId?: string;
+
   @ApiPropertyOptional({ enum: SaleStatus })
   @IsOptional()
   @IsEnum(SaleStatus)

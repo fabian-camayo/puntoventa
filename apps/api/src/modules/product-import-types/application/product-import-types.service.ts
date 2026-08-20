@@ -17,6 +17,7 @@ import { ProductImportTypeRepository } from '../infrastructure/product-import-ty
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
 import { ProductsService } from '../../products/application/products.service';
+import { InventoryService } from '../../inventory/application/inventory.service';
 import { CreateProductImportTypeDto } from './dto/create-product-import-type.dto';
 import { UpdateProductImportTypeDto } from './dto/update-product-import-type.dto';
 import { readExcelDataRows, readExcelHeaders } from './excel.util';
@@ -28,6 +29,7 @@ export class ProductImportTypesService {
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
     private readonly productsService: ProductsService,
+    private readonly inventoryService: InventoryService,
   ) {}
 
   async findAll(
@@ -241,7 +243,7 @@ export class ProductImportTypesService {
             actor,
           );
           if (mapped.initialStock != null && mapped.trackInventory !== false) {
-            await this.setStock(branchId, existing.id, mapped.initialStock);
+            await this.setStock(branchId, existing.id, mapped.initialStock, actor);
           }
           updated += 1;
         } else {
@@ -264,7 +266,7 @@ export class ProductImportTypesService {
             actor,
           );
           if (mapped.initialStock != null && (mapped.trackInventory ?? true)) {
-            await this.setStock(branchId, product.id, mapped.initialStock);
+            await this.setStock(branchId, product.id, mapped.initialStock, actor);
           }
           created += 1;
         }
@@ -300,12 +302,27 @@ export class ProductImportTypesService {
     };
   }
 
-  private async setStock(branchId: string, productId: string, quantity: number) {
-    await this.prisma.inventoryItem.upsert({
-      where: { branchId_productId: { branchId, productId } },
-      create: { branchId, productId, quantity },
-      update: { quantity, version: { increment: 1 } },
-    });
+  /**
+   * Fija el stock inicial/importado de un producto mediante el mecanismo de ajustes
+   * manuales de inventario, para que quede auditado (usuario, fecha, stock anterior/nuevo)
+   * igual que cualquier otra modificación manual de stock.
+   */
+  private async setStock(
+    branchId: string,
+    productId: string,
+    quantity: number,
+    actor: JwtPayload,
+  ): Promise<void> {
+    await this.inventoryService.createManualAdjustment(
+      {
+        branchId,
+        productId,
+        mode: 'SET',
+        quantity,
+        reason: 'Importación de productos (Excel)',
+      },
+      actor,
+    );
   }
 
   private mapRow(

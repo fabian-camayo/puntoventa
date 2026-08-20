@@ -31,12 +31,14 @@ export class SaleService {
     branchId: string;
     search?: string;
     status?: string;
+    registerId?: string;
     page?: number;
     limit?: number;
   }): Observable<PaginatedResult<SaleListItemDto>> {
     const query: Record<string, string> = { branchId: params.branchId };
     if (params.search) query['search'] = params.search;
     if (params.status) query['status'] = params.status;
+    if (params.registerId) query['registerId'] = params.registerId;
     if (params.page) query['page'] = String(params.page);
     if (params.limit) query['limit'] = String(params.limit);
 

@@ -10,20 +10,26 @@
         <ion-icon name="layers-outline"></ion-icon>
         {{ 'ADMIN.INVENTORY' | translate }}
       </h1>
-      @if (canExport) {
-        <ion-button
-          fill="outline"
-          (click)="exportExcel()"
-          [disabled]="exporting() || !branchId()"
-        >
-          @if (exporting()) {
-            <ion-spinner name="crescent" slot="start"></ion-spinner>
-          } @else {
-            <ion-icon name="download-outline" slot="start"></ion-icon>
-          }
-          {{ 'INVENTORY.EXPORT_EXCEL' | translate }}
+      <div class="title-actions">
+        <ion-button fill="outline" routerLink="/admin/inventory-adjustments">
+          <ion-icon name="time-outline" slot="start"></ion-icon>
+          {{ 'INVENTORY.ADJUSTMENTS_HISTORY' | translate }}
         </ion-button>
-      }
+        @if (canExport) {
+          <ion-button
+            fill="outline"
+            (click)="exportExcel()"
+            [disabled]="exporting() || !branchId()"
+          >
+            @if (exporting()) {
+              <ion-spinner name="crescent" slot="start"></ion-spinner>
+            } @else {
+              <ion-icon name="download-outline" slot="start"></ion-icon>
+            }
+            {{ 'INVENTORY.EXPORT_EXCEL' | translate }}
+          </ion-button>
+        }
+      </div>
     </div>
 
     <div class="pv-toolbar-card">
@@ -53,17 +59,20 @@
           <p>{{ 'INVENTORY.EMPTY_HINT' | translate }}</p>
         </div>
       } @else {
-        <div class="table-header">
+        <div class="table-header" [class.with-actions]="canAdjust">
           <span class="col-sku">{{ 'INVENTORY.SKU' | translate }}</span>
           <span class="col-name">{{ 'INVENTORY.PRODUCT_NAME' | translate }}</span>
           <span class="col-qty">{{ 'INVENTORY.QUANTITY' | translate }}</span>
           <span class="col-reserved">{{ 'INVENTORY.RESERVED' | translate }}</span>
+          @if (canAdjust) {
+            <span class="col-actions"></span>
+          }
         </div>
 
         <ion-list class="inventory-list" lines="full">
           @for (item of items(); track item.id) {
             <ion-item class="stock-row" [detail]="false">
-              <div class="stock-grid">
+              <div class="stock-grid" [class.with-actions]="canAdjust">
                 <span class="col-sku mono">{{ item.sku || '—' }}</span>
                 <span class="col-name"><strong>{{ item.name || '—' }}</strong></span>
                 <span class="col-qty">{{ item.quantity }}</span>
@@ -74,6 +83,18 @@
                     —
                   }
                 </span>
+                @if (canAdjust) {
+                  <span class="col-actions">
+                    <ion-button
+                      fill="clear"
+                      size="small"
+                      (click)="openAdjustModal(item)"
+                      [title]="'INVENTORY.ADJUST_ACTION' | translate"
+                    >
+                      <ion-icon name="swap-vertical-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  </span>
+                }
               </div>
             </ion-item>
           }

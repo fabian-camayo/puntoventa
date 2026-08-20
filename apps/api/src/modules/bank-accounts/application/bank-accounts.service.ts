@@ -7,6 +7,7 @@ import { Prisma } from '@prisma/client';
 import { BankAccountRepository } from '../infrastructure/bank-account.repository';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
+import { diffAuditValues, snapshotAuditValue } from '../../audit/application/audit-diff.util';
 import { CreateBankAccountDto } from './dto/create-bank-account.dto';
 import { UpdateBankAccountDto } from './dto/update-bank-account.dto';
 import { JwtPayload } from '@puntoventa/shared';
@@ -63,7 +64,13 @@ export class BankAccountsService {
       module: 'bank_accounts',
       entityType: 'BankAccount',
       entityId: item.id,
-      newValues: { code, name: dto.name } as Prisma.InputJsonValue,
+      newValues: snapshotAuditValue({
+        code,
+        name: dto.name,
+        bankName: dto.bankName,
+        accountNumber: dto.accountNumber,
+        isActive: dto.isActive ?? true,
+      }) as Prisma.InputJsonValue,
     });
 
     return this.mapToDto(item);
@@ -80,12 +87,29 @@ export class BankAccountsService {
       isActive: dto.isActive,
     });
 
+    const { before, after } = diffAuditValues(
+      {
+        name: existing.name,
+        bankName: existing.bankName,
+        accountNumber: existing.accountNumber,
+        isActive: existing.isActive,
+      },
+      {
+        name: item.name,
+        bankName: item.bankName,
+        accountNumber: item.accountNumber,
+        isActive: item.isActive,
+      },
+    );
+
     await this.auditService.log({
       userId: actor.sub,
       action: 'UPDATE',
       module: 'bank_accounts',
       entityType: 'BankAccount',
       entityId: id,
+      oldValues: before as Prisma.InputJsonValue,
+      newValues: after as Prisma.InputJsonValue,
     });
 
     return this.mapToDto(item);
@@ -103,6 +127,11 @@ export class BankAccountsService {
       module: 'bank_accounts',
       entityType: 'BankAccount',
       entityId: id,
+      oldValues: snapshotAuditValue({
+        code: existing.code,
+        name: existing.name,
+        isActive: existing.isActive,
+      }) as Prisma.InputJsonValue,
     });
 
     return { success: true };

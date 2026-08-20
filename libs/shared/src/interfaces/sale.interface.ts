@@ -77,6 +77,7 @@ export interface SaleListItemDto {
   total: number;
   itemCount: number;
   customerName?: string;
+  registerId?: string;
   registerName?: string;
   cashierName?: string;
   completedAt?: string;

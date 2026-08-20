@@ -242,6 +242,30 @@
                 <small class="field-hint">{{ 'CONFIG.TICKET_HEADER_HINT' | translate }}</small>
               </div>
               <div class="field-box span-3">
+                <label>{{ 'CONFIG.INVOICE_RESOLUTION' | translate }}</label>
+                <ion-item lines="none" class="field-item">
+                  <ion-textarea
+                    formControlName="invoiceResolution"
+                    [autoGrow]="true"
+                    rows="2"
+                    [placeholder]="'CONFIG.INVOICE_RESOLUTION_HINT' | translate"
+                  ></ion-textarea>
+                </ion-item>
+                <small class="field-hint">{{ 'CONFIG.INVOICE_RESOLUTION_HINT' | translate }}</small>
+              </div>
+              <div class="field-box span-3">
+                <label>{{ 'CONFIG.WARRANTY_POLICY' | translate }}</label>
+                <ion-item lines="none" class="field-item">
+                  <ion-textarea
+                    formControlName="warrantyPolicy"
+                    [autoGrow]="true"
+                    rows="3"
+                    [placeholder]="'CONFIG.WARRANTY_POLICY_HINT' | translate"
+                  ></ion-textarea>
+                </ion-item>
+                <small class="field-hint">{{ 'CONFIG.WARRANTY_POLICY_HINT' | translate }}</small>
+              </div>
+              <div class="field-box span-3">
                 <label>{{ 'CONFIG.TICKET_FOOTER' | translate }}</label>
                 <ion-item lines="none" class="field-item">
                   <ion-textarea

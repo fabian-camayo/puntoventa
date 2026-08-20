@@ -3,9 +3,14 @@
     <ion-title>{{ 'SALES.DETAIL_TITLE' | translate }}</ion-title>
     <ion-buttons slot="end">
       @if (sale.status === SaleStatus.COMPLETED) {
-        <ion-button (click)="print()">
-          <ion-icon name="print-outline" slot="start"></ion-icon>
-          {{ 'POS.PRINT_RECEIPT' | translate }}
+        <ion-button (click)="print()" [disabled]="printing">
+          @if (printing) {
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
+            {{ 'POS.PRINTING' | translate }}
+          } @else {
+            <ion-icon name="print-outline" slot="start"></ion-icon>
+            {{ 'POS.PRINT_RECEIPT' | translate }}
+          }
         </ion-button>
       }
       @if (canEditSale) {

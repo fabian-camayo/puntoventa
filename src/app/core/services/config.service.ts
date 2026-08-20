@@ -19,6 +19,8 @@ export interface BusinessConfigDto {
   logoUrl?: string;
   ticketHeader?: string;
   ticketFooter?: string;
+  invoiceResolution?: string;
+  warrantyPolicy?: string;
   invoicePrefix?: string;
   invoiceNumberPadding?: number;
   invoiceNextNumber?: number;
@@ -38,6 +40,8 @@ export interface UpdateBusinessConfigPayload {
   logoUrl?: string | null;
   ticketHeader?: string;
   ticketFooter?: string;
+  invoiceResolution?: string;
+  warrantyPolicy?: string;
   invoicePrefix?: string;
   invoiceNumberPadding?: number;
   invoiceNextNumber?: number;

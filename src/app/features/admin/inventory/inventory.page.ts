@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import {
   IonButton,
   IonIcon,
@@ -11,6 +12,7 @@ import {
   IonSpinner,
   IonRefresher,
   IonRefresherContent,
+  ModalController,
   ToastController,
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
@@ -23,16 +25,21 @@ import {
   chevronForwardOutline,
   layersOutline,
   downloadOutline,
+  swapVerticalOutline,
+  timeOutline,
 } from 'ionicons/icons';
 import { InventoryService, StockItemDto } from '@core/services/inventory.service';
 import { ConfigService } from '@core/services/config.service';
 import { AuthService } from '@core/services/auth.service';
+import { InventoryAdjustmentModal } from './inventory-adjustment.modal';
 
 addIcons({
   chevronBackOutline,
   chevronForwardOutline,
   layersOutline,
   downloadOutline,
+  swapVerticalOutline,
+  timeOutline,
 });
 
 @Component({
@@ -54,6 +61,7 @@ addIcons({
     IonRefresherContent,
     TranslateModule,
     AdminBackButton,
+    RouterLink,
   ],
 })
 export class InventoryPage implements OnInit, OnDestroy {
@@ -61,12 +69,14 @@ export class InventoryPage implements OnInit, OnDestroy {
   private readonly configService = inject(ConfigService);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastController);
+  private readonly modalCtrl = inject(ModalController);
   private readonly destroy$ = new Subject<void>();
   private readonly search$ = new Subject<string>();
 
   readonly canExport =
     this.auth.hasPermission('inventory.view') ||
     this.auth.hasPermission('reports.export');
+  readonly canAdjust = this.auth.hasPermission('inventory.adjust');
 
   branchId = signal<string | null>(null);
   items = signal<StockItemDto[]>([]);
@@ -144,6 +154,30 @@ export class InventoryPage implements OnInit, OnDestroy {
     }
   }
 
+  async openAdjustModal(item: StockItemDto): Promise<void> {
+    const branchId = this.branchId();
+    if (!branchId || !this.canAdjust) return;
+
+    const modal = await this.modalCtrl.create({
+      component: InventoryAdjustmentModal,
+      componentProps: {
+        branchId,
+        productId: item.productId,
+        productName: item.name ?? '',
+        sku: item.sku ?? '',
+        unit: item.unit ?? '',
+        currentQty: item.quantity,
+      },
+      cssClass: 'pv-form-modal',
+    });
+    await modal.present();
+    const { role } = await modal.onDidDismiss();
+    if (role === 'saved') {
+      await this.loadStock();
+      await this.showToast('INVENTORY.ADJUST_OK', 'success');
+    }
+  }
+
   private setupSearch(): void {
     this.search$
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
@@ -203,6 +237,7 @@ export class InventoryPage implements OnInit, OnDestroy {
       'INVENTORY.CONTEXT_ERROR': 'No se pudo cargar la sucursal',
       'INVENTORY.EXPORT_OK': 'Excel generado correctamente',
       'INVENTORY.EXPORT_ERROR': 'No se pudo generar el Excel',
+      'INVENTORY.ADJUST_OK': 'Ajuste de inventario registrado correctamente',
     };
     const t = await this.toast.create({
       message: messages[messageKey] ?? messageKey,

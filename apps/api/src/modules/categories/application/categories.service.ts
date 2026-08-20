@@ -7,6 +7,7 @@ import { Prisma } from '@prisma/client';
 import { CategoryRepository } from '../infrastructure/category.repository';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
+import { diffAuditValues, snapshotAuditValue } from '../../audit/application/audit-diff.util';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { JwtPayload } from '@puntoventa/shared';
@@ -55,7 +56,14 @@ export class CategoriesService {
       module: 'categories',
       entityType: 'Category',
       entityId: category.id,
-      newValues: { code: dto.code, name: dto.name } as Prisma.InputJsonValue,
+      newValues: snapshotAuditValue({
+        code: dto.code,
+        name: dto.name,
+        description: dto.description,
+        parentId: dto.parentId,
+        sortOrder: dto.sortOrder ?? 0,
+        isActive: dto.isActive ?? true,
+      }) as Prisma.InputJsonValue,
     });
 
     return this.mapCategoryToDto(category);
@@ -73,12 +81,31 @@ export class CategoriesService {
       isActive: dto.isActive,
     });
 
+    const { before, after } = diffAuditValues(
+      {
+        name: existing.name,
+        description: existing.description,
+        parentId: existing.parentId,
+        sortOrder: existing.sortOrder,
+        isActive: existing.isActive,
+      },
+      {
+        name: category.name,
+        description: category.description,
+        parentId: category.parentId,
+        sortOrder: category.sortOrder,
+        isActive: category.isActive,
+      },
+    );
+
     await this.auditService.log({
       userId: actor.sub,
       action: 'UPDATE',
       module: 'categories',
       entityType: 'Category',
       entityId: id,
+      oldValues: before as Prisma.InputJsonValue,
+      newValues: after as Prisma.InputJsonValue,
     });
 
     return this.mapCategoryToDto(category);
@@ -96,6 +123,11 @@ export class CategoriesService {
       module: 'categories',
       entityType: 'Category',
       entityId: id,
+      oldValues: snapshotAuditValue({
+        code: existing.code,
+        name: existing.name,
+        isActive: existing.isActive,
+      }) as Prisma.InputJsonValue,
     });
 
     return { success: true };

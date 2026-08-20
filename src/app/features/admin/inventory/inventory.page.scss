@@ -37,6 +37,13 @@
   }
 }
 
+.title-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .table-header,
 .stock-grid {
   display: grid;
@@ -44,6 +51,14 @@
   align-items: center;
   gap: 8px;
   width: 100%;
+
+  &.with-actions {
+    grid-template-columns: 120px 1.5fr 100px 100px 48px;
+  }
+}
+
+.col-actions {
+  text-align: right;
 }
 
 .table-header {

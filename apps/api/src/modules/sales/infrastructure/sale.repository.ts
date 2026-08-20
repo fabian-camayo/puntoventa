@@ -36,6 +36,8 @@ export class SaleRepository {
     params: {
       search?: string;
       status?: SaleStatus;
+      registerId?: string;
+      registerIds?: string[];
       page?: number;
       limit?: number;
     },
@@ -46,6 +48,11 @@ export class SaleRepository {
 
     const where = {
       branchId,
+      ...(params.registerId
+        ? { registerId: params.registerId }
+        : params.registerIds
+          ? { registerId: { in: params.registerIds } }
+          : {}),
       ...(params.status ? { status: params.status } : {}),
       ...(params.search
         ? {

@@ -10,6 +10,8 @@ import {
   IonBadge,
   IonChip,
   IonSpinner,
+  IonSelect,
+  IonSelectOption,
   IonRefresher,
   IonRefresherContent,
   ModalController,
@@ -25,8 +27,9 @@ import {
   chevronBackOutline,
   chevronForwardOutline,
 } from 'ionicons/icons';
-import { SaleListItemDto, SaleStatus, SaleDto } from '@puntoventa/shared';
+import { SaleListItemDto, SaleStatus, SaleDto, RegisterDto } from '@puntoventa/shared';
 import { SaleService } from '@core/services/sale.service';
+import { RegisterService } from '@core/services/register.service';
 import { ConfigService } from '@core/services/config.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppCurrencyPipe } from '@shared/pipes/app-currency.pipe';
@@ -56,6 +59,8 @@ type StatusFilter = 'ALL' | SaleStatus;
     IonBadge,
     IonChip,
     IonSpinner,
+    IonSelect,
+    IonSelectOption,
     IonRefresher,
     IonRefresherContent,
     TranslateModule,
@@ -65,6 +70,7 @@ type StatusFilter = 'ALL' | SaleStatus;
 })
 export class SalesPage implements OnInit, OnDestroy {
   private readonly saleService = inject(SaleService);
+  private readonly registerService = inject(RegisterService);
   private readonly configService = inject(ConfigService);
   private readonly auth = inject(AuthService);
   private readonly modalCtrl = inject(ModalController);
@@ -75,6 +81,11 @@ export class SalesPage implements OnInit, OnDestroy {
   readonly SaleStatus = SaleStatus;
   readonly canVoid = this.auth.hasPermission('sales.void');
   readonly canDelete = this.auth.hasPermission('sales.delete');
+  /** Solo el administrador puede ver y filtrar las ventas de todas las cajas. */
+  readonly isRegisterAdmin = this.auth.hasPermission('registers.admin');
+
+  registers = signal<RegisterDto[]>([]);
+  registerFilter = signal<string>('ALL');
 
   branchId = signal<string | null>(null);
   businessName = signal('');
@@ -85,6 +96,8 @@ export class SalesPage implements OnInit, OnDestroy {
   logoUrl = signal<string | undefined>(undefined);
   ticketHeader = signal<string | undefined>(undefined);
   ticketFooter = signal<string | undefined>(undefined);
+  invoiceResolution = signal<string | undefined>(undefined);
+  warrantyPolicy = signal<string | undefined>(undefined);
   sales = signal<SaleListItemDto[]>([]);
   searchQuery = signal('');
   statusFilter = signal<StatusFilter>(SaleStatus.COMPLETED);
@@ -112,6 +125,13 @@ export class SalesPage implements OnInit, OnDestroy {
   setStatusFilter(filter: StatusFilter): void {
     if (this.statusFilter() === filter) return;
     this.statusFilter.set(filter);
+    this.page.set(1);
+    this.loadSales();
+  }
+
+  setRegisterFilter(registerId: string): void {
+    if (this.registerFilter() === registerId) return;
+    this.registerFilter.set(registerId);
     this.page.set(1);
     this.loadSales();
   }
@@ -183,7 +203,10 @@ export class SalesPage implements OnInit, OnDestroy {
           logoUrl: this.logoUrl(),
           ticketHeader: this.ticketHeader(),
           ticketFooter: this.ticketFooter(),
+          invoiceResolution: this.invoiceResolution(),
+          warrantyPolicy: this.warrantyPolicy(),
           registerName: sale.registerName,
+          cashierName: sale.cashierName,
         },
         cssClass: 'pv-form-modal',
       });
@@ -218,6 +241,14 @@ export class SalesPage implements OnInit, OnDestroy {
         this.logoUrl.set(res.logoUrl);
         this.ticketHeader.set(res.ticketHeader);
         this.ticketFooter.set(res.ticketFooter);
+        this.invoiceResolution.set(res.invoiceResolution);
+        this.warrantyPolicy.set(res.warrantyPolicy);
+        if (this.isRegisterAdmin) {
+          this.registerService.listMine(res.branchId).subscribe({
+            next: (registers) => this.registers.set(registers),
+            error: () => this.registers.set([]),
+          });
+        }
         this.loadSales();
       },
       error: async () => {
@@ -239,6 +270,7 @@ export class SalesPage implements OnInit, OnDestroy {
           branchId,
           search: this.searchQuery() || undefined,
           status: filter === 'ALL' ? undefined : filter,
+          registerId: this.registerFilter() === 'ALL' ? undefined : this.registerFilter(),
           page: this.page(),
           limit: 20,
         })

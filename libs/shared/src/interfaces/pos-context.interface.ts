@@ -13,5 +13,7 @@ export interface PosContextDto {
   logoUrl?: string;
   ticketHeader?: string;
   ticketFooter?: string;
+  invoiceResolution?: string;
+  warrantyPolicy?: string;
   defaultCustomerId?: string;
 }

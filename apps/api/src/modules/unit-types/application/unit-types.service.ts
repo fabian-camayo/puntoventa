@@ -6,6 +6,7 @@ import {
 import { Prisma } from '@prisma/client';
 import { UnitTypeRepository } from '../infrastructure/unit-type.repository';
 import { AuditService } from '../../audit/application/audit.service';
+import { diffAuditValues, snapshotAuditValue } from '../../audit/application/audit-diff.util';
 import { CreateUnitTypeDto } from './dto/create-unit-type.dto';
 import { UpdateUnitTypeDto } from './dto/update-unit-type.dto';
 import { JwtPayload } from '@puntoventa/shared';
@@ -60,7 +61,13 @@ export class UnitTypesService {
       module: 'unit_types',
       entityType: 'UnitType',
       entityId: item.id,
-      newValues: { code, name: dto.name } as Prisma.InputJsonValue,
+      newValues: snapshotAuditValue({
+        code,
+        name: dto.name,
+        description: dto.description,
+        isActive: dto.isActive ?? true,
+        sortOrder: dto.sortOrder ?? 0,
+      }) as Prisma.InputJsonValue,
     });
 
     return this.mapToDto(item);
@@ -77,12 +84,29 @@ export class UnitTypesService {
       sortOrder: dto.sortOrder,
     });
 
+    const { before, after } = diffAuditValues(
+      {
+        name: existing.name,
+        description: existing.description,
+        isActive: existing.isActive,
+        sortOrder: existing.sortOrder,
+      },
+      {
+        name: item.name,
+        description: item.description,
+        isActive: item.isActive,
+        sortOrder: item.sortOrder,
+      },
+    );
+
     await this.auditService.log({
       userId: actor.sub,
       action: 'UPDATE',
       module: 'unit_types',
       entityType: 'UnitType',
       entityId: id,
+      oldValues: before as Prisma.InputJsonValue,
+      newValues: after as Prisma.InputJsonValue,
     });
 
     return this.mapToDto(item);
@@ -100,6 +124,11 @@ export class UnitTypesService {
       module: 'unit_types',
       entityType: 'UnitType',
       entityId: id,
+      oldValues: snapshotAuditValue({
+        code: existing.code,
+        name: existing.name,
+        isActive: existing.isActive,
+      }) as Prisma.InputJsonValue,
     });
 
     return { success: true };

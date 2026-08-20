@@ -9,6 +9,8 @@ import {
   IonBadge,
   IonChip,
   IonSpinner,
+  IonSelect,
+  IonSelectOption,
   IonRefresher,
   IonRefresherContent,
   ModalController,
@@ -25,7 +27,7 @@ import {
   lockOpenOutline,
   lockClosedOutline,
 } from 'ionicons/icons';
-import { RegisterSessionDto } from '@puntoventa/shared';
+import { RegisterSessionDto, RegisterDto } from '@puntoventa/shared';
 import { RegisterService } from '@core/services/register.service';
 import { ConfigService } from '@core/services/config.service';
 import { AuthService } from '@core/services/auth.service';
@@ -57,6 +59,8 @@ type StatusFilter = 'ALL' | 'OPEN' | 'CLOSED';
     IonBadge,
     IonChip,
     IonSpinner,
+    IonSelect,
+    IonSelectOption,
     IonRefresher,
     IonRefresherContent,
     TranslateModule,
@@ -74,10 +78,13 @@ export class RegisterSessionsPage implements OnInit, OnDestroy {
 
   readonly canOpen = this.auth.hasPermission('registers.open');
   readonly canClose = this.auth.hasPermission('registers.close');
+  /** El administrador puede elegir cualquier caja; el resto opera solo la suya. */
+  readonly isRegisterAdmin = this.auth.hasPermission('registers.admin');
 
   branchId = signal<string | null>(null);
   registerId = signal<string | null>(null);
   registerName = signal('');
+  registers = signal<RegisterDto[]>([]);
   sessions = signal<RegisterSessionDto[]>([]);
   activeSession = signal<RegisterSessionDto | null>(null);
   statusFilter = signal<StatusFilter>('ALL');
@@ -92,6 +99,17 @@ export class RegisterSessionsPage implements OnInit, OnDestroy {
         this.branchId.set(ctx.branchId);
         this.registerId.set(ctx.registerId);
         this.registerName.set(ctx.registerName);
+
+        if (this.isRegisterAdmin) {
+          this.registerService
+            .listMine(ctx.branchId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (registers) => this.registers.set(registers),
+              error: () => this.registers.set([]),
+            });
+        }
+
         void this.loadSessions();
         void this.loadActiveSession();
       },
@@ -99,6 +117,19 @@ export class RegisterSessionsPage implements OnInit, OnDestroy {
         await this.showToast('REGISTERS.CONTEXT_ERROR', 'danger');
       },
     });
+  }
+
+  selectRegister(registerId: string): void {
+    if (!registerId || registerId === this.registerId()) return;
+
+    const register = this.registers().find((r) => r.id === registerId);
+    if (!register) return;
+
+    this.registerId.set(register.id);
+    this.registerName.set(register.name);
+    this.page.set(1);
+    void this.loadSessions();
+    void this.loadActiveSession();
   }
 
   ngOnDestroy(): void {

@@ -7,6 +7,7 @@ import {
   IsUUID,
   Min,
   Max,
+  MaxLength,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
@@ -69,6 +70,23 @@ export class UpdateBusinessConfigDto {
   @IsOptional()
   @IsString()
   ticketFooter?: string;
+
+  @ApiPropertyOptional({
+    description: 'Resolución de facturación (ej. resolución DIAN) impresa en el comprobante',
+    example: 'Resolución No. 18764000000001 de 2026',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  invoiceResolution?: string;
+
+  @ApiPropertyOptional({
+    description: 'Política de garantía impresa al final del comprobante',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  warrantyPolicy?: string;
 
   @ApiPropertyOptional({
     description: 'Prefijo de factura. Ej: FEV → FEV001',

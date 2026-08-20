@@ -14,6 +14,10 @@ export interface ReceiptPrintData {
   ticketHeader?: string;
   /** Mensaje legal / pie de factura */
   ticketFooter?: string;
+  /** Resolución de facturación (ej. resolución DIAN) configurada en el negocio */
+  invoiceResolution?: string;
+  /** Política de garantía configurada en el negocio */
+  warrantyPolicy?: string;
   registerName?: string;
   cashierName?: string;
 }
@@ -22,25 +26,109 @@ const DEFAULT_LEGAL_FOOTER =
   'Documento equivalente a factura de venta. Conserve este comprobante. ' +
   'Gracias por su compra.';
 
+/** Cuánto esperar como máximo por `afterprint` antes de limpiar de todas formas. */
+const PRINT_CLEANUP_TIMEOUT_MS = 4000;
+/** Cuánto esperar a que cargue el logo antes de imprimir de todas formas. */
+const LOGO_LOAD_TIMEOUT_MS = 1200;
+
 @Injectable({ providedIn: 'root' })
 export class ReceiptPrintService {
-  printReceipt(data: ReceiptPrintData): void {
-    const html = this.buildReceiptHtml(data);
-    const printWindow = window.open('', '_blank', 'width=420,height=720');
+  private printing = false;
 
-    if (!printWindow) {
-      return;
+  /** true mientras hay una impresión en curso; útil para deshabilitar el botón "Imprimir". */
+  isPrinting(): boolean {
+    return this.printing;
+  }
+
+  /**
+   * Genera el comprobante e imprime directamente, sin abrir pestaña ni ventana
+   * externa: el contenido se renderiza en un `<iframe>` oculto dentro de la
+   * página actual y se invoca `print()` sobre ese iframe. El usuario nunca sale
+   * del contexto de la aplicación ni tiene que interactuar con nada fuera del
+   * botón "Imprimir".
+   */
+  printReceipt(data: ReceiptPrintData): Promise<void> {
+    if (this.printing) {
+      // Ya hay una impresión en curso (protege contra doble clic / doble disparo).
+      return Promise.resolve();
     }
+    this.printing = true;
 
-    printWindow.document.open();
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.focus();
+    return new Promise<void>((resolve, reject) => {
+      let settled = false;
+      let iframe: HTMLIFrameElement | null = null;
 
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 400);
+      const cleanup = () => {
+        this.printing = false;
+        if (iframe?.parentNode) {
+          iframe.parentNode.removeChild(iframe);
+        }
+      };
+
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        resolve();
+      };
+
+      const fail = (err: unknown) => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        reject(err instanceof Error ? err : new Error('No se pudo imprimir el comprobante'));
+      };
+
+      try {
+        iframe = document.createElement('iframe');
+        iframe.setAttribute('aria-hidden', 'true');
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        iframe.style.visibility = 'hidden';
+
+        iframe.onload = () => {
+          const win = iframe?.contentWindow;
+          const doc = iframe?.contentDocument;
+          if (!win || !doc) {
+            fail(new Error('No se pudo preparar el documento de impresión'));
+            return;
+          }
+
+          win.onafterprint = finish;
+
+          const triggerPrint = () => {
+            try {
+              win.focus();
+              win.print();
+              // No todos los navegadores disparan `afterprint` de forma confiable
+              // (ej. al cancelar el diálogo en algunos entornos); nos aseguramos
+              // de limpiar el iframe de todas formas tras un margen razonable.
+              setTimeout(finish, PRINT_CLEANUP_TIMEOUT_MS);
+            } catch (err) {
+              fail(err);
+            }
+          };
+
+          const img = doc.querySelector<HTMLImageElement>('.logo');
+          if (img && !img.complete) {
+            img.addEventListener('load', triggerPrint, { once: true });
+            img.addEventListener('error', triggerPrint, { once: true });
+            setTimeout(triggerPrint, LOGO_LOAD_TIMEOUT_MS);
+          } else {
+            triggerPrint();
+          }
+        };
+
+        iframe.srcdoc = this.buildReceiptHtml(data);
+        document.body.appendChild(iframe);
+      } catch (err) {
+        fail(err);
+      }
+    });
   }
 
   private buildReceiptHtml(data: ReceiptPrintData): string {
@@ -54,6 +142,8 @@ export class ReceiptPrintService {
       logoUrl,
       ticketHeader,
       ticketFooter,
+      invoiceResolution,
+      warrantyPolicy,
       registerName,
       cashierName,
     } = data;
@@ -124,6 +214,14 @@ export class ReceiptPrintService {
       ticketFooter?.trim() || DEFAULT_LEGAL_FOOTER,
     );
 
+    const resolutionMsg = invoiceResolution?.trim()
+      ? `<div class="legal-block"><div class="legal-label">Resolución de facturación</div><div class="message legal-msg">${this.formatMultiline(invoiceResolution)}</div></div>`
+      : '';
+
+    const warrantyMsg = warrantyPolicy?.trim()
+      ? `<div class="legal-block"><div class="legal-label">Política de garantía</div><div class="message legal-msg">${this.formatMultiline(warrantyPolicy)}</div></div>`
+      : '';
+
     return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -158,6 +256,8 @@ export class ReceiptPrintService {
       word-break: break-word;
     }
     .header-msg { margin: 6px 0; font-weight: 600; }
+    .legal-block { margin-top: 6px; }
+    .legal-label { font-size: 9px; font-weight: bold; text-transform: uppercase; }
     .legal-msg { margin-top: 4px; font-size: 9px; color: #333; }
     .meta div { margin: 1px 0; }
     table { width: 100%; border-collapse: collapse; table-layout: fixed; }
@@ -243,8 +343,9 @@ export class ReceiptPrintService {
   </div>
 
   <div class="divider"></div>
+  ${resolutionMsg}
+  ${warrantyMsg}
   <div class="center legal-msg message">${footerMsg}</div>
-  <script>window.onload = () => setTimeout(() => window.print(), 50);</script>
 </body>
 </html>`;
   }

@@ -3,12 +3,14 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { SaleStatus, CashMovementType, RegisterSessionStatus } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { SaleRepository } from '../infrastructure/sale.repository';
+import { RegisterAccessService } from '../../registers/application/register-access.service';
 import { AuditService } from '../../audit/application/audit.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
@@ -20,11 +22,13 @@ import { JwtPayload } from '@puntoventa/shared';
 export class SalesService {
   constructor(
     private readonly saleRepository: SaleRepository,
+    private readonly registerAccess: RegisterAccessService,
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
   ) {}
 
   async createTab(dto: CreateSaleDto, user: JwtPayload) {
+    await this.registerAccess.assertCanAccessRegister(dto.registerId, user);
     await this.assertRegisterIsOpen(dto.registerId);
 
     const tabId = dto.tabId ?? uuidv4();
@@ -64,7 +68,8 @@ export class SalesService {
     return this.mapSaleToDto(sale);
   }
 
-  async getActiveTabs(registerId: string) {
+  async getActiveTabs(registerId: string, actor: JwtPayload) {
+    await this.registerAccess.assertCanAccessRegister(registerId, actor);
     const sales = await this.saleRepository.findActiveByRegister(registerId);
     return sales.map((s) => ({
       id: s.id,
@@ -79,20 +84,40 @@ export class SalesService {
     }));
   }
 
-  async findById(id: string) {
+  async findById(id: string, actor: JwtPayload) {
     const sale = await this.saleRepository.findByIdWithDetails(id);
     if (!sale) throw new NotFoundException('Venta no encontrada');
+    await this.registerAccess.assertCanAccessRegister(sale.registerId, actor);
     return this.mapSaleToDto(sale);
   }
 
-  async list(params: {
-    branchId: string;
-    search?: string;
-    status?: SaleStatus;
-    page?: number;
-    limit?: number;
-  }) {
-    const result = await this.saleRepository.findByBranch(params.branchId, params);
+  async list(
+    params: {
+      branchId: string;
+      search?: string;
+      status?: SaleStatus;
+      registerId?: string;
+      page?: number;
+      limit?: number;
+    },
+    actor: JwtPayload,
+  ) {
+    const accessibleIds = await this.registerAccess.getAccessibleRegisterIds(actor);
+    if (accessibleIds) {
+      if (params.registerId && !accessibleIds.includes(params.registerId)) {
+        throw new ForbiddenException('No tiene acceso a esta caja');
+      }
+      if (!params.registerId && accessibleIds.length === 0) {
+        const page = params.page ?? 1;
+        const limit = params.limit ?? 20;
+        return { items: [], total: 0, page, limit, totalPages: 1 };
+      }
+    }
+
+    const result = await this.saleRepository.findByBranch(params.branchId, {
+      ...params,
+      registerIds: !params.registerId && accessibleIds ? accessibleIds : undefined,
+    });
 
     return {
       ...result,
@@ -103,6 +128,7 @@ export class SalesService {
         total: Number(sale.total),
         itemCount: sale._count.items,
         customerName: sale.customer?.name,
+        registerId: sale.registerId,
         registerName: sale.register.name,
         cashierName: `${sale.user.firstName} ${sale.user.lastName}`.trim(),
         completedAt: sale.completedAt?.toISOString(),
@@ -114,6 +140,7 @@ export class SalesService {
   async update(id: string, dto: UpdateSaleDto, user: JwtPayload) {
     const existing = await this.saleRepository.findByIdWithDetails(id);
     if (!existing) throw new NotFoundException('Venta no encontrada');
+    await this.registerAccess.assertCanAccessRegister(existing.registerId, user);
 
     if (existing.status === SaleStatus.COMPLETED || existing.status === SaleStatus.VOIDED) {
       throw new BadRequestException('No se puede modificar una venta finalizada');
@@ -183,6 +210,10 @@ export class SalesService {
   }
 
   async suspend(id: string, user: JwtPayload) {
+    const existing = await this.saleRepository.findByIdWithDetails(id);
+    if (!existing) throw new NotFoundException('Venta no encontrada');
+    await this.registerAccess.assertCanAccessRegister(existing.registerId, user);
+
     const sale = await this.prisma.sale.update({
       where: { id, status: { in: [SaleStatus.ACTIVE, SaleStatus.DRAFT] } },
       data: { status: SaleStatus.SUSPENDED, suspendedAt: new Date() },
@@ -200,6 +231,10 @@ export class SalesService {
   }
 
   async recover(id: string, user: JwtPayload) {
+    const existing = await this.saleRepository.findByIdWithDetails(id);
+    if (!existing) throw new NotFoundException('Venta suspendida no encontrada');
+    await this.registerAccess.assertCanAccessRegister(existing.registerId, user);
+
     const sale = await this.prisma.sale.update({
       where: { id, status: SaleStatus.SUSPENDED },
       data: { status: SaleStatus.ACTIVE, suspendedAt: null },
@@ -211,6 +246,7 @@ export class SalesService {
   async checkout(id: string, dto: CheckoutDto, user: JwtPayload) {
     const existing = await this.saleRepository.findByIdWithDetails(id);
     if (!existing) throw new NotFoundException('Venta no encontrada');
+    await this.registerAccess.assertCanAccessRegister(existing.registerId, user);
     if (existing.version !== dto.version) {
       throw new ConflictException('Conflicto de versión. Recargue la venta.');
     }
@@ -277,7 +313,11 @@ export class SalesService {
       module: 'sales',
       entityType: 'Sale',
       entityId: id,
-      newValues: { documentNumber: result.documentNumber, total: Number(result.total) },
+      newValues: {
+        documentNumber: result.documentNumber,
+        total: Number(result.total),
+        registerId: result.registerId,
+      },
     });
 
     return this.mapSaleToDto(result);
@@ -287,6 +327,7 @@ export class SalesService {
   async voidSale(id: string, user: JwtPayload) {
     const existing = await this.saleRepository.findByIdWithDetails(id);
     if (!existing) throw new NotFoundException('Venta no encontrada');
+    await this.registerAccess.assertCanAccessRegister(existing.registerId, user);
     if (existing.status !== SaleStatus.COMPLETED) {
       throw new BadRequestException('Solo se pueden anular ventas completadas');
     }
@@ -319,6 +360,7 @@ export class SalesService {
         documentNumber: existing.documentNumber,
         total: Number(existing.total),
         status: existing.status,
+        registerId: existing.registerId,
       },
     });
 
@@ -332,6 +374,7 @@ export class SalesService {
   async adminUpdate(id: string, dto: AdminUpdateSaleDto, user: JwtPayload) {
     const existing = await this.saleRepository.findByIdWithDetails(id);
     if (!existing) throw new NotFoundException('Venta no encontrada');
+    await this.registerAccess.assertCanAccessRegister(existing.registerId, user);
     if (existing.status !== SaleStatus.COMPLETED) {
       throw new BadRequestException('Solo se pueden editar ventas completadas');
     }
@@ -455,6 +498,7 @@ export class SalesService {
   async remove(id: string, user: JwtPayload) {
     const existing = await this.saleRepository.findByIdWithDetails(id);
     if (!existing) throw new NotFoundException('Venta no encontrada');
+    await this.registerAccess.assertCanAccessRegister(existing.registerId, user);
 
     await this.prisma.executeInTransaction(async (tx) => {
       if (existing.status === SaleStatus.COMPLETED) {

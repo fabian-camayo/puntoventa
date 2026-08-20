@@ -39,22 +39,22 @@ export class SalesController {
   @Get('tabs')
   @RequirePermissions('sales.view', 'sales.create')
   @ApiOperation({ summary: 'Obtener pestañas activas de una caja' })
-  getTabs(@Query('registerId') registerId: string) {
-    return this.salesService.getActiveTabs(registerId);
+  getTabs(@Query('registerId') registerId: string, @CurrentUser() user: JwtPayload) {
+    return this.salesService.getActiveTabs(registerId, user);
   }
 
   @Get()
   @RequirePermissions('sales.view')
   @ApiOperation({ summary: 'Listar ventas con paginación' })
-  list(@Query() query: ListSalesQueryDto) {
-    return this.salesService.list(query);
+  list(@Query() query: ListSalesQueryDto, @CurrentUser() user: JwtPayload) {
+    return this.salesService.list(query, user);
   }
 
   @Get(':id')
   @RequirePermissions('sales.view', 'sales.create')
   @ApiOperation({ summary: 'Obtener venta por ID' })
-  findOne(@Param('id') id: string) {
-    return this.salesService.findById(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.salesService.findById(id, user);
   }
 
   @Put(':id')

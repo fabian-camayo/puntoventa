@@ -1,0 +1,125 @@
+.list-card {
+  overflow: hidden;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  padding: 12px 12px 0;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--pv-text-secondary);
+  }
+
+  ion-select,
+  ion-input {
+    --background: var(--pv-bg-secondary);
+    --padding-start: 10px;
+    border: 1px solid var(--pv-border);
+    border-radius: var(--pv-radius-md);
+  }
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+
+  ion-chip {
+    margin: 0;
+  }
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  padding: 24px;
+  text-align: center;
+  color: var(--pv-text-secondary);
+
+  ion-icon {
+    font-size: 4rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+
+  h2 {
+    margin: 0 0 8px;
+    color: var(--pv-text-primary);
+  }
+}
+
+.table-header,
+.log-grid {
+  display: grid;
+  grid-template-columns: 150px 1fr 130px 140px 150px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.table-header {
+  padding: 10px 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--pv-text-secondary);
+  background: var(--pv-bg-secondary);
+  border-bottom: 1px solid var(--pv-border);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px;
+  border-top: 1px solid var(--pv-border);
+}
+
+.page-info {
+  color: var(--pv-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+  .filters-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .filters-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .table-header {
+    display: none;
+  }
+
+  .log-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+  }
+
+  .col-date,
+  .col-entity {
+    grid-column: 1 / -1;
+  }
+}

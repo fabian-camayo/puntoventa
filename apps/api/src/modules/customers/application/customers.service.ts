@@ -7,6 +7,7 @@ import { Prisma } from '@prisma/client';
 import { CustomerRepository } from '../infrastructure/customer.repository';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
+import { diffAuditValues, snapshotAuditValue } from '../../audit/application/audit-diff.util';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { JwtPayload } from '@puntoventa/shared';
@@ -65,7 +66,14 @@ export class CustomersService {
       module: 'customers',
       entityType: 'Customer',
       entityId: customer.id,
-      newValues: { code: dto.code, name: dto.name } as Prisma.InputJsonValue,
+      newValues: snapshotAuditValue({
+        code: dto.code,
+        name: dto.name,
+        taxId: dto.taxId,
+        email: dto.email,
+        phone: dto.phone,
+        creditLimit: dto.creditLimit,
+      }) as Prisma.InputJsonValue,
     });
 
     return this.mapCustomerToDto(customer);
@@ -77,12 +85,35 @@ export class CustomersService {
 
     const customer = await this.customerRepository.update(id, dto);
 
+    const { before, after } = diffAuditValues(
+      {
+        name: existing.name,
+        taxId: existing.taxId,
+        email: existing.email,
+        phone: existing.phone,
+        address: existing.address,
+        creditLimit: existing.creditLimit,
+        isActive: existing.isActive,
+      },
+      {
+        name: customer.name,
+        taxId: customer.taxId,
+        email: customer.email,
+        phone: customer.phone,
+        address: customer.address,
+        creditLimit: customer.creditLimit,
+        isActive: customer.isActive,
+      },
+    );
+
     await this.auditService.log({
       userId: actor.sub,
       action: 'UPDATE',
       module: 'customers',
       entityType: 'Customer',
       entityId: id,
+      oldValues: before as Prisma.InputJsonValue,
+      newValues: after as Prisma.InputJsonValue,
     });
 
     return this.mapCustomerToDto(customer);
@@ -100,6 +131,11 @@ export class CustomersService {
       module: 'customers',
       entityType: 'Customer',
       entityId: id,
+      oldValues: snapshotAuditValue({
+        code: existing.code,
+        name: existing.name,
+        isActive: existing.isActive,
+      }) as Prisma.InputJsonValue,
     });
 
     return { success: true };

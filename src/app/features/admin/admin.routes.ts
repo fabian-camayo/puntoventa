@@ -25,13 +25,29 @@ export const ADMIN_ROUTES: Routes = [
         'customers.view',
         'inventory.view',
         'registers.view',
+        'audit.view',
       ],
     },
+  },
+  {
+    path: 'audit',
+    loadComponent: () => import('./audit/audit.page').then((m) => m.AuditPage),
+    canActivate: [permissionGuard],
+    data: { permission: 'audit.view' },
   },
   {
     path: 'inventory',
     loadComponent: () =>
       import('./inventory/inventory.page').then((m) => m.InventoryPage),
+    canActivate: [permissionGuard],
+    data: { permission: 'inventory.view' },
+  },
+  {
+    path: 'inventory-adjustments',
+    loadComponent: () =>
+      import('./inventory-adjustments/inventory-adjustments.page').then(
+        (m) => m.InventoryAdjustmentsPage,
+      ),
     canActivate: [permissionGuard],
     data: { permission: 'inventory.view' },
   },

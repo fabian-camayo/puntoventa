@@ -147,6 +147,7 @@ export class RegisterRepository {
   findSessions(params: {
     branchId: string;
     registerId?: string;
+    registerIds?: string[];
     status?: RegisterSessionStatus;
     page?: number;
     limit?: number;
@@ -157,7 +158,11 @@ export class RegisterRepository {
 
     const where: Prisma.RegisterSessionWhereInput = {
       register: { branchId: params.branchId },
-      ...(params.registerId ? { registerId: params.registerId } : {}),
+      ...(params.registerId
+        ? { registerId: params.registerId }
+        : params.registerIds
+          ? { registerId: { in: params.registerIds } }
+          : {}),
       ...(params.status ? { status: params.status } : {}),
     };
 

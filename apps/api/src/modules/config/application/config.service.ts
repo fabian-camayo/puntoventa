@@ -17,6 +17,7 @@ import { BusinessConfigRepository } from '../infrastructure/business-config.repo
 import { AppSettingRepository } from '../infrastructure/app-setting.repository';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
+import { diffAuditValues } from '../../audit/application/audit-diff.util';
 import { UpdateBusinessConfigDto } from './dto/update-business-config.dto';
 import { UpdateAppSettingDto } from './dto/update-app-setting.dto';
 import { SetupWizardDto } from './dto/setup-wizard.dto';
@@ -76,6 +77,8 @@ export class ConfigService {
       logoUrl: config.logoUrl ?? undefined,
       ticketHeader: config.ticketHeader ?? undefined,
       ticketFooter: config.ticketFooter ?? undefined,
+      invoiceResolution: config.invoiceResolution ?? undefined,
+      warrantyPolicy: config.warrantyPolicy ?? undefined,
       invoicePrefix: config.invoicePrefix ?? 'FEV',
       invoiceNumberPadding: config.invoiceNumberPadding ?? 3,
       invoiceNextNumber: config.invoiceNextNumber ?? 1,
@@ -92,11 +95,44 @@ export class ConfigService {
       );
     }
 
+    const before = await this.businessConfigRepository.findByBranchId(branchId);
+
     const config = await this.businessConfigRepository.upsert(branchId, {
       ...dto,
       invoicePrefix,
       logoUrl: dto.logoUrl === undefined ? undefined : dto.logoUrl || null,
     });
+
+    const { before: oldValues, after: newValues } = diffAuditValues(
+      before
+        ? {
+            businessName: before.businessName,
+            taxId: before.taxId,
+            currency: before.currency,
+            currencySymbol: before.currencySymbol,
+            taxRate: before.taxRate,
+            invoiceResolution: before.invoiceResolution,
+            warrantyPolicy: before.warrantyPolicy,
+            invoicePrefix: before.invoicePrefix,
+            invoiceNumberPadding: before.invoiceNumberPadding,
+            invoiceNextNumber: before.invoiceNextNumber,
+            allowNegativeStock: before.allowNegativeStock,
+          }
+        : null,
+      {
+        businessName: config.businessName,
+        taxId: config.taxId,
+        currency: config.currency,
+        currencySymbol: config.currencySymbol,
+        taxRate: config.taxRate,
+        invoiceResolution: config.invoiceResolution,
+        warrantyPolicy: config.warrantyPolicy,
+        invoicePrefix: config.invoicePrefix,
+        invoiceNumberPadding: config.invoiceNumberPadding,
+        invoiceNextNumber: config.invoiceNextNumber,
+        allowNegativeStock: config.allowNegativeStock,
+      },
+    );
 
     await this.auditService.log({
       userId: actor.sub,
@@ -104,7 +140,8 @@ export class ConfigService {
       module: 'config',
       entityType: 'BusinessConfig',
       entityId: config.id,
-      newValues: { businessName: dto.businessName } as Prisma.InputJsonValue,
+      oldValues: oldValues as Prisma.InputJsonValue,
+      newValues: newValues as Prisma.InputJsonValue,
     });
 
     return this.getBusinessConfig(branchId);
@@ -181,6 +218,8 @@ export class ConfigService {
       logoUrl: businessConfig?.logoUrl ?? undefined,
       ticketHeader: businessConfig?.ticketHeader ?? undefined,
       ticketFooter: businessConfig?.ticketFooter ?? undefined,
+      invoiceResolution: businessConfig?.invoiceResolution ?? undefined,
+      warrantyPolicy: businessConfig?.warrantyPolicy ?? undefined,
       defaultCustomerId: businessConfig?.defaultCustomerId ?? undefined,
     };
   }
@@ -251,6 +290,9 @@ export class ConfigService {
   }
 
   async updateAppSetting(dto: UpdateAppSettingDto, actor: JwtPayload) {
+    const before = await this.appSettingRepository.findByKey(dto.key);
+    const isSecret = dto.isSecret ?? before?.isSecret ?? false;
+
     const setting = await this.appSettingRepository.upsert(
       dto.key,
       dto.value,
@@ -258,13 +300,15 @@ export class ConfigService {
       dto.isSecret,
     );
 
+    // Los valores de configuraciones marcadas como secretas nunca se guardan en la auditoría.
     await this.auditService.log({
       userId: actor.sub,
       action: 'CONFIG_CHANGE',
       module: 'config',
       entityType: 'AppSetting',
       entityId: setting.id,
-      newValues: { key: dto.key } as Prisma.InputJsonValue,
+      oldValues: { key: dto.key, value: isSecret ? '********' : before?.value } as Prisma.InputJsonValue,
+      newValues: { key: dto.key, value: isSecret ? '********' : dto.value } as Prisma.InputJsonValue,
     });
 
     return {

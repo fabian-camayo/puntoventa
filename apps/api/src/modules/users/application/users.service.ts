@@ -9,6 +9,7 @@ import { PaginationQuery } from '@puntoventa/shared';
 import { UserRepository } from '../infrastructure/user.repository';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
+import { diffAuditValues, snapshotAuditValue } from '../../audit/application/audit-diff.util';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtPayload } from '@puntoventa/shared';
@@ -81,7 +82,14 @@ export class UsersService {
       module: 'users',
       entityType: 'User',
       entityId: user!.id,
-      newValues: { username: dto.username } as Prisma.InputJsonValue,
+      newValues: snapshotAuditValue({
+        username: user!.username,
+        firstName: user!.firstName,
+        lastName: user!.lastName,
+        email: user!.email,
+        isActive: user!.isActive,
+        roles: user!.userRoles?.map((ur) => ur.role.code) ?? [],
+      }) as Prisma.InputJsonValue,
     });
 
     return this.mapUserToDto(user!);
@@ -123,12 +131,39 @@ export class UsersService {
       });
     });
 
+    const beforeRoles = existing.userRoles.map((ur) => ur.role.code).sort();
+    const afterRoles = (user!.userRoles ?? []).map((ur) => ur.role.code).sort();
+
+    const { before, after } = diffAuditValues(
+      {
+        firstName: existing.firstName,
+        lastName: existing.lastName,
+        email: existing.email,
+        isActive: existing.isActive,
+        roles: beforeRoles,
+      },
+      {
+        firstName: user!.firstName,
+        lastName: user!.lastName,
+        email: user!.email,
+        isActive: user!.isActive,
+        roles: afterRoles,
+      },
+    );
+
+    // Nunca se guarda la contraseña/PIN; solo se deja constancia de que cambiaron.
+    const changedFlags: Record<string, boolean> = {};
+    if (dto.password) changedFlags['passwordChanged'] = true;
+    if (dto.pin) changedFlags['pinChanged'] = true;
+
     await this.auditService.log({
       userId: actor.sub,
       action: 'UPDATE',
       module: 'users',
       entityType: 'User',
       entityId: id,
+      oldValues: before as Prisma.InputJsonValue,
+      newValues: { ...(after ?? {}), ...changedFlags } as Prisma.InputJsonValue,
     });
 
     return this.mapUserToDto(user!);
@@ -146,6 +181,12 @@ export class UsersService {
       module: 'users',
       entityType: 'User',
       entityId: id,
+      oldValues: snapshotAuditValue({
+        username: existing.username,
+        firstName: existing.firstName,
+        lastName: existing.lastName,
+        isActive: existing.isActive,
+      }) as Prisma.InputJsonValue,
     });
 
     return { success: true };

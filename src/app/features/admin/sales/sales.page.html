@@ -19,6 +19,19 @@
         [debounce]="0"
         (ionInput)="onSearchInput($event)"
       ></ion-searchbar>
+      @if (isRegisterAdmin && registers().length > 0) {
+        <ion-select
+          class="register-filter-select"
+          interface="popover"
+          [value]="registerFilter()"
+          (ionChange)="setRegisterFilter($event.detail.value)"
+        >
+          <ion-select-option value="ALL">{{ 'SALES.FILTER_ALL_REGISTERS' | translate }}</ion-select-option>
+          @for (reg of registers(); track reg.id) {
+            <ion-select-option [value]="reg.id">{{ reg.name }}</ion-select-option>
+          }
+        </ion-select>
+      }
       <div class="filter-chips">
         <ion-chip
           [color]="statusFilter() === SaleStatus.COMPLETED ? 'primary' : 'medium'"

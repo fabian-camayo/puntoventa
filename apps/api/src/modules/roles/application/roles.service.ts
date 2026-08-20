@@ -9,6 +9,7 @@ import { PaginationQuery } from '@puntoventa/shared';
 import { RoleRepository } from '../infrastructure/role.repository';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
+import { diffAuditValues, snapshotAuditValue } from '../../audit/application/audit-diff.util';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { AssignPermissionsDto } from './dto/assign-permissions.dto';
@@ -53,7 +54,12 @@ export class RolesService {
       module: 'roles',
       entityType: 'Role',
       entityId: role.id,
-      newValues: { code: dto.code } as Prisma.InputJsonValue,
+      newValues: snapshotAuditValue({
+        code: role.code,
+        name: role.name,
+        description: role.description,
+        isActive: role.isActive,
+      }) as Prisma.InputJsonValue,
     });
 
     return this.mapRoleToDto(role);
@@ -68,12 +74,19 @@ export class RolesService {
 
     const role = await this.roleRepository.update(id, dto);
 
+    const { before, after } = diffAuditValues(
+      { name: existing.name, description: existing.description, isActive: existing.isActive },
+      { name: role.name, description: role.description, isActive: role.isActive },
+    );
+
     await this.auditService.log({
       userId: actor.sub,
       action: 'UPDATE',
       module: 'roles',
       entityType: 'Role',
       entityId: id,
+      oldValues: before as Prisma.InputJsonValue,
+      newValues: after as Prisma.InputJsonValue,
     });
 
     return this.mapRoleToDto(role);
@@ -94,14 +107,30 @@ export class RolesService {
       module: 'roles',
       entityType: 'Role',
       entityId: id,
+      oldValues: snapshotAuditValue({
+        code: existing.code,
+        name: existing.name,
+        description: existing.description,
+        isActive: existing.isActive,
+      }) as Prisma.InputJsonValue,
     });
 
     return { success: true };
   }
 
+  /**
+   * Los cambios de permisos de un rol se auditan con prioridad especial: se guarda
+   * la lista completa de permisos otorgados antes y después (no solo un conteo),
+   * para poder reconstruir exactamente qué permiso se agregó o quitó.
+   */
   async assignPermissions(id: string, dto: AssignPermissionsDto, actor: JwtPayload) {
-    const role = await this.roleRepository.findById(id);
+    const role = await this.roleRepository.findByIdWithPermissions(id);
     if (!role) throw new NotFoundException('Rol no encontrado');
+
+    const beforeCodes = (role.rolePermissions ?? [])
+      .filter((rp) => rp.granted)
+      .map((rp) => rp.permission.code)
+      .sort();
 
     await this.prisma.executeInTransaction(async (tx) => {
       await tx.rolePermission.deleteMany({ where: { roleId: id } });
@@ -117,15 +146,23 @@ export class RolesService {
       }
     });
 
+    const updated = await this.roleRepository.findByIdWithPermissions(id);
+    const afterCodes = (updated?.rolePermissions ?? [])
+      .filter((rp) => rp.granted)
+      .map((rp) => rp.permission.code)
+      .sort();
+
+    const added = afterCodes.filter((c) => !beforeCodes.includes(c));
+    const removed = beforeCodes.filter((c) => !afterCodes.includes(c));
+
     await this.auditService.log({
       userId: actor.sub,
       action: 'UPDATE',
       module: 'roles',
       entityType: 'Role',
       entityId: id,
-      newValues: {
-        permissionCount: dto.permissions.length,
-      } as Prisma.InputJsonValue,
+      oldValues: { permissions: beforeCodes } as Prisma.InputJsonValue,
+      newValues: { permissions: afterCodes, added, removed } as Prisma.InputJsonValue,
     });
 
     return this.findById(id);

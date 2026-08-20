@@ -1,0 +1,103 @@
+<ion-header class="modal-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="dismiss()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'AUDIT.DETAIL_TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="modal-content">
+  @if (loading()) {
+    <div class="loading-state">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
+  } @else if (log(); as l) {
+    <div class="detail-layout">
+      <div class="detail-header">
+        <ion-icon name="shield-checkmark-outline"></ion-icon>
+        <div>
+          <h2>{{ l.entityType }} @if (l.entityId) { <span class="entity-id">#{{ l.entityId.slice(0, 8) }}</span> }</h2>
+          <ion-badge [color]="actionColor(l.action)">{{ actionLabel(l.action) }}</ion-badge>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>{{ 'AUDIT.USER' | translate }}</label>
+          <span>{{ l.userName ?? l.username ?? '—' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>{{ 'AUDIT.DATE' | translate }}</label>
+          <span>{{ formatDate(l.createdAt) }}</span>
+        </div>
+        <div class="detail-item">
+          <label>{{ 'AUDIT.MODULE' | translate }}</label>
+          <span>{{ moduleLabel(l.module) }}</span>
+        </div>
+        <div class="detail-item">
+          <label>{{ 'AUDIT.ENTITY_ID' | translate }}</label>
+          <span>{{ l.entityId ?? '—' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>{{ 'AUDIT.IP_ADDRESS' | translate }}</label>
+          <span>{{ l.ipAddress ?? '—' }}</span>
+        </div>
+        <div class="detail-item span-2">
+          <label>{{ 'AUDIT.USER_AGENT' | translate }}</label>
+          <span class="user-agent">{{ l.userAgent ?? '—' }}</span>
+        </div>
+      </div>
+
+      @if (hasDiff()) {
+        <div class="changes-section">
+          <h3>{{ 'AUDIT.CHANGES' | translate }}</h3>
+          <div class="diff-table">
+            <div class="diff-row diff-header">
+              <span>{{ 'AUDIT.FIELD' | translate }}</span>
+              <span>{{ 'AUDIT.BEFORE' | translate }}</span>
+              <span>{{ 'AUDIT.AFTER' | translate }}</span>
+            </div>
+            @for (row of diffRows(); track row.field) {
+              <div class="diff-row">
+                <span class="field-name">{{ row.field }}</span>
+                <span class="before-value">{{ row.before }}</span>
+                <span class="after-value">{{ row.after }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      } @else if (isCreationOnly()) {
+        <div class="changes-section">
+          <h3>{{ 'AUDIT.CREATED_DATA' | translate }}</h3>
+          <div class="kv-list">
+            @for (row of snapshotRows('newValues'); track row.field) {
+              <div class="kv-row">
+                <span class="field-name">{{ row.field }}</span>
+                <span class="after-value">{{ row.after }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      } @else if (isDeletionOnly()) {
+        <div class="changes-section">
+          <h3>{{ 'AUDIT.DELETED_DATA' | translate }}</h3>
+          <div class="kv-list">
+            @for (row of snapshotRows('oldValues'); track row.field) {
+              <div class="kv-row">
+                <span class="field-name">{{ row.field }}</span>
+                <span class="after-value">{{ row.after }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <p>{{ 'AUDIT.LOAD_ERROR' | translate }}</p>
+    </div>
+  }
+</ion-content>

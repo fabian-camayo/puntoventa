@@ -7,6 +7,7 @@ import { Prisma } from '@prisma/client';
 import { SupplierRepository } from '../infrastructure/supplier.repository';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
+import { diffAuditValues, snapshotAuditValue } from '../../audit/application/audit-diff.util';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
 import { JwtPayload } from '@puntoventa/shared';
@@ -57,7 +58,13 @@ export class SuppliersService {
       module: 'suppliers',
       entityType: 'Supplier',
       entityId: supplier.id,
-      newValues: { code: dto.code, name: dto.name } as Prisma.InputJsonValue,
+      newValues: snapshotAuditValue({
+        code: dto.code,
+        name: dto.name,
+        taxId: dto.taxId,
+        email: dto.email,
+        phone: dto.phone,
+      }) as Prisma.InputJsonValue,
     });
 
     return this.mapSupplierToDto(supplier);
@@ -69,12 +76,35 @@ export class SuppliersService {
 
     const supplier = await this.supplierRepository.update(id, dto);
 
+    const { before, after } = diffAuditValues(
+      {
+        name: existing.name,
+        taxId: existing.taxId,
+        email: existing.email,
+        phone: existing.phone,
+        city: existing.city,
+        address: existing.address,
+        isActive: existing.isActive,
+      },
+      {
+        name: supplier.name,
+        taxId: supplier.taxId,
+        email: supplier.email,
+        phone: supplier.phone,
+        city: supplier.city,
+        address: supplier.address,
+        isActive: supplier.isActive,
+      },
+    );
+
     await this.auditService.log({
       userId: actor.sub,
       action: 'UPDATE',
       module: 'suppliers',
       entityType: 'Supplier',
       entityId: id,
+      oldValues: before as Prisma.InputJsonValue,
+      newValues: after as Prisma.InputJsonValue,
     });
 
     return this.mapSupplierToDto(supplier);
@@ -92,6 +122,11 @@ export class SuppliersService {
       module: 'suppliers',
       entityType: 'Supplier',
       entityId: id,
+      oldValues: snapshotAuditValue({
+        code: existing.code,
+        name: existing.name,
+        isActive: existing.isActive,
+      }) as Prisma.InputJsonValue,
     });
 
     return { success: true };

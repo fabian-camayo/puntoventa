@@ -9,6 +9,7 @@ import {
 import { TerminalRepository } from '../infrastructure/terminal.repository';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
+import { diffAuditValues, snapshotAuditValue } from '../../audit/application/audit-diff.util';
 import { UpdateTerminalDto } from './dto/update-terminal.dto';
 import { TerminalHeartbeatDto } from './dto/terminal-heartbeat.dto';
 import { JwtPayload } from '@puntoventa/shared';
@@ -97,13 +98,27 @@ export class TerminalsService {
 
     const updated = await this.terminalRepository.update(id, data);
 
+    const { before, after } = diffAuditValues(
+      {
+        name: existing.name,
+        registerId: existing.registerId,
+        isActive: existing.isActive,
+      },
+      {
+        name: updated.name,
+        registerId: updated.registerId,
+        isActive: updated.isActive,
+      },
+    );
+
     await this.auditService.log({
       userId: actor.sub,
       action: 'UPDATE',
       module: 'registers',
       entityType: 'Terminal',
       entityId: id,
-      newValues: { registerId: dto.registerId, name: dto.name } as Prisma.InputJsonValue,
+      oldValues: before as Prisma.InputJsonValue,
+      newValues: after as Prisma.InputJsonValue,
     });
 
     const withDetails = await this.terminalRepository.findById(updated.id);
@@ -122,6 +137,12 @@ export class TerminalsService {
       module: 'registers',
       entityType: 'Terminal',
       entityId: id,
+      oldValues: snapshotAuditValue({
+        deviceId: existing.deviceId,
+        name: existing.name,
+        registerId: existing.registerId,
+        isActive: existing.isActive,
+      }) as Prisma.InputJsonValue,
     });
   }
 
