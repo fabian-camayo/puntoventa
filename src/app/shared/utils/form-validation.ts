@@ -48,6 +48,7 @@ function resolveInvalidMessage(form: FormGroup): string {
     if (errors['min']) return `El valor mínimo es ${errors['min'].min}`;
     if (errors['max']) return `El valor máximo es ${errors['max'].max}`;
     if (errors['required']) return 'Complete los campos obligatorios';
+    if (errors['ipv4']) return 'Ingrese una dirección IPv4 válida (ej. 192.168.1.10)';
   }
   return 'Revise los campos del formulario';
 }

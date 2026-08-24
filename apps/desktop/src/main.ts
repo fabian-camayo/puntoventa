@@ -30,7 +30,7 @@ async function createWindow(): Promise<void> {
     height: 1080,
     minWidth: 1280,
     minHeight: 720,
-    title: 'PuntoVenta',
+    title: 'Granel',
     show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),

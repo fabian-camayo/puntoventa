@@ -23,12 +23,31 @@
       <p>{{ 'COMMON.LOADING' | translate }}</p>
     </div>
   } @else if (summary(); as data) {
-    <div class="cash-hero">
-      <ion-icon name="cash-outline"></ion-icon>
-      <div>
-        <span class="cash-label">{{ 'POS.CASH_IN_DRAWER' | translate }}</span>
-        <strong class="cash-amount">{{ data.cashInDrawer | appCurrency:'1.0-0' }}</strong>
+    <div class="cash-hero-row">
+      <div class="cash-hero">
+        <ion-icon name="cash-outline"></ion-icon>
+        <div>
+          <span class="cash-label">{{ 'POS.CASH_IN_DRAWER' | translate }}</span>
+          <strong class="cash-amount">{{ data.cashInDrawer | appCurrency:'1.0-0' }}</strong>
+        </div>
       </div>
+
+      @if (canClose) {
+        <ion-button
+          class="close-register-btn"
+          fill="outline"
+          size="small"
+          [disabled]="closing()"
+          (click)="closeRegister()"
+        >
+          @if (closing()) {
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
+          } @else {
+            <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+          }
+          {{ 'REGISTERS.CLOSE_ACTION' | translate }}
+        </ion-button>
+      }
     </div>
 
     <div class="stats-grid">

@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsBoolean, IsUUID, MaxLength } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsUUID, IsIP, MaxLength } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateTerminalDto {
@@ -17,4 +17,9 @@ export class UpdateTerminalDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsIP('4')
+  ipAddress?: string;
 }

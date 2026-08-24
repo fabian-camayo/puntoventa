@@ -13,6 +13,8 @@ import {
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { Request } from 'express';
 import { TerminalsService } from '../application/terminals.service';
+import { CreateTerminalDto } from '../application/dto/create-terminal.dto';
+import { CheckTerminalIpDto } from '../application/dto/check-terminal-ip.dto';
 import { UpdateTerminalDto } from '../application/dto/update-terminal.dto';
 import { TerminalHeartbeatDto } from '../application/dto/terminal-heartbeat.dto';
 import { JwtAuthGuard } from '../../../presentation/guards/jwt-auth.guard';
@@ -33,6 +35,27 @@ export class TerminalsController {
   @ApiOperation({ summary: 'Listar terminales/equipos con estado de conexión' })
   findAll(@Query('branchId') branchId: string) {
     return this.terminalsService.findAll(branchId);
+  }
+
+  @Get('scan-network')
+  @RequirePermissions('registers.admin')
+  @ApiOperation({ summary: 'Escanear la red local en busca de computadores disponibles (no crea terminales)' })
+  scanNetwork(@Query('branchId') branchId: string) {
+    return this.terminalsService.scanNetwork(branchId);
+  }
+
+  @Post('check-ip')
+  @RequirePermissions('registers.admin')
+  @ApiOperation({ summary: 'Verificar disponibilidad de una IP antes de crear la terminal' })
+  checkIp(@Body() dto: CheckTerminalIpDto) {
+    return this.terminalsService.checkIp(dto);
+  }
+
+  @Post()
+  @RequirePermissions('registers.admin')
+  @ApiOperation({ summary: 'Crear una terminal explícitamente (requiere IP verificada)' })
+  create(@Body() dto: CreateTerminalDto, @CurrentUser() user: JwtPayload) {
+    return this.terminalsService.create(dto, user);
   }
 
   @Post('heartbeat')

@@ -185,6 +185,91 @@
   gap: 2px;
 }
 
+.col-register {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+
+  ion-select {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.create-register-btn {
+  --padding-start: 4px;
+  --padding-end: 4px;
+  flex-shrink: 0;
+
+  ion-icon {
+    color: var(--pv-accent);
+    font-size: 1.2rem;
+  }
+}
+
+.scan-card {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+}
+
+.scan-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.scan-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--pv-text-primary);
+
+  ion-icon {
+    color: var(--pv-accent);
+    font-size: 1.1rem;
+  }
+}
+
+.scan-subnet {
+  margin: 12px 0 0;
+  font-size: 0.75rem;
+  color: var(--pv-text-secondary);
+}
+
+.scan-empty {
+  margin: 12px 0 0;
+  font-size: 0.85rem;
+  color: var(--pv-text-secondary);
+}
+
+.scan-list {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--pv-border);
+  border-radius: var(--pv-radius-md);
+}
+
+.scan-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--pv-border);
+  }
+}
+
 @media (max-width: 960px) {
   .connection-summary {
     grid-template-columns: 1fr;

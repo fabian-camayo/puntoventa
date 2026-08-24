@@ -10,12 +10,67 @@
         <ion-icon name="desktop-outline"></ion-icon>
         {{ 'TERMINALS.TITLE' | translate }}
       </h1>
+      @if (canManage) {
+        <ion-button class="new-terminal-btn" (click)="openNewTerminal()">
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          {{ 'TERMINALS.NEW_TITLE' | translate }}
+        </ion-button>
+      }
     </div>
 
     <div class="terminals-hint pv-card">
       <ion-icon name="wifi-outline"></ion-icon>
       <p>{{ 'TERMINALS.HINT' | translate }}</p>
     </div>
+
+    @if (canManage) {
+      <div class="pv-card scan-card">
+        <div class="scan-header">
+          <div class="scan-title">
+            <ion-icon name="search-outline"></ion-icon>
+            <span>{{ 'TERMINALS.DETECTED_COMPUTERS' | translate }}</span>
+          </div>
+          <ion-button fill="outline" size="small" [disabled]="scanning()" (click)="scanNetwork()">
+            @if (scanning()) {
+              <ion-spinner name="crescent" slot="start"></ion-spinner>
+              {{ 'TERMINALS.SCANNING' | translate }}
+            } @else {
+              <ion-icon name="scan-outline" slot="start"></ion-icon>
+              {{ 'TERMINALS.SCAN_NETWORK' | translate }}
+            }
+          </ion-button>
+        </div>
+
+        @if (hasScanned()) {
+          @if (scanSubnet()) {
+            <p class="scan-subnet mono">{{ scanSubnet() }}</p>
+          }
+          @if (scanResults().length === 0) {
+            <p class="scan-empty">{{ 'TERMINALS.SCAN_EMPTY' | translate }}</p>
+          } @else {
+            <div class="scan-list">
+              @for (item of scanResults(); track item.ipAddress) {
+                <div class="scan-item">
+                  <span class="mono">{{ item.ipAddress }}</span>
+                  @if (item.alreadyRegistered) {
+                    <ion-badge color="medium">{{ 'TERMINALS.ALREADY_REGISTERED' | translate }}</ion-badge>
+                  } @else {
+                    <ion-button
+                      fill="clear"
+                      size="small"
+                      (click)="registerDetected(item)"
+                    >
+                      <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+                      {{ 'TERMINALS.REGISTER_AS_TERMINAL' | translate }}
+                    </ion-button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    }
 
     <div class="connection-summary">
       <div class="summary-card">
@@ -111,6 +166,17 @@
                         <ion-select-option [value]="reg.id">{{ reg.name }}</ion-select-option>
                       }
                     </ion-select>
+                    @if (!terminal.registerId) {
+                      <ion-button
+                        fill="clear"
+                        size="small"
+                        class="create-register-btn"
+                        [attr.title]="'TERMINALS.CREATE_REGISTER' | translate"
+                        (click)="createRegisterForTerminal(terminal)"
+                      >
+                        <ion-icon name="add-circle-outline" slot="icon-only"></ion-icon>
+                      </ion-button>
+                    }
                   } @else {
                     <span>{{ terminal.registerName ?? '—' }}</span>
                   }

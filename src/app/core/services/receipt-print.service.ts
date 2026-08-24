@@ -290,7 +290,7 @@ export class ReceiptPrintService {
 <body>
   <div class="center">
     ${logoHtml}
-    <div class="business">${this.escape(businessName ?? 'PuntoVenta')}</div>
+    <div class="business">${this.escape(businessName ?? 'Granel')}</div>
     ${businessLines}
   </div>
 

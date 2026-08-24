@@ -1,0 +1,27 @@
+:host {
+  display: contents;
+}
+
+.app-global-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  z-index: 2;
+  margin: 0;
+  text-align: center;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: var(--pv-text-secondary);
+  opacity: 0.5;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+
+  &.on-dark {
+    color: rgba(255, 255, 255, 0.5);
+    opacity: 1;
+  }
+}

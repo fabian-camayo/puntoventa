@@ -1,8 +1,8 @@
 {
   "name": "@puntoventa/desktop",
   "version": "1.0.0",
-  "description": "PuntoVenta Desktop - Electron",
-  "author": "PuntoVenta",
+  "description": "Granel Desktop - Electron",
+  "author": "FASER Software & Development",
   "main": "dist/main.js",
   "private": true,
   "scripts": {
@@ -15,7 +15,7 @@
   },
   "build": {
     "appId": "com.puntoventa.desktop",
-    "productName": "PuntoVenta",
+    "productName": "Granel",
     "electronVersion": "35.7.5",
     "directories": {
       "output": "../../dist/installer",
@@ -63,7 +63,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "PuntoVenta",
+      "shortcutName": "Granel",
       "include": "installer.nsh",
       "warningsAsErrors": false
     },

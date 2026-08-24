@@ -1,0 +1,93 @@
+<ion-header class="modal-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" class="close-btn" (click)="dismiss()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'TERMINALS.NEW_TITLE' | translate }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button class="save-btn" (click)="save()" [disabled]="saving() || !canCreate">
+        @if (saving()) {
+          <ion-spinner name="crescent"></ion-spinner>
+        } @else {
+          <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+          {{ 'TERMINALS.CREATE_ACTION' | translate }}
+        }
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="modal-content">
+  <form [formGroup]="form" class="form-layout">
+    <section class="form-section">
+      <div class="section-title">
+        <ion-icon name="desktop-outline"></ion-icon>
+        <span>{{ 'TERMINALS.NEW_TITLE' | translate }}</span>
+      </div>
+      <p class="section-hint">{{ 'TERMINALS.NEW_HINT' | translate }}</p>
+
+      <div class="fields-grid">
+        <div class="field-box">
+          <label>{{ 'TERMINALS.NAME' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.name)">
+            <ion-input formControlName="name" placeholder="Caja principal"></ion-input>
+          </ion-item>
+          <app-field-error [control]="form.controls.name" />
+        </div>
+
+        <div class="field-box">
+          <label>{{ 'TERMINALS.IP_ADDRESS' | translate }}<span class="req">*</span></label>
+          <ion-item lines="none" class="field-item" [class.invalid]="isInvalid(form.controls.ipAddress)">
+            <ion-input formControlName="ipAddress" placeholder="192.168.1.10" inputmode="decimal"></ion-input>
+          </ion-item>
+          <app-field-error [control]="form.controls.ipAddress" />
+        </div>
+      </div>
+
+      <div class="verify-row">
+        <ion-button
+          fill="outline"
+          size="small"
+          [disabled]="!canVerify"
+          (click)="verify()"
+        >
+          @if (checkState() === 'checking') {
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
+            {{ 'TERMINALS.VERIFYING' | translate }}
+          } @else {
+            <ion-icon name="wifi-outline" slot="start"></ion-icon>
+            {{ 'TERMINALS.VERIFY_CONNECTION' | translate }}
+          }
+        </ion-button>
+
+        @if (checkState() === 'ok') {
+          <div class="check-result check-ok">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+            <div>
+              <strong>{{ 'TERMINALS.AVAILABLE' | translate }}</strong>
+              @if (latencyMs() !== undefined) {
+                <span>{{ 'TERMINALS.LATENCY' | translate }}: {{ latencyMs() }} ms</span>
+              }
+            </div>
+          </div>
+        } @else if (checkState() === 'fail') {
+          <div class="check-result check-fail">
+            <ion-icon name="close-circle-outline"></ion-icon>
+            <div>
+              <strong>{{ checkMessage() }}</strong>
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (checkState() !== 'ok') {
+        <p class="verify-required-hint">
+          <ion-icon name="pulse-outline"></ion-icon>
+          {{ 'TERMINALS.VERIFY_REQUIRED_HINT' | translate }}
+        </p>
+      }
+    </section>
+  </form>
+</ion-content>

@@ -15,7 +15,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import {
   logInOutline,
-  storefrontOutline,
   personOutline,
   lockClosedOutline,
   eyeOutline,
@@ -25,7 +24,6 @@ import { AuthService } from '@core/services/auth.service';
 
 addIcons({
   logInOutline,
-  storefrontOutline,
   personOutline,
   lockClosedOutline,
   eyeOutline,

@@ -255,7 +255,11 @@ model Terminal {
   id         String    @id @default(uuid()) @db.Char(36)
   branchId   String    @map("branch_id") @db.Char(36)
   registerId String?   @map("register_id") @db.Char(36)
-  deviceId   String    @unique @map("device_id") @db.VarChar(100)
+  // Token de navegador (localStorage), no un identificador de hardware. Puede
+  // ser null cuando la terminal fue creada manualmente por el admin a partir
+  // de una IP verificada y aún ningún navegador se ha conectado desde ella;
+  // se completa de forma oportunista cuando ese equipo visita el POS.
+  deviceId   String?   @unique @map("device_id") @db.VarChar(100)
   name       String    @db.VarChar(150)
   ipAddress  String?   @map("ip_address") @db.VarChar(64)
   isActive   Boolean   @default(true) @map("is_active")

@@ -110,7 +110,8 @@ export interface TerminalDto {
   registerId?: string;
   registerName?: string;
   registerCode?: string;
-  deviceId: string;
+  /** Token de navegador (localStorage); puede no existir aún en terminales creadas por IP. */
+  deviceId?: string;
   name: string;
   ipAddress?: string;
   isActive: boolean;
@@ -121,4 +122,36 @@ export interface TerminalDto {
   registerConnectionStatus?: DeviceConnectionStatus;
   barcodeReaderStatus?: DeviceConnectionStatus;
   hasOpenRegisterSession?: boolean;
+}
+
+export interface CreateTerminalRequest {
+  branchId: string;
+  name: string;
+  ipAddress: string;
+}
+
+export interface CheckTerminalIpRequest {
+  branchId: string;
+  ipAddress: string;
+}
+
+export interface CheckTerminalIpResult {
+  ipAddress: string;
+  ok: boolean;
+  latencyMs?: number;
+  alreadyRegistered?: boolean;
+  message?: string;
+}
+
+export interface NetworkScanResultItem {
+  ipAddress: string;
+  reachable: boolean;
+  alreadyRegistered: boolean;
+  latencyMs?: number;
+}
+
+export interface NetworkScanResult {
+  subnet: string;
+  items: NetworkScanResultItem[];
+  scannedAt: string;
 }

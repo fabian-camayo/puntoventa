@@ -1,15 +1,25 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import {
   TerminalDto,
+  CheckTerminalIpResult,
+  NetworkScanResult,
   isTerminalOnline,
   getBarcodeReaderStatus,
   getRegisterConnectionStatus,
 } from '@puntoventa/shared';
 import { TerminalRepository } from '../infrastructure/terminal.repository';
+import { pingHost, scanLocalSubnet } from '../infrastructure/network-check.util';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
 import { AuditService } from '../../audit/application/audit.service';
 import { diffAuditValues, snapshotAuditValue } from '../../audit/application/audit-diff.util';
+import { CreateTerminalDto } from './dto/create-terminal.dto';
+import { CheckTerminalIpDto } from './dto/check-terminal-ip.dto';
 import { UpdateTerminalDto } from './dto/update-terminal.dto';
 import { TerminalHeartbeatDto } from './dto/terminal-heartbeat.dto';
 import { JwtPayload } from '@puntoventa/shared';
@@ -74,6 +84,87 @@ export class TerminalsService {
     return { ok: true, serverTime: now.toISOString() };
   }
 
+  /** Comprueba formato, duplicidad y disponibilidad real de una IP antes de registrar una terminal. */
+  async checkIp(dto: CheckTerminalIpDto): Promise<CheckTerminalIpResult> {
+    const existing = await this.prisma.terminal.findFirst({
+      where: { branchId: dto.branchId, ipAddress: dto.ipAddress, isActive: true },
+    });
+    if (existing) {
+      return {
+        ipAddress: dto.ipAddress,
+        ok: false,
+        alreadyRegistered: true,
+        message: 'Esta IP ya está registrada como terminal.',
+      };
+    }
+
+    const ping = await pingHost(dto.ipAddress);
+    return {
+      ipAddress: dto.ipAddress,
+      ok: ping.ok,
+      latencyMs: ping.latencyMs,
+      alreadyRegistered: false,
+      message: ping.ok ? undefined : 'No se pudo conectar con el computador.',
+    };
+  }
+
+  /** Lista las IP que responden en la subred del servidor, sin crear ninguna terminal. */
+  async scanNetwork(branchId: string): Promise<NetworkScanResult> {
+    const { subnet, reachable } = await scanLocalSubnet();
+    const registered = await this.prisma.terminal.findMany({
+      where: { branchId, isActive: true, ipAddress: { not: null } },
+      select: { ipAddress: true },
+    });
+    const registeredIps = new Set(registered.map((t) => t.ipAddress));
+
+    return {
+      subnet,
+      scannedAt: new Date().toISOString(),
+      items: reachable.map((r) => ({
+        ipAddress: r.ipAddress,
+        reachable: true,
+        alreadyRegistered: registeredIps.has(r.ipAddress),
+        latencyMs: r.latencyMs,
+      })),
+    };
+  }
+
+  /** Crea una terminal explícitamente; nunca ocurre automáticamente por detección de red. */
+  async create(dto: CreateTerminalDto, actor: JwtPayload): Promise<TerminalDto> {
+    const duplicate = await this.prisma.terminal.findFirst({
+      where: { branchId: dto.branchId, ipAddress: dto.ipAddress, isActive: true },
+    });
+    if (duplicate) {
+      throw new ConflictException('Esta IP ya está registrada como terminal.');
+    }
+
+    const ping = await pingHost(dto.ipAddress);
+    if (!ping.ok) {
+      throw new BadRequestException('No se pudo conectar con el computador. Verifique la IP.');
+    }
+
+    const created = await this.prisma.terminal.create({
+      data: {
+        branchId: dto.branchId,
+        name: dto.name,
+        ipAddress: dto.ipAddress,
+        lastSeenAt: new Date(),
+      },
+    });
+
+    await this.auditService.log({
+      userId: actor.sub,
+      action: 'CREATE',
+      module: 'registers',
+      entityType: 'Terminal',
+      entityId: created.id,
+      newValues: { name: dto.name, ipAddress: dto.ipAddress } as Prisma.InputJsonValue,
+    });
+
+    const withDetails = await this.terminalRepository.findById(created.id);
+    return this.mapToDto(withDetails!);
+  }
+
   async update(id: string, dto: UpdateTerminalDto, actor: JwtPayload): Promise<TerminalDto> {
     const existing = await this.terminalRepository.findById(id);
     if (!existing) throw new NotFoundException('Terminal no encontrada');
@@ -87,9 +178,24 @@ export class TerminalsService {
       }
     }
 
+    if (dto.ipAddress !== undefined && dto.ipAddress !== existing.ipAddress) {
+      const duplicate = await this.prisma.terminal.findFirst({
+        where: {
+          branchId: existing.branchId,
+          ipAddress: dto.ipAddress,
+          isActive: true,
+          id: { not: id },
+        },
+      });
+      if (duplicate) {
+        throw new ConflictException('Esta IP ya está registrada como terminal.');
+      }
+    }
+
     const data: Prisma.TerminalUpdateInput = {};
     if (dto.name !== undefined) data.name = dto.name;
     if (dto.isActive !== undefined) data.isActive = dto.isActive;
+    if (dto.ipAddress !== undefined) data.ipAddress = dto.ipAddress;
     if (dto.registerId !== undefined) {
       data.register = dto.registerId
         ? { connect: { id: dto.registerId } }
@@ -103,11 +209,13 @@ export class TerminalsService {
         name: existing.name,
         registerId: existing.registerId,
         isActive: existing.isActive,
+        ipAddress: existing.ipAddress,
       },
       {
         name: updated.name,
         registerId: updated.registerId,
         isActive: updated.isActive,
+        ipAddress: updated.ipAddress,
       },
     );
 
@@ -156,7 +264,7 @@ export class TerminalsService {
       registerId: terminal.registerId ?? undefined,
       registerName: terminal.register?.name,
       registerCode: terminal.register?.code,
-      deviceId: terminal.deviceId,
+      deviceId: terminal.deviceId ?? undefined,
       name: terminal.name,
       ipAddress: terminal.ipAddress ?? undefined,
       isActive: terminal.isActive,

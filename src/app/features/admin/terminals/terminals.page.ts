@@ -14,6 +14,7 @@ import {
   IonRefresherContent,
   AlertController,
   ToastController,
+  ModalController,
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
 import { AdminBackButton } from '@shared/components/admin-back-button/admin-back-button.component';
@@ -27,14 +28,30 @@ import {
   cashOutline,
   barcodeOutline,
   scanOutline,
+  addOutline,
+  searchOutline,
+  addCircleOutline,
 } from 'ionicons/icons';
-import { RegisterDto, TerminalDto, DeviceConnectionStatus } from '@puntoventa/shared';
+import { RegisterDto, TerminalDto, DeviceConnectionStatus, NetworkScanResultItem } from '@puntoventa/shared';
 import { RegisterService } from '@core/services/register.service';
 import { ConfigService } from '@core/services/config.service';
 import { AuthService } from '@core/services/auth.service';
 import { DeviceService } from '@core/services/device.service';
+import { TerminalFormModal } from './terminal-form.modal';
+import { RegisterFormModal } from '../registers/register-form.modal';
 
-addIcons({ desktopOutline, trashOutline, createOutline, wifiOutline, cashOutline, barcodeOutline, scanOutline });
+addIcons({
+  desktopOutline,
+  trashOutline,
+  createOutline,
+  wifiOutline,
+  cashOutline,
+  barcodeOutline,
+  scanOutline,
+  addOutline,
+  searchOutline,
+  addCircleOutline,
+});
 
 @Component({
   selector: 'app-terminals',
@@ -64,6 +81,7 @@ export class TerminalsPage implements OnInit, OnDestroy {
   private readonly device = inject(DeviceService);
   private readonly alertCtrl = inject(AlertController);
   private readonly toast = inject(ToastController);
+  private readonly modalCtrl = inject(ModalController);
   private readonly destroy$ = new Subject<void>();
 
   readonly canManage = this.auth.hasPermission('registers.admin');
@@ -74,6 +92,11 @@ export class TerminalsPage implements OnInit, OnDestroy {
   registers = signal<RegisterDto[]>([]);
   loading = signal(false);
   private refreshTimer: ReturnType<typeof setInterval> | null = null;
+
+  scanning = signal(false);
+  scanResults = signal<NetworkScanResultItem[]>([]);
+  scanSubnet = signal('');
+  hasScanned = signal(false);
 
   readonly summaryOnline = computed(() => this.terminals().filter((t) => t.isOnline).length);
   readonly summaryRegisterConnected = computed(() =>
@@ -147,6 +170,69 @@ export class TerminalsPage implements OnInit, OnDestroy {
     if (this.refreshTimer) {
       clearInterval(this.refreshTimer);
       this.refreshTimer = null;
+    }
+  }
+
+  async openNewTerminal(prefillIp = ''): Promise<void> {
+    const branchId = this.branchId();
+    if (!branchId || !this.canManage) return;
+
+    const modal = await this.modalCtrl.create({
+      component: TerminalFormModal,
+      componentProps: { branchId, prefillIp },
+      cssClass: 'pv-form-modal',
+    });
+    await modal.present();
+    const { role } = await modal.onDidDismiss();
+    if (role === 'saved') {
+      await this.loadData();
+      await this.showToast('Terminal creada correctamente', 'success');
+    }
+  }
+
+  async scanNetwork(): Promise<void> {
+    const branchId = this.branchId();
+    if (!branchId || !this.canManage || this.scanning()) return;
+
+    this.scanning.set(true);
+    try {
+      const result = await firstValueFrom(this.registerService.scanNetwork(branchId));
+      this.scanResults.set(result.items);
+      this.scanSubnet.set(result.subnet);
+      this.hasScanned.set(true);
+    } catch {
+      await this.showToast('No se pudo escanear la red', 'danger');
+    } finally {
+      this.scanning.set(false);
+    }
+  }
+
+  async registerDetected(item: NetworkScanResultItem): Promise<void> {
+    if (item.alreadyRegistered) return;
+    await this.openNewTerminal(item.ipAddress);
+  }
+
+  async createRegisterForTerminal(terminal: TerminalDto): Promise<void> {
+    const branchId = this.branchId();
+    if (!branchId || !this.canManage) return;
+
+    const modal = await this.modalCtrl.create({
+      component: RegisterFormModal,
+      componentProps: { register: null, branchId },
+      cssClass: 'pv-form-modal',
+    });
+    await modal.present();
+    const { data, role } = await modal.onDidDismiss<RegisterDto>();
+    if (role !== 'saved' || !data?.id) return;
+
+    try {
+      await firstValueFrom(
+        this.registerService.updateTerminal(terminal.id, { registerId: data.id }),
+      );
+      await this.loadData();
+      await this.showToast('Caja creada y asignada al equipo', 'success');
+    } catch {
+      await this.showToast('La caja se creó, pero no se pudo asignar al equipo', 'danger');
     }
   }
 

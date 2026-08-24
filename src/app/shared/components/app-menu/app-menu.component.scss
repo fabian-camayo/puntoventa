@@ -44,18 +44,6 @@
   flex-shrink: 0;
 }
 
-.brand-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, var(--pv-accent), var(--pv-accent-dark));
-  color: #fff;
-  font-size: 1.2rem;
-}
-
 .brand-text {
   font-size: 1.1rem;
   font-weight: 700;

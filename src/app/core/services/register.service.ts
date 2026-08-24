@@ -6,6 +6,9 @@ import {
   CloseRegisterRequest,
   CreateCashMovementRequest,
   CashMovementDto,
+  CheckTerminalIpResult,
+  CreateTerminalRequest,
+  NetworkScanResult,
   OpenRegisterRequest,
   PaginatedResult,
   PosSessionSummaryDto,
@@ -28,6 +31,7 @@ export interface UpdateTerminalPayload {
   name?: string;
   registerId?: string | null;
   isActive?: boolean;
+  ipAddress?: string;
 }
 
 export interface TerminalHeartbeatPayload {
@@ -104,6 +108,29 @@ export class RegisterService {
 
   deleteTerminal(id: string): Observable<unknown> {
     return this.http.delete(`${this.config.apiBaseUrl}/terminals/${id}`);
+  }
+
+  createTerminal(payload: CreateTerminalRequest): Observable<TerminalDto> {
+    return this.http
+      .post<{ data: TerminalDto }>(`${this.config.apiBaseUrl}/terminals`, payload)
+      .pipe(map((r) => r.data));
+  }
+
+  checkTerminalIp(branchId: string, ipAddress: string): Observable<CheckTerminalIpResult> {
+    return this.http
+      .post<{ data: CheckTerminalIpResult }>(`${this.config.apiBaseUrl}/terminals/check-ip`, {
+        branchId,
+        ipAddress,
+      })
+      .pipe(map((r) => r.data));
+  }
+
+  scanNetwork(branchId: string): Observable<NetworkScanResult> {
+    return this.http
+      .get<{ data: NetworkScanResult }>(`${this.config.apiBaseUrl}/terminals/scan-network`, {
+        params: { branchId },
+      })
+      .pipe(map((r) => r.data));
   }
 
   sendHeartbeat(payload: TerminalHeartbeatPayload): Observable<{ ok: true; serverTime: string }> {

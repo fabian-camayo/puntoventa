@@ -58,7 +58,7 @@ Function PvDbPageCreate
     Abort
   ${EndIf}
 
-  ${NSD_CreateLabel} 0 0 100% 36u "Base de datos MySQL (debe estar en ejecucion). Si la base no existe, PuntoVenta la crea. Deje la contrasena vacia solo si root no tiene clave."
+  ${NSD_CreateLabel} 0 0 100% 36u "Base de datos MySQL (debe estar en ejecucion). Si la base no existe, Granel la crea. Deje la contrasena vacia solo si root no tiene clave."
   Pop $0
 
   ${NSD_CreateLabel} 0 40u 90u 12u "Host MySQL:"
@@ -131,7 +131,7 @@ FunctionEnd
 
 !macro customInstall
   FileOpen $0 "$INSTDIR\installer.env" w
-  FileWrite $0 "# Generado por el instalador PuntoVenta$\r$\n"
+  FileWrite $0 "# Generado por el instalador Granel$\r$\n"
   !insertmacro PvWriteEnvLine $0 "DB_HOST" "$PvDbHost"
   !insertmacro PvWriteEnvLine $0 "DB_PORT" "$PvDbPort"
   !insertmacro PvWriteEnvLine $0 "DB_USER" "$PvDbUser"

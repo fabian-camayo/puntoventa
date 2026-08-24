@@ -27,6 +27,7 @@ import {
   cashOutline,
   receiptOutline,
   swapHorizontalOutline,
+  lockClosedOutline,
 } from 'ionicons/icons';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -35,7 +36,9 @@ import {
   PosSessionSummaryDto,
 } from '@puntoventa/shared';
 import { RegisterService } from '@core/services/register.service';
+import { AuthService } from '@core/services/auth.service';
 import { AppCurrencyPipe } from '@shared/pipes/app-currency.pipe';
+import { RegisterSessionModal } from './register-session.modal';
 
 addIcons({
   closeOutline,
@@ -43,6 +46,7 @@ addIcons({
   cashOutline,
   receiptOutline,
   swapHorizontalOutline,
+  lockClosedOutline,
 });
 
 type SummaryTab = 'sales' | 'movements';
@@ -75,12 +79,16 @@ type SummaryTab = 'sales' | 'movements';
 export class SessionSummaryModal implements OnInit {
   private readonly modalCtrl = inject(ModalController);
   private readonly registerService = inject(RegisterService);
+  private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastController);
 
   @Input({ required: true }) sessionId!: string;
 
+  readonly canClose = this.auth.hasPermission('registers.close');
+
   summary = signal<PosSessionSummaryDto | null>(null);
   loading = signal(true);
+  closing = signal(false);
   tab = signal<SummaryTab>('sales');
 
   ngOnInit(): void {
@@ -89,6 +97,34 @@ export class SessionSummaryModal implements OnInit {
 
   close(): void {
     void this.modalCtrl.dismiss(this.summary()?.session ?? null, 'closed');
+  }
+
+  async closeRegister(): Promise<void> {
+    const data = this.summary();
+    if (!data || !this.canClose || this.closing()) return;
+
+    this.closing.set(true);
+    try {
+      const modal = await this.modalCtrl.create({
+        component: RegisterSessionModal,
+        componentProps: {
+          mode: 'close',
+          registerId: data.session.registerId,
+          registerName: data.session.registerName,
+          session: data.session,
+        },
+        cssClass: 'pv-form-modal',
+      });
+      await modal.present();
+      const { role } = await modal.onDidDismiss();
+      if (role === 'saved') {
+        // La caja quedó cerrada: se cierra también el resumen para volver al POS
+        // (que refrescará la sesión activa al no recibir datos).
+        void this.modalCtrl.dismiss(null, 'register-closed');
+      }
+    } finally {
+      this.closing.set(false);
+    }
   }
 
   async refresh(): Promise<void> {

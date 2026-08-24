@@ -224,6 +224,18 @@ export class ConfigService {
     };
   }
 
+  /**
+   * Resuelve la Terminal (equipo físico) del solicitante para heredar su caja
+   * asignada. NUNCA crea una Terminal aquí: una terminal solo existe si un
+   * administrador la registró explícitamente (IP verificada) desde el módulo
+   * de Terminales. Esta función únicamente:
+   *  1) busca una terminal ya registrada por deviceId o, si no hay match, por IP;
+   *  2) actualiza su lastSeenAt (heartbeat pasivo);
+   *  3) vincula oportunistamente el deviceId del navegador a una terminal que
+   *     ya fue creada por IP y todavía no tiene deviceId asociado (para que un
+   *     admin pueda registrar el equipo por IP antes de que alguien inicie sesión
+   *     en él, sin quedar huérfano de deviceId para siempre).
+   */
   private async resolveTerminal(
     branchId: string,
     deviceId?: string,
@@ -234,25 +246,28 @@ export class ConfigService {
     if (deviceId) {
       const existing = await this.prisma.terminal.findUnique({ where: { deviceId } });
       if (existing) {
-        if (existing.isActive) {
-          await this.prisma.terminal.update({
-            where: { deviceId },
-            data: { lastSeenAt: new Date(), ipAddress: cleanIp ?? existing.ipAddress },
-          });
-        }
-        return existing.isActive ? { registerId: existing.registerId } : null;
+        if (!existing.isActive) return null;
+        await this.prisma.terminal.update({
+          where: { deviceId },
+          data: { lastSeenAt: new Date(), ipAddress: cleanIp ?? existing.ipAddress },
+        });
+        return { registerId: existing.registerId };
       }
 
-      const created = await this.prisma.terminal.create({
-        data: {
-          branchId,
-          deviceId,
-          name: cleanIp ? `Equipo ${cleanIp}` : 'Equipo nuevo',
-          ipAddress: cleanIp,
-          lastSeenAt: new Date(),
-        },
-      });
-      return { registerId: created.registerId };
+      if (cleanIp) {
+        const byIp = await this.prisma.terminal.findFirst({
+          where: { branchId, ipAddress: cleanIp, isActive: true, deviceId: null },
+        });
+        if (byIp) {
+          await this.prisma.terminal.update({
+            where: { id: byIp.id },
+            data: { deviceId, lastSeenAt: new Date() },
+          });
+          return { registerId: byIp.registerId };
+        }
+      }
+
+      return null;
     }
 
     if (cleanIp) {

@@ -5,6 +5,7 @@ export * from './constants/app-modes';
 export * from './constants/currency';
 export * from './constants/keyboard-shortcuts';
 export * from './constants/device-connectivity';
+export * from './constants/network';
 export * from './constants/inventory-adjustment-reasons';
 export * from './constants/audit-catalog';
 export * from './interfaces/api-response.interface';
