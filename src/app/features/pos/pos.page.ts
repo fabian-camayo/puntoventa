@@ -229,9 +229,15 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     const types = this.paymentTypeMap();
     return this.paymentLines().some((line) => types.get(line.paymentTypeId)?.affectsCash);
   });
+  /**
+   * Cambio a devolver = efectivo entregado (suma de TODOS los métodos que
+   * afectan caja) menos lo que aún se debe en efectivo tras descontar los
+   * métodos que no afectan caja. Puede ser negativo (pago insuficiente):
+   * no se recorta a 0 para que el cajero vea exactamente cuánto falta.
+   */
   readonly changeAmount = computed(() => {
     if (!this.hasCashPayment()) return 0;
-    return Math.max(0, Math.round((this.cashTendered() - this.cashRequired()) * 100) / 100);
+    return Math.round((this.cashTendered() - this.cashRequired()) * 100) / 100;
   });
   readonly hasSufficientPayment = computed(() => {
     if (this.paymentLines().length === 0) return false;
@@ -492,6 +498,39 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
 
   trackSaleItem(item: SaleItemDto): string {
     return `${item.productId}:${item.unitTypeId ?? ''}`;
+  }
+
+  /**
+   * El backend recrea todas las filas de items en cada guardado (IDs nuevos)
+   * y las devuelve sin orden garantizado, lo que hacía "saltar" el carrito
+   * al cambiar una cantidad. Se conserva el orden que el cajero ya ve
+   * localmente y solo se actualizan los datos de cada ítem con lo que
+   * confirma el servidor; los ítems nuevos que no estaban localmente se
+   * agregan al final.
+   */
+  private reconcileItemOrder(
+    localOrder: SaleItemDto[],
+    serverItems: SaleItemDto[],
+  ): SaleItemDto[] {
+    const byKey = new Map(serverItems.map((item) => [this.trackSaleItem(item), item]));
+    const ordered: SaleItemDto[] = [];
+
+    for (const local of localOrder) {
+      const key = this.trackSaleItem(local);
+      const match = byKey.get(key);
+      if (match) {
+        ordered.push(match);
+        byKey.delete(key);
+      }
+    }
+
+    for (const item of serverItems) {
+      if (byKey.has(this.trackSaleItem(item))) {
+        ordered.push(item);
+      }
+    }
+
+    return ordered;
   }
 
   unitsForProduct(productId: string): ProductUnitDto[] {
@@ -1117,7 +1156,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
 
       this.activeSale.set({
         ...updated,
-        items: updated.items ?? [],
+        items: this.reconcileItemOrder(sale.items, updated.items ?? []),
         tabLabel,
       });
       this.syncTabSummary(saleId, updated.items.length, updated.total);
@@ -1129,7 +1168,7 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
         if (this.activeTabId() === saleId) {
           this.activeSale.set({
             ...fresh,
-            items: fresh.items ?? [],
+            items: this.reconcileItemOrder(sale.items, fresh.items ?? []),
             tabLabel,
           });
           this.syncTabSummary(saleId, fresh.items.length, fresh.total);
@@ -1228,8 +1267,14 @@ export class PosPage implements OnInit, OnDestroy, ViewWillEnter {
     };
   }
 
+  /**
+   * COP no maneja centavos y toda la UI muestra los montos sin decimales:
+   * redondear a peso entero aquí (en el origen del cálculo por ítem) evita
+   * que queden fracciones de peso "fantasma" (ej. IVA 19% de $50 = $9.5)
+   * que no se ven en pantalla pero descuadran el cambio contra lo pagado.
+   */
   private roundMoney(value: number): number {
-    return Math.round(value * 100) / 100;
+    return Math.round(value);
   }
 
   private loadPaymentTypes(): void {

@@ -340,8 +340,9 @@ export class SaleEditModal implements OnInit {
     };
   }
 
+  /** COP no maneja centavos; ver mismo criterio en pos.page.ts#roundMoney. */
   private roundMoney(value: number): number {
-    return Math.round(value * 100) / 100;
+    return Math.round(value);
   }
 
   private async showToast(
